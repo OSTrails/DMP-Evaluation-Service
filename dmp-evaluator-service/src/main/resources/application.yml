@@ -1,0 +1,19 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: dmp-evaluator-service
+  # Jackson Configuration for JSON Processing
+  jackson:
+    serialization:
+      indent_output: true  # Pretty-print JSON
+    #default-property-inclusion: non_null  # Ignore null values
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017//dmp-evaluator
+
+logging:
+  level:
+    root: info
+    org.springframework: DEBUG
+    io.github.ostrails.dmpevaluatorservice: DEBUG
