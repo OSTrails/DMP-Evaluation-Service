@@ -1,11 +1,9 @@
 package io.github.ostrails.dmpevaluatorservice.model
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
-import java.time.Instant
-import java.time.LocalDateTime
+import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 
-data class EvaluationResult(
-    val reportId: String,
+data class EvaluationReportResponse(
+    val report: EvaluationReport,
     val evaluations: List<Evaluation>,
-    val timestamp: Instant = Instant.now(),
 )

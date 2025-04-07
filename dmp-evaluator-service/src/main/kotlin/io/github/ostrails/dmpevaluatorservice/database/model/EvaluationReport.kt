@@ -7,7 +7,6 @@ import java.time.Instant
 @Document(collection = "evaluation_reports")
 data class EvaluationReport(
     @Id var reportId: String? = null,
-    val dmpId: String,
     val generatedAt: Instant = Instant.now(),
     val evaluations: List<String> = listOf()
 )
