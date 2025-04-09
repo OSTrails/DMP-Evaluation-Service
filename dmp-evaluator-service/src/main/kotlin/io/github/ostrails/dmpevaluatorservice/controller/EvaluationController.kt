@@ -1,12 +1,10 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
-import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/evaluations")
 class EvaluationController(
     private val evaluationService: EvaluationService,
-    private val evaluationReportRepository: EvaluationReportRepository
 ) {
 
     @PostMapping
