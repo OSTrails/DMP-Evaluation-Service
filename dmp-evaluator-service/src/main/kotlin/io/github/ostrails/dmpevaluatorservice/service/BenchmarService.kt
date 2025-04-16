@@ -2,10 +2,11 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
-import org.springframework.data.annotation.Id
 import org.springframework.stereotype.Service
 
 @Service
@@ -24,7 +25,11 @@ class BenchmarService(
     }
 
     suspend fun getBenchmarks():List<BenchmarkRecord> {
-        return benchmarkRepository.findAll().asFlow().toList()
+        try {
+            return benchmarkRepository.findAll().asFlow().toList()
+        }catch (e:Exception){
+            throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
+        }
     }
 
     suspend fun addMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {

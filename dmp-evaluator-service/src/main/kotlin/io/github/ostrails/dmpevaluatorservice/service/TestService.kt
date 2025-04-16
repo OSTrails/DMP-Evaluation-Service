@@ -2,7 +2,9 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.TestRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
 
@@ -20,10 +22,8 @@ class TestService(
     }
 
     suspend fun getTest(testId: String): TestRecord {
-        val test = testRepository.findById(testId).awaitSingle()
-        if (test == null) {
-            throw IllegalArgumentException("Test not found")
-        }else return test
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        return test
     }
 
    suspend fun addMetric(testId: String, testInfo: TestUpdateRequest): TestRecord? {

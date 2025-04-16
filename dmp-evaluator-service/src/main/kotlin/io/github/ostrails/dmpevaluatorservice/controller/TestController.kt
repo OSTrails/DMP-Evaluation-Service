@@ -2,7 +2,6 @@ package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
-import io.github.ostrails.dmpevaluatorservice.model.test.Test
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

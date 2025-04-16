@@ -24,6 +24,12 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmark)
     }
 
+    @GetMapping
+    suspend fun getBenchmarks(): ResponseEntity<List<BenchmarkRecord>> {
+        val benchmarks = benchMarkService.getBenchmarks()
+        return ResponseEntity.ok(benchmarks)
+    }
+
 
 
 
