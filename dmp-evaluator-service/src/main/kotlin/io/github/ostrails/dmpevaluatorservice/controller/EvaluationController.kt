@@ -29,14 +29,8 @@ class EvaluationController(
     @GetMapping("/report/{reportid}/full")
     suspend fun getReport(@PathVariable reportid: String): ResponseEntity<EvaluationReportResponse> {
         val evaluationreport = evaluationService.getFullreport(reportid)
+        //        System.out.println(evaluations)
         return ResponseEntity.ok(evaluationreport)
     }
 
-
-//    @GetMapping( "/{reportId}")
-//    fun getReport(@PathVariable reportId: String): ResponseEntity<List<EvaluationResult>> {
-//        val evaluations = evaluationService.getEvaluation(reportId)
-//        System.out.println(evaluations)
-//        return ResponseEntity.ok(evaluations)
-//    }
 }

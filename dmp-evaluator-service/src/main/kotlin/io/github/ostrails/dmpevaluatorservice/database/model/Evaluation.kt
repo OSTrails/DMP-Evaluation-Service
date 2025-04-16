@@ -11,4 +11,4 @@ data class Evaluation(
     val details: String,
     val timestamp: Instant = Instant.now(),
     val reportId: String?  // Links back to EvaluationReport
-    )
+)

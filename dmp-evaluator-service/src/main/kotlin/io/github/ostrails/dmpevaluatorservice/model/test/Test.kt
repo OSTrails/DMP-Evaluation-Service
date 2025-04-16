@@ -6,5 +6,7 @@ class Test (
     val description: String,
     val license: String,
     val version: String,
-    val metricImplemented: String,
+    val metricImplemented: String?,
+    val evaluator: String?,
+    val functionEvaluator: String?,
 )

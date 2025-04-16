@@ -17,12 +17,7 @@ class BenchmarkController(
         val result = benchMarkService.createBenchmark(benchmarkBody)
         return ResponseEntity.ok(result)
     }
-//
-//    @GetMapping()
-//    suspend fun getAllEvaluations(): ResponseEntity<List<Evaluation>> {
-//
-//        return ResponseEntity.ok(evaluations)
-//    }
+
     @PostMapping("/edit/{benchmarkId}")
     suspend fun addMetric(@PathVariable benchmarkId: String, @RequestBody newMetrics: metricsListsIDs): ResponseEntity<BenchmarkRecord> {
         val benchmark = benchMarkService.addMetric(benchmarkId, newMetrics.metrics)
