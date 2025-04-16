@@ -48,8 +48,7 @@ class EvaluationService(
 
         val evaluations = evaluators.mapIndexed { index, evaluation ->
             Evaluation(
-                evaluationId = UUID.randomUUID().toString(),
-                completenessScore = (1..10).random(),
+                result = (1..10).random(),
                 details = "Auto-generated evaluation " + evaluation,
                 reportId = report.reportId
             )
@@ -80,15 +79,6 @@ class EvaluationService(
             report= report,
             evaluations = evaluations
         )
-
-
-
-
-
-//        val report = request.reportId?.let {
-//            evaluationReportRepository.findById(it).awaitFirstOrNull()
-//        }?:evaluationReportRepository.save(EvaluationReport()).awaitSingle()
-
     }
 
 

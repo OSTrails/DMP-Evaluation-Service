@@ -1,4 +1,4 @@
-package io.github.ostrails.dmpevaluatorservice.evaluators.externalevaluator
+package io.github.ostrails.dmpevaluatorservice.evaluators.externalEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport

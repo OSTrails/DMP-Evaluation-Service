@@ -6,8 +6,8 @@ import java.time.Instant
 
 @Document(collection = "evaluations")
 data class Evaluation(
-    @Id val evaluationId: String,
-    val completenessScore: Int,
+    @Id val evaluationId:  String? = null,
+    val result: Int,
     val details: String,
     val timestamp: Instant = Instant.now(),
     val reportId: String?  // Links back to EvaluationReport

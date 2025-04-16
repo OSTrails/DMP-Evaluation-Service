@@ -1,8 +1,8 @@
 package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 
+import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
-import io.github.ostrails.dmpevaluatorservice.model.Benchmark
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import org.springframework.stereotype.Component
@@ -18,7 +18,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
         val evaluationsResults = tests.map { test ->
             Evaluation(
                     evaluationId = UUID.randomUUID().toString(),
-                    completenessScore = (1..10).random(),
+                    result = (1..10).random(),
                     details = "Auto-generated evaluation of the test" + test ,
                     reportId = report.reportId
             )
@@ -32,11 +32,12 @@ class CompletenessEvaluator: EvaluatorPlugin {
     }
 
     override fun getPluginInformation(): PluginInfo {
-        val becnhmark1 = Benchmark(
-            id = "Benchmark ID",
-            title = "Test Benchmark for sturcture code",
-            description = "This benchmark is only to fill the data object ",
-            version = "0.0.1"
+        val becnhmark1 = BenchmarkRecord(
+            benchmarkId = "Benchmark ID",
+            metrics = listOf(),
+                title = "Test Benchmark for sturcture code",
+                description = "This benchmark is only to fill the data object ",
+                version = "0.0.1",
         )
         return PluginInfo(
             pluginId = "Completeness",

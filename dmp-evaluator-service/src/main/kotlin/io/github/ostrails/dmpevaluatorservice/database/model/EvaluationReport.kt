@@ -8,5 +8,5 @@ import java.time.Instant
 data class EvaluationReport(
     @Id var reportId: String? = null,
     val generatedAt: Instant = Instant.now(),
-    val evaluations: List<String> = listOf()
+    val evaluations: List<String?> = listOf()
 )

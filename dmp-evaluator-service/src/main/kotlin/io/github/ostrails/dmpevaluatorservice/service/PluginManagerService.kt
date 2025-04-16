@@ -11,4 +11,6 @@ class PluginManagerService(
     fun getEvaluators(): List<EvaluatorPlugin> {
         return pluginRegistry.plugins
     }
+
+
 }
