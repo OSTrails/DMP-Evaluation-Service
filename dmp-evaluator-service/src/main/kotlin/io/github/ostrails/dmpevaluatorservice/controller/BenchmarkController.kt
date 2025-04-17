@@ -30,7 +30,15 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmarks)
     }
 
+    @DeleteMapping("/{benchmarkId}")
+    suspend fun deleteBenchmark(@PathVariable benchmarkId: String): ResponseEntity<String> {
+        val benchmarkId = benchMarkService.deleteBenchmark(benchmarkId)
+        return ResponseEntity.ok(benchmarkId)
+    }
 
-
-
+    @GetMapping("/{benchmarkId}")
+    suspend fun getBenchmark(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkRecord> {
+        val benchmark = benchMarkService.getBenchmarkDetail(benchmarkId)
+        return ResponseEntity.ok(benchmark)
+    }
 }

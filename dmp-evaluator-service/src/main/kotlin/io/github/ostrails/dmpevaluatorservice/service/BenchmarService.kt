@@ -6,6 +6,8 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 
@@ -38,5 +40,19 @@ class BenchmarService(
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
     }
 
+    suspend fun deleteBenchmark(benchmarkId: String): String? {
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+        try {
+            benchmarkRepository.delete(benchmark).awaitFirstOrNull()
+        }catch (e:Exception){
+            throw DatabaseException("There is a error with the database trying to delete the record ${benchmarkId}   ${e.message}")
+        }
+        return benchmarkId
+
+    }
+
+    suspend fun getBenchmarkDetail(benchmarkId: String): BenchmarkRecord{
+        return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+    }
 
 }

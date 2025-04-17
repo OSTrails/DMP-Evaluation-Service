@@ -2,9 +2,11 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
+import kotlin.jvm.Throws
 
 @Service
 class MetricService(
@@ -20,7 +22,8 @@ class MetricService(
     }
 
     suspend fun metricDetail(metricId: String): MetricRecord {
-        return metricRepository.findById(metricId).awaitSingle()
+
+        return metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no metric with the ID $metricId")
     }
 
     suspend fun deleteMetric(metricId: String): String? {
