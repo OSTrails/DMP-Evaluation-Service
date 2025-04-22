@@ -44,7 +44,12 @@ class MetricController(
         }else{
             return ResponseEntity.notFound().build()
         }
+    }
 
+    @PostMapping("/delete/test/{metricId}")
+    suspend fun deleteTest(@PathVariable metricId: String, @RequestBody tests: List<String>): ResponseEntity<MetricRecord> {
+        val result = metricService.deleteTest(metricId, tests)
+        return ResponseEntity.ok(result)
     }
 
 }

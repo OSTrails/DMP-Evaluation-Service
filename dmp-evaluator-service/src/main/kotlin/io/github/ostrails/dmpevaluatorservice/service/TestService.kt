@@ -1,7 +1,9 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
+import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.TestRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -10,7 +12,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class TestService(
-    val testRepository: TestRepository
+    val testRepository: TestRepository,
+    private val metricService: MetricService
 ) {
 
     suspend fun createTest(test: TestRecord): TestRecord {
@@ -27,8 +30,9 @@ class TestService(
     }
 
    suspend fun addMetric(testId: String, testInfo: TestUpdateRequest): TestRecord? {
-       val test = testRepository.findById(testId).awaitSingle()
-       if (test != null) {
+       val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+
+       if (testInfo.metricImplemented != null) {
            val updateTest = test.copy(
                title = testInfo.title ?: test.title,
                description = testInfo.description ?: test.description,
@@ -37,10 +41,21 @@ class TestService(
                metricImplemented = testInfo.metricImplemented ?: testInfo.metricImplemented,
                evaluator = testInfo.evaluator ?: testInfo.evaluator,
                functionEvaluator = testInfo.functionEvaluator ?: testInfo.functionEvaluator, )
-           return testRepository.save(updateTest).awaitSingle()
-
+           metricService.addTests(testInfo.metricImplemented, listOf(testId))
+           val testSaved = testRepository.save(updateTest).awaitSingle()
+           return testSaved
        }else {
-           return null
+           throw ResourceNotFoundException("The metric id ${testInfo.metricImplemented} not found")
        }
    }
+
+    suspend fun deleteTest(testId: String): String? {
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        try {
+            testRepository.delete(test).awaitFirstOrNull()
+        }catch (e:Exception){
+            throw DatabaseException("There is a error with the database trying to delete the test ${testId}   ${e.message}")
+        }
+        return testId
+    }
 }

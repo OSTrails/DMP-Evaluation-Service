@@ -24,7 +24,7 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     override fun getPluginInformation(): PluginInfo {        return PluginInfo(
         pluginId = "Completeness",
         description = "Evaluator to perform completeness tests",
-        benchmarks = listOf()
+        tests = listOf()
     )
     }
 

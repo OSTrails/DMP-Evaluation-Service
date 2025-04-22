@@ -1,9 +1,9 @@
 package io.github.ostrails.dmpevaluatorservice.model
 
-import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 
 data class PluginInfo(
     val pluginId: String,
     val description: String,
-    val benchmarks: List<BenchmarkRecord>
+    val tests: List<TestRecord>?
 )

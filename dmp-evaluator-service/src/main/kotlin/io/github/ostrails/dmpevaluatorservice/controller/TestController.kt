@@ -4,6 +4,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -43,6 +44,12 @@ class TestController(
     @GetMapping("/{testId}")
     suspend fun getTest(@PathVariable testId: String): ResponseEntity<TestRecord>{
         val result = testService.getTest(testId)
+        return ResponseEntity.ok(result)
+    }
+
+    @DeleteMapping("/{testId}")
+    suspend fun deleteTest(@PathVariable testId: String): ResponseEntity<String>{
+        val result = testService.deleteTest(testId)
         return ResponseEntity.ok(result)
     }
 }

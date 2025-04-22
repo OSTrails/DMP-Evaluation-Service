@@ -6,7 +6,6 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundE
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
-import kotlin.jvm.Throws
 
 @Service
 class MetricService(
@@ -22,8 +21,7 @@ class MetricService(
     }
 
     suspend fun metricDetail(metricId: String): MetricRecord {
-
-        return metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no metric with the ID $metricId")
+        return metricRepository.findById(metricId).awaitSingle() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
     }
 
     suspend fun deleteMetric(metricId: String): String? {
@@ -37,13 +35,24 @@ class MetricService(
     }
 
     suspend fun addTests(metricId: String, tests:List<String>): MetricRecord {
-        val metric = metricRepository.findById(metricId).awaitSingle()
-        val testsToAdd = tests.filterNot { it in tests }
+        val testsToAdd: List<String>
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        if (metric.testAssociated != null) {
+            testsToAdd = tests.filterNot { it in metric.testAssociated }
+        }else testsToAdd = tests
         val updateMetric = metric.copy(testAssociated = metric.testAssociated?.plus(testsToAdd) ?: tests)
         return metricRepository.save(updateMetric).awaitSingle()
     }
+
+    suspend fun deleteTest(metricId: String, tests: List<String>): MetricRecord{
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        if (metric.testAssociated != null && metric.testAssociated.isNotEmpty()) {
+            val testFiltered = metric.testAssociated.filterNot { it in tests }
+            val updateMetric = metric.copy(testAssociated = testFiltered ?: null)
+            return metricRepository.save(updateMetric).awaitSingle()
+        }else {
+            throw ResourceNotFoundException("There is not tests to delete in this metric")
+        }
+    }
 }
 
-//val benchmark = benchmarkRepository.findById(benchmarkId).awaitSingle()
-//val updateBenchmark = benchmark.copy(metrics = benchmark.metrics?.plus(metricsId))
-//return benchmarkRepository.save(updateBenchmark).awaitSingle()
