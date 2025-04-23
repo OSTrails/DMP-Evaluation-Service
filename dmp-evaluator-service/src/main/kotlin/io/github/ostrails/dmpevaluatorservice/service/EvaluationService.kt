@@ -1,18 +1,21 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
+import kotlinx.serialization.json.*
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-
 
 @Service
 class EvaluationService(
@@ -73,12 +76,20 @@ class EvaluationService(
     * Function to generate the evaluation report with all the evlauations
     * */
     suspend fun getFullreport(reportId: String): EvaluationReportResponse? {
-        val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: return null
+        val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: throw ResourceNotFoundException("There is exist report with the id $reportId")
         val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() } ?: emptyList()
         return EvaluationReportResponse(
             report= report,
             evaluations = evaluations
         )
+    }
+
+    suspend fun gatewayEvaluationService(file: FilePart): kotlinx.serialization.json.JsonObject {
+        val content = file.content()
+            .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
+            .reduce { acc, text -> acc + text }
+            .awaitFirst()
+        return Json.parseToJsonElement(content).jsonObject
     }
 
 

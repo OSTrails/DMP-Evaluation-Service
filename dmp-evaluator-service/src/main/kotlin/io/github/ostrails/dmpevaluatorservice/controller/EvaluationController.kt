@@ -7,6 +7,7 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.http.codec.multipart.FilePart
 
 @RestController
 @RequestMapping("/api/evaluations")
@@ -31,6 +32,26 @@ class EvaluationController(
         val evaluationreport = evaluationService.getFullreport(reportid)
         //        System.out.println(evaluations)
         return ResponseEntity.ok(evaluationreport)
+    }
+
+
+
+    /*
+    Example in how to call the benchmark with a file
+    curl -X POST http://localhost:8080/api/evaluation/benchmark \
+  -F 'file=@/path/to/my-dmp.json' \
+  -F 'dimension=completeness' \
+  -F 'tests=metadataCoverage' \
+  -F 'tests=structure'
+
+    * */
+
+    @PostMapping("/benchmark", consumes = ["multipart/form-data"])
+    suspend fun runBenchmark(
+        @RequestPart("maDMP") maDMP: FilePart
+    ): ResponseEntity<kotlinx.serialization.json.JsonObject> {
+        val jsonResult = evaluationService.gatewayEvaluationService(maDMP)
+        return ResponseEntity.ok(jsonResult)
     }
 
 }
