@@ -9,6 +9,7 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
@@ -35,9 +36,24 @@ class BenchmarService(
     }
 
     suspend fun addMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitSingle()
-        val updateBenchmark = benchmark.copy(metrics = benchmark.metrics?.plus(metricsId))
+        val metricToAdd:List<String>
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        if (benchmark.metrics !=  null){
+            metricToAdd = metricsId.filterNot { it in benchmark.metrics }
+        }else metricToAdd = metricsId
+        val updateBenchmark = benchmark.copy(metrics = benchmark.metrics?.plus(metricToAdd) ?: metricsId)
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
+    }
+
+    suspend fun deleteMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $benchmarkId not found")
+        if (benchmark.metrics != null && benchmark.metrics.isNotEmpty()) {
+            val metricFiltered = benchmark.metrics.filterNot { it in metricsId }
+            val updateBenchmark = benchmark.copy(metrics = metricFiltered ?: null)
+            return benchmarkRepository.save(updateBenchmark).awaitSingle()
+        }else {
+            throw ResourceNotFoundException("There is not metric to delete in this benchmark")
+        }
     }
 
     suspend fun deleteBenchmark(benchmarkId: String): String? {

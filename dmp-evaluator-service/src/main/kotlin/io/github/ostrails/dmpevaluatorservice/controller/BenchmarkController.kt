@@ -41,4 +41,10 @@ class BenchmarkController(
         val benchmark = benchMarkService.getBenchmarkDetail(benchmarkId)
         return ResponseEntity.ok(benchmark)
     }
+
+    @PostMapping("/{benchmarkId}/delete/metric")
+    suspend fun deleteMetric(@PathVariable benchmarkId: String, @RequestBody metrics: List<String> ): ResponseEntity<BenchmarkRecord> {
+        val result = benchMarkService.deleteMetric(benchmarkId, metrics)
+        return ResponseEntity.ok(result)
+    }
 }
