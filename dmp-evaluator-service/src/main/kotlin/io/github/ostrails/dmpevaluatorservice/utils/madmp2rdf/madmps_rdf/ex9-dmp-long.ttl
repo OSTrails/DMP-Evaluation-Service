@@ -1,0 +1,39 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dmp: <http://purl.org/dmp#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rml: <http://w3id.org/rml/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://doi.org/10.0000/00.0.1234> a dmp:DataManagementPlan;
+  dmp:contact <https://www.tiss.tuwien.ac.at/person/2351952424>;
+  dmp:created "2019-12-06T11:33:05.619Z"^^xsd:dateTime;
+  dmp:description "This DMP is for our new project.";
+  dmp:identifier_type "doi";
+  dmp:language "eng";
+  dmp:modified "2019-12-06T11:33:05.619Z"^^xsd:dateTime;
+  dmp:title "DMP for our new project" .
+
+<https://hdl.handle.net/0000/00.00000> a dcat:Dataset;
+  dcat:description "Audio recordings with test persons", "Images of test object X",
+    "Some test scripts";
+  dcat:title "Client application", "Image collection", "Interviews" .
+
+<https://orcid.org/0000-0002-0000-0000> a foaf:Person;
+  dmp:role "ProjectLeader";
+  foaf:mbox "leo.messi@barcelona.com";
+  foaf:name "Leo Messi" .
+
+<https://orcid.org/0000-0002-4929-7875> a foaf:Person;
+  dmp:role "ContactPerson", "DataManager";
+  foaf:mbox "robert@bayern.de";
+  foaf:name "Robert Lewandowski" .
+
+<https://www.tiss.tuwien.ac.at/person/2351952424> a foaf:Person;
+  dmp:contact_type "other";
+  foaf:mbox "john.smith@tuwien.ac.at";
+  foaf:name "John Smith" .
+
+<https://www.tiss.tuwien.ac.at/person/305962565> a foaf:Person;
+  dmp:role "DataCurator";
+  foaf:mbox "CR@juve.it";
+  foaf:name "Cristiano Ronaldo" .
