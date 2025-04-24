@@ -54,5 +54,10 @@ class MetricService(
             throw ResourceNotFoundException("There is not tests to delete in this metric")
         }
     }
+
+    suspend fun findMultipleMetrics(metricIds: List<String>): List<MetricRecord> {
+        val metrics = metricRepository.findByIdIn(metricIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Metrics with the ids ${metricIds} not found")
+        return metrics
+    }
 }
 

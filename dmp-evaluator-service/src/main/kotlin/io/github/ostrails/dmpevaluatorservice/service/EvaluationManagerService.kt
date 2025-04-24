@@ -2,6 +2,8 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
+import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
@@ -22,7 +24,10 @@ import org.springframework.stereotype.Service
 @Service
 class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
-    private val evaluationReportRepository: EvaluationReportRepository
+    private val evaluationReportRepository: EvaluationReportRepository,
+    private val benchmarkRepository: BenchmarkRepository,
+    private val benchmarService: BenchmarService,
+    private val evaluationService: EvaluationService
 ) {
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
@@ -86,11 +91,14 @@ class EvaluationManagerService(
         )
     }
 
-    suspend fun gatewayEvaluationService(file: FilePart, benchmarkName: String): JsonObject {
+    suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<TestRecord> {
         val file = fileToJsonObject(file)
-        System.out.println("------------------------------------- $benchmarkName")
+        System.out.println("------------------------------------- $benchmarkTitle")
+        val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
+        println("benchmark finding --------------------------- $benchmarkTitle")
+        val tests = evaluationService.testsToExecute(benchmark)
         //val metrics:
-        return file
+        return tests
     }
 
     suspend fun fileToJsonObject(file: FilePart): JsonObject {
@@ -98,7 +106,6 @@ class EvaluationManagerService(
             .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
             .reduce { acc, text -> acc + text }
             .awaitFirst()
-
         return Json.parseToJsonElement(content).jsonObject
     }
 

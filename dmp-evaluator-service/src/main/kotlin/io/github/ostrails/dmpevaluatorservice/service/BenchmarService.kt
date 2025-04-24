@@ -71,4 +71,8 @@ class BenchmarService(
         return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
     }
 
+    suspend fun getbenchmarkByTitle(title: String): BenchmarkRecord {
+        return benchmarkRepository.findByTitle(title).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the title $title")
+    }
+
 }

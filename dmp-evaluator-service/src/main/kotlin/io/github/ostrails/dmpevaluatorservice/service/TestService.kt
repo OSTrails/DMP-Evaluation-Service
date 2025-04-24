@@ -58,4 +58,11 @@ class TestService(
         }
         return testId
     }
+
+    suspend fun findMultipleTests(testsIds: List<String>): List<TestRecord> {
+            val tests = testRepository.findByIdIn(testsIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests with the ids ${testsIds} not found")
+            return tests
+    }
+
+
 }

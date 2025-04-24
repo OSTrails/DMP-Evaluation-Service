@@ -1,6 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
@@ -51,7 +52,8 @@ class EvaluationController(
     suspend fun runBenchmark(
         @RequestPart("maDMP") maDMP: FilePart,
         @RequestPart("benchmark") benchmark: String
-    ): ResponseEntity<kotlinx.serialization.json.JsonObject> {
+    ): ResponseEntity<List<TestRecord>>{
+            //kotlinx.serialization.json.JsonObject>
         println("Received benchmark. $benchmark")
         val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark)
         return ResponseEntity.ok(jsonResult)
