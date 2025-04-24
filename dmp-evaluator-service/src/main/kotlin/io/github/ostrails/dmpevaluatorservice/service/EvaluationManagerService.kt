@@ -8,6 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundE
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
+import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDF
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -102,6 +103,9 @@ class EvaluationManagerService(
         return Json.parseToJsonElement(content).jsonObject
     }
 
-
+    //
+    //suspend fun jsonToRDF(json: String): String {
+     //   return "test"
+    //}
 
 }

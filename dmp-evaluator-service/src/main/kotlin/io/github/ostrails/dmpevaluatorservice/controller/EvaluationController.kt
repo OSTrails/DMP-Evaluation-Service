@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
+import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDF
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
@@ -36,24 +37,21 @@ class EvaluationController(
     }
 
 
+    /*
+        Example in how to call the benchmark with a file
+        curl -X POST http://localhost:8080/api/evaluations/benchmark \
+    -F 'file=@/path/to/my-dmp.json' \
+    -F 'dimension=completeness' \
+    -F 'tests=metadataCoverage' \
+    */
 
     /*
-    Example in how to call the benchmark with a file
-    curl -X POST http://localhost:8080/api/evaluation/benchmark \
-  -F 'file=@/path/to/my-dmp.json' \
-  -F 'dimension=completeness' \
-  -F 'tests=metadataCoverage' \
-  -F 'tests=structure'
-
-    * */
-
-    @PostMapping("/benchmark", consumes = ["multipart/form-data"])
-    suspend fun runBenchmark(
-        @RequestPart("maDMP") maDMP: FilePart,
-        @RequestPart("benchmark") benchmark: String
-    ): ResponseEntity<kotlinx.serialization.json.JsonObject> {
-        println("Received benchmark. $benchmark")
-        val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark)
-        return ResponseEntity.ok(jsonResult)
+        The input is a JSON string that is passed to the HTTP POST request body
+    */
+    @PostMapping("/benchmark/test")
+    suspend fun runBenchmark(@RequestBody jsonBody: kotlinx.serialization.json.JsonObject): ResponseEntity<kotlinx.serialization.json.JsonObject> {
+        val toRDF = ToRDF()
+        toRDF.jsonToRDF(jsonBody.toString())
+        return ResponseEntity.ok(kotlinx.serialization.json.JsonObject(mapOf()))
     }
 }

@@ -8,7 +8,7 @@
 @base <http://purl.org/dmp#>.
 
 <#DMPMapping> a rml:LogicalSource ;
-    rml:source "madmps_json/ex9-dmp-long.json" ;
+    rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp" .
 
@@ -50,7 +50,7 @@
     ] .
 
 <#ContactMapping> a rml:LogicalSource ;
-    rml:source "madmps_json/ex9-dmp-long.json";
+    rml:source "{{madmp_json_path}}";
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.contact" .
 
@@ -75,7 +75,7 @@
     ] .
 
 <#ContributorMapping> a rml:LogicalSource ;
-    rml:source "madmps_json/ex9-dmp-long.json";
+    rml:source "{{madmp_json_path}}";
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.contributor[*]" .
 
@@ -100,7 +100,7 @@
     ] .
 
 <#DatasetMapping> a rml:LogicalSource ;
-    rml:source "madmps_json/ex9-dmp-long.json";
+    rml:source "{{madmp_json_path}}";
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*]" .
 

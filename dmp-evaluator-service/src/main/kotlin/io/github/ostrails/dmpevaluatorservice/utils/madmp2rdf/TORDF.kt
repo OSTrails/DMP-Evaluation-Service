@@ -1,58 +1,72 @@
 package io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf
 
-//import be.ugent.idlab.knows.functions.agent.Agent;
-//import be.ugent.idlab.knows.functions.agent.AgentFactory;
-import be.ugent.rml.Executor;
-import be.ugent.rml.Utils;
-import be.ugent.rml.records.RecordsFactory;
-import be.ugent.rml.store.QuadStore;
-import be.ugent.rml.store.QuadStoreFactory;
-import be.ugent.rml.store.RDF4JStore;
-import be.ugent.rml.term.NamedNode;
+import be.ugent.rml.Executor
+import be.ugent.rml.Utils
+import be.ugent.rml.records.RecordsFactory
+import be.ugent.rml.store.QuadStore
+import be.ugent.rml.store.QuadStoreFactory
+import be.ugent.rml.store.RDF4JStore
+import be.ugent.rml.term.NamedNode
+import java.io.File
+import java.io.FileInputStream
+import java.io.OutputStreamWriter
+import java.io.BufferedWriter
 
-import java.io.*;
-
-class TORDF () {
+class ToRDF {
 
     suspend fun jsonToRDF(json: String) {
         try {
-            File mappingFile = Utils.getFile("rmlmappings/rmlMappings.ttl");
+            // Define the output directory
+            val outputDir = File("target/output")
+            outputDir.mkdirs()
 
-            // Get the mapping string stream
-            InputStream mappingStream = new FileInputStream(mappingFile);
+            // Save the json String to a file in the output directory
+            val madmp_file = File(outputDir, "madmp_file.json")
+            madmp_file.writeText(json)
+            val madmp_file_path = madmp_file.absolutePath
+            println("File created at: ${madmp_file.absolutePath}")
 
-            // Load the mapping in a QuadStore
-            QuadStore rmlStore = QuadStoreFactory.read(mappingStream);
+            val resource = this::class.java.classLoader.getResource("rmlmappings/rmlMappings.ttl")
+            val mappingFile = File(resource?.toURI() ?: error("Resource not found"))
+            val mappingContent = mappingFile.readText().replace("{{madmp_json_path}}", madmp_file_path)
+            
+            // Create a file with the updated path to the madmp JSON file in the output directory
+            val updatedMappingFile = File(outputDir, "updated_rmlMappings.ttl")
+            updatedMappingFile.writeText(mappingContent)
+            val mappingStream = FileInputStream(updatedMappingFile)
 
-            // Set up the basepath for the records factory, i.e., the basepath for the (local file) data sources
-            RecordsFactory factory = new RecordsFactory(mappingFile.getParent(), mappingFile.getParent());
+            // Load the mapping into a QuadStore
+            val rmlStore: QuadStore = QuadStoreFactory.read(mappingStream)
 
-            // Set up the functions used during the mapping
-            //Agent functionAgent = AgentFactory.createFromFnO("fno/functions_idlab.ttl", "fno/functions_idlab_test_classes_java_mapping.ttl");
+            // Records factory for data sources
+            val factory = RecordsFactory(mappingFile.parent, mappingFile.parent)
 
-            // Set up the outputstore (needed when you want to output something else than nquads
-            QuadStore outputStore = new RDF4JStore();
+            // Output store
+            val outputStore = RDF4JStore()
 
             // Create the Executor
-            Executor executor = new Executor(rmlStore, factory, outputStore, Utils.getBaseDirectiveTurtleOrDefault(mappingStream, "http://purl.org/dmp#"), null);
+            val executor = Executor(
+            rmlStore,
+            factory,
+            outputStore,
+            Utils.getBaseDirectiveTurtleOrDefault(mappingStream, "http://purl.org/dmp#"),
+            null
+            )
 
-            // Execute the mapping
-            QuadStore result = executor.execute(null).get(new NamedNode("rmlmapper://default.store"));
+            val result = executor.execute(null).get(NamedNode("rmlmapper://default.store"))
 
-            // Output the result
-            outFile = new File("madmps_rdf/ex9-dmp-long.json.ttl");
-            FileOutputStream fos = new FileOutputStream(outFile);
-            OutputStreamWriter osw = new OutputStreamWriter(fos);
-            BufferedWriter out = new BufferedWriter(osw);
-            result.write(out, "turtle");
-            out.flush();
-            out.close();
-            fos.close();
+            result?.let {
+            val out_file = File(outputDir, "madmp.ttl")
+                println("RDF output file will be saved at: ${out_file.absolutePath}")
+                out_file.parentFile.mkdirs()
+                BufferedWriter(OutputStreamWriter(out_file.outputStream())).use { writer ->
+                    it.write(writer, "turtle")
+                }
+            } ?: println("No RDF output was generated. 'result' was null.")
 
-        } catch (Exception e) {
-            fail("No exception was expected.");
+        } catch (e: Exception) {
+            println("An error occurred during RDF generation: ${e.message}")
+            e.printStackTrace()
         }
-    
     }
-
 }
