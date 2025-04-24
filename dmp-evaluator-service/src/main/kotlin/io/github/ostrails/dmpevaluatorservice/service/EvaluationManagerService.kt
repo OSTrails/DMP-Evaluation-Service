@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
+import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
@@ -27,7 +28,8 @@ class EvaluationManagerService(
     private val evaluationReportRepository: EvaluationReportRepository,
     private val benchmarkRepository: BenchmarkRepository,
     private val benchmarService: BenchmarService,
-    private val evaluationService: EvaluationService
+    private val evaluationService: EvaluationService,
+    private val pluginManagerService: PluginManagerService
 ) {
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
@@ -93,11 +95,10 @@ class EvaluationManagerService(
 
     suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<TestRecord> {
         val file = fileToJsonObject(file)
-        System.out.println("------------------------------------- $benchmarkTitle")
         val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
-        println("benchmark finding --------------------------- $benchmarkTitle")
         val tests = evaluationService.testsToExecute(benchmark)
-        //val metrics:
+        val evaluations = generateTestsResults(tests)
+            //TODO() // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
         return tests
     }
 
@@ -107,6 +108,16 @@ class EvaluationManagerService(
             .reduce { acc, text -> acc + text }
             .awaitFirst()
         return Json.parseToJsonElement(content).jsonObject
+    }
+
+    suspend fun generateTestsResults(tests: List<TestRecord>){
+        val evaluators = pluginManagerService.getEvaluators()
+        val plguginstests = tests.mapNotNull {
+            val evaluatorId = it.evaluator ?: return@mapNotNull null
+            val plugin = pluginManagerService.getEvaluatorByPluginId(evaluatorId)
+            println("Plugin for test ${it.title} the plugin is $plugin")
+        }
+        println("Evaluator -------- ${evaluators }")
     }
 
 

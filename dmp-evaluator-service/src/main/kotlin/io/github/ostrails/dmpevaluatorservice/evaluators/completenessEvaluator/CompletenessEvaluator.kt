@@ -11,7 +11,12 @@ import java.util.*
 @Component
 class CompletenessEvaluator: EvaluatorPlugin {
 
-    override fun supports(dimension: String): Boolean = dimension == "completeness"
+    override fun supports(t: String): Boolean = t == getPluginIdentifier()
+
+    override val functionMap = mapOf(
+        "evaluateStructure" to ::evaluateStructure,
+        "evaluateMetadata" to ::evaluateMetadata
+    )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
         val evaluationsResults = tests.map { test ->
@@ -26,14 +31,40 @@ class CompletenessEvaluator: EvaluatorPlugin {
     }
 
     override fun getPluginIdentifier(): String {
-        return "EvaluatorTest "
+        return "CompletenessEvaluator"
     }
 
     override fun getPluginInformation(): PluginInfo {
         return PluginInfo(
-            pluginId = "Completeness",
+            pluginId = getPluginIdentifier(),
             description = "Evaluator to perform completeness tests",
             tests = listOf()
+        )
+    }
+
+    fun evaluateStructure(
+        maDMP: Map<String, Any>,
+        config: Map<String, Any>,
+        report: EvaluationReport
+    ): Evaluation {
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = (1..10).random(),
+            details = "Auto-generated evaluation of the test",
+            reportId = report.reportId
+        )
+    }
+
+    fun evaluateMetadata(
+        maDMP: Map<String, Any>,
+        config: Map<String, Any>,
+        report: EvaluationReport
+    ): Evaluation {
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = (1..10).random(),
+            details = "Auto-generated evaluation of the test",
+            reportId = report.reportId
         )
     }
 }

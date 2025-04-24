@@ -48,7 +48,7 @@ class MetricService(
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
         if (metric.testAssociated != null && metric.testAssociated.isNotEmpty()) {
             val testFiltered = metric.testAssociated.filterNot { it in tests }
-            val updateMetric = metric.copy(testAssociated = testFiltered ?: null)
+            val updateMetric = metric.copy(testAssociated = testFiltered)
             return metricRepository.save(updateMetric).awaitSingle()
         }else {
             throw ResourceNotFoundException("There is not tests to delete in this metric")

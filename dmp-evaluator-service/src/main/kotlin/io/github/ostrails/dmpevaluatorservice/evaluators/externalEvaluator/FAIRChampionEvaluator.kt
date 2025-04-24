@@ -5,9 +5,18 @@ import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class FAIRChampionEvaluator: EvaluatorPlugin {
+
+    override fun supports(t: String): Boolean = t == getPluginIdentifier()
+
+    override val functionMap = mapOf(
+        "evaluateStructure" to ::evaluateStructure,
+        "evaluateMetadata" to ::evaluateMetadata
+    )
+
     override fun evaluate(
         maDMP: Map<String, Any>,
         config: Map<String, Any>,
@@ -18,16 +27,42 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     }
 
     override fun getPluginIdentifier(): String {
-        return "External evaluator FAIR Champion"
+        return "FAIR_Champion"
     }
 
     override fun getPluginInformation(): PluginInfo {        return PluginInfo(
-        pluginId = "Completeness",
+        pluginId = getPluginIdentifier(),
         description = "Evaluator to perform completeness tests",
         tests = listOf()
     )
     }
 
-    override fun supports(dimension: String): Boolean = dimension == "FAIR"
+
+
+    fun evaluateStructure(
+        maDMP: Map<String, Any>,
+        config: Map<String, Any>,
+        report: EvaluationReport
+    ): Evaluation {
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = (1..10).random(),
+            details = "Auto-generated evaluation of the test",
+            reportId = report.reportId
+        )
+    }
+
+    fun evaluateMetadata(
+        maDMP: Map<String, Any>,
+        config: Map<String, Any>,
+        report: EvaluationReport
+    ): Evaluation {
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = (1..10).random(),
+            details = "Auto-generated evaluation of the test",
+            reportId = report.reportId
+        )
+    }
 
 }
