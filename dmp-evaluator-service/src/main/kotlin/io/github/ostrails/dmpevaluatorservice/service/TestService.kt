@@ -1,6 +1,5 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
-import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.TestRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
@@ -38,7 +37,7 @@ class TestService(
                description = testInfo.description ?: test.description,
                license = testInfo.license ?: test.license,
                version = testInfo.version ?: test.version,
-               metricImplemented = testInfo.metricImplemented ?: testInfo.metricImplemented,
+               metricImplemented = testInfo.metricImplemented,
                evaluator = testInfo.evaluator ?: testInfo.evaluator,
                functionEvaluator = testInfo.functionEvaluator ?: testInfo.functionEvaluator, )
            metricService.addTests(testInfo.metricImplemented, listOf(testId))

@@ -2,15 +2,12 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
-import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
-import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
-import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -20,8 +17,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.plugin.core.PluginRegistry
-import org.springframework.plugin.core.config.PluginRegistriesBeanDefinitionRegistrar
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,9 +24,7 @@ class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
     private val evaluationReportRepository: EvaluationReportRepository,
     private val benchmarService: BenchmarService,
-    private val evaluationService: EvaluationService,
-    private val pluginManagerService: PluginManagerService,
-    private val pluginRegistry: PluginRegistry<EvaluatorPlugin, String>
+    private val evaluationService: EvaluationService
 ) {
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
@@ -88,7 +81,7 @@ class EvaluationManagerService(
     * */
     suspend fun getFullreport(reportId: String): EvaluationReportResponse? {
         val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: throw ResourceNotFoundException("There is exist report with the id $reportId")
-        val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() } ?: emptyList()
+        val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() }
         return EvaluationReportResponse(
             report= report,
             evaluations = evaluations
@@ -96,12 +89,10 @@ class EvaluationManagerService(
     }
 
     suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<Evaluation> {
-        val file = fileToJsonObject(file)
+        val maDMP = fileToJsonObject(file) // Translate a json file to json object
         val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
-        val tests = evaluationService.testsToExecute(benchmark)
-        val evaluations = evaluationService.generateTestsResults(benchmark, file)
-        //val evaluations = generateTestsResults(tests)
-            //TODO() // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
+        val evaluations = evaluationService.generateTestsResults(benchmark, maDMP)
+        //TODO() // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
 
         return evaluations
     }
