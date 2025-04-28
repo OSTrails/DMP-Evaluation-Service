@@ -64,5 +64,10 @@ class TestService(
             return tests
     }
 
+    suspend fun getTestsByMetrics(metricId: String):List<TestRecord>{
+        val tests = testRepository.findBymetricImplemented(metricId).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests associated with the metric id $metricId not found")
+        return tests
+    }
+
 
 }

@@ -6,4 +6,6 @@ import reactor.core.publisher.Flux
 
 interface TestRepository: ReactiveMongoRepository<TestRecord, String> {
     fun findByIdIn(ids: List<String>): Flux<TestRecord>
+
+    fun findBymetricImplemented(implemented: String): Flux<TestRecord>
 }

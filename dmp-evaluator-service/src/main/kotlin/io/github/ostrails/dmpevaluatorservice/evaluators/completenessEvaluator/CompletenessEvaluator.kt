@@ -43,28 +43,27 @@ class CompletenessEvaluator: EvaluatorPlugin {
     }
 
     fun evaluateStructure(
-        maDMP: Map<String, Any>,
-        config: Map<String, Any>,
-        report: EvaluationReport
+        maDMP: Any,
+        //report: EvaluationReport
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = (1..10).random(),
             details = "Auto-generated evaluation of the test",
-            reportId = report.reportId
+            reportId = "Tested"
+            //reportId = report.reportId
         )
     }
 
     fun evaluateMetadata(
-        maDMP: Map<String, Any>,
-        config: Map<String, Any>,
-        report: EvaluationReport
+        maDMP: Any,
+        //report: EvaluationReport
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = (1..10).random(),
             details = "Auto-generated evaluation of the test",
-            reportId = report.reportId
+            reportId = "tested"
         )
     }
 }

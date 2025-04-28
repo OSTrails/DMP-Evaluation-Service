@@ -1,6 +1,5 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
-import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
@@ -11,6 +10,7 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundE
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
+import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -20,16 +20,18 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.plugin.core.PluginRegistry
+import org.springframework.plugin.core.config.PluginRegistriesBeanDefinitionRegistrar
 import org.springframework.stereotype.Service
 
 @Service
 class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
     private val evaluationReportRepository: EvaluationReportRepository,
-    private val benchmarkRepository: BenchmarkRepository,
     private val benchmarService: BenchmarService,
     private val evaluationService: EvaluationService,
-    private val pluginManagerService: PluginManagerService
+    private val pluginManagerService: PluginManagerService,
+    private val pluginRegistry: PluginRegistry<EvaluatorPlugin, String>
 ) {
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
@@ -93,13 +95,15 @@ class EvaluationManagerService(
         )
     }
 
-    suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<TestRecord> {
+    suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<Evaluation> {
         val file = fileToJsonObject(file)
         val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
         val tests = evaluationService.testsToExecute(benchmark)
-        val evaluations = generateTestsResults(tests)
+        val evaluations = evaluationService.generateTestsResults(benchmark, file)
+        //val evaluations = generateTestsResults(tests)
             //TODO() // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
-        return tests
+
+        return evaluations
     }
 
     suspend fun fileToJsonObject(file: FilePart): JsonObject {
@@ -110,15 +114,17 @@ class EvaluationManagerService(
         return Json.parseToJsonElement(content).jsonObject
     }
 
-    suspend fun generateTestsResults(tests: List<TestRecord>){
-        val evaluators = pluginManagerService.getEvaluators()
-        val plguginstests = tests.mapNotNull {
-            val evaluatorId = it.evaluator ?: return@mapNotNull null
-            val plugin = pluginManagerService.getEvaluatorByPluginId(evaluatorId)
-            println("Plugin for test ${it.title} the plugin is $plugin")
-        }
-        println("Evaluator -------- ${evaluators }")
-    }
+//    suspend fun generateTestsResults(tests: List<TestRecord>){
+//        val evaluators = pluginManagerService.getEvaluators()
+//        val plguginsTests = tests.mapNotNull {
+//            val evaluatorId = it.evaluator ?: return@mapNotNull null
+//            val functionName =it.functionEvaluator ?: return@mapNotNull null
+//            val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
+//            val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
+//            println("Plugin for test ${it.title} the plugin is $plugin")
+//        }
+//        println("Evaluator -------- ${evaluators }")
+//    }
 
 
 

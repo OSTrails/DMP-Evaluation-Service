@@ -1,18 +1,28 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import kotlinx.serialization.json.*
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
+import org.springframework.plugin.core.PluginRegistry
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @Service
 class EvaluationService(
     private val metricService: MetricService,
     private val testService: TestService,
-    private val pluginManagerService: PluginManagerService
+    private val pluginManagerService: PluginManagerService,
+    private val pluginRegistry: PluginRegistry<EvaluatorPlugin, String>,
 ) {
+    private val log: Logger = LoggerFactory.getLogger(EvaluationService::class.java)
 
 //    suspend fun runBenchmark(maDMP: JsonObject, benchmark: BenchmarkRecord): List<EvaluatorPlugin> {
 //        //val testsToExecute = testsToExecute(benchmark)
@@ -25,12 +35,30 @@ class EvaluationService(
         val metrics = metricService.findMultipleMetrics(metricsIds)
         val testsIds = metrics.mapNotNull { it.testAssociated }.flatten()
         val tests = testService.findMultipleTests(testsIds)
-        val evaluators = pluginManagerService.getEvaluators()
         return tests
     }
 
 
+    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: Any): List<Evaluation> = coroutineScope{
+        val tests = testsToExecute(benchmark)
 
+        val testsEvaluations = tests.mapNotNull { test ->
+            val evaluatorId = test.evaluator ?: return@mapNotNull null
+            val functionName = test.functionEvaluator ?: return@mapNotNull null
+            val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
+            val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
+            println("----------------- ///// ------------ Plugin for test ${test.title} the plugin is $plugin and the function is $functionTest")
 
+            async<Evaluation?> {
+                try {
+                    functionTest(maDMP)
+                }catch (e:Exception){
+                    log.error("Error running test: ${test.title} ", e)
+                    null
+                }
+            }
+        }
+        testsEvaluations.awaitAll().filterNotNull()
+    }
 
 }

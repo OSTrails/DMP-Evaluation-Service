@@ -52,7 +52,7 @@ class EvaluationController(
     suspend fun runBenchmark(
         @RequestPart("maDMP") maDMP: FilePart,
         @RequestPart("benchmark") benchmark: String
-    ): ResponseEntity<List<TestRecord>>{
+    ): ResponseEntity<List<Evaluation>>{
             //kotlinx.serialization.json.JsonObject>
         println("Received benchmark. $benchmark")
         val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark)

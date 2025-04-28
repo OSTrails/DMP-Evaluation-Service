@@ -52,4 +52,12 @@ class TestController(
         val result = testService.deleteTest(testId)
         return ResponseEntity.ok(result)
     }
+
+    @GetMapping("/metrics/{metricId}")
+    suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestRecord>>{
+        val result = testService.getTestsByMetrics(metricId)
+        return ResponseEntity.ok(result)
+    }
+
+
 }
