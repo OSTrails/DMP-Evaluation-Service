@@ -31,18 +31,16 @@ class EvaluationService(
     }
 
 
-    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: Any): List<Evaluation> = coroutineScope{
+    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: Any, reportId:String): List<Evaluation> = coroutineScope{
         val tests = testsToExecute(benchmark)
-
         val testsEvaluations = tests.mapNotNull { test ->
             val evaluatorId = test.evaluator ?: return@mapNotNull null
             val functionName = test.functionEvaluator ?: return@mapNotNull null
             val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
             val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
-
             async<Evaluation?> {
                 try {
-                    functionTest(maDMP)
+                    functionTest(maDMP, reportId)
                 }catch (e:Exception){
                     log.error("Error running test: ${test.title} ", e)
                     null

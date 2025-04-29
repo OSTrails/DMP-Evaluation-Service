@@ -4,10 +4,12 @@ import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.GlobalExceptionHandler
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
+import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -29,7 +31,7 @@ class EvaluationManagerService(
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
         // fetch the report id from the request or from the db.
-        val reportEvaluation = getReportId(request)
+        val reportEvaluation = getReportId(request.reportId)
         val evaluationsResults = evaluationResults(reportEvaluation, request)
         return EvaluationResult(
             reportId = reportEvaluation.reportId.toString(),
@@ -38,11 +40,13 @@ class EvaluationManagerService(
     }
 
     /*
-    * Funtion to fecth or create the report for the evaluations
+    * Function to fetch or create the report for the evaluations
     * */
-    suspend fun getReportId(request: EvaluationRequest): EvaluationReport {
-        val report = request.reportId?.let {
-            evaluationReportRepository.findById(it).awaitFirstOrNull()
+    suspend fun getReportId(request: String?): EvaluationReport {
+        val report = request.let {
+            if (it != null) {
+                evaluationReportRepository.findById(it).awaitFirstOrNull()
+            }else evaluationReportRepository.save(EvaluationReport()).awaitSingle()
         }?:evaluationReportRepository.save(EvaluationReport()).awaitSingle()
         return report
     }
@@ -55,7 +59,7 @@ class EvaluationManagerService(
 
         val evaluations = evaluators.mapIndexed { index, evaluation ->
             Evaluation(
-                result = (1..10).random(),
+                result = ResultTestEnum.FAIL,
                 details = "Auto-generated evaluation " + evaluation,
                 reportId = report.reportId
             )
@@ -88,13 +92,32 @@ class EvaluationManagerService(
         )
     }
 
-    suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String): List<Evaluation> {
-        val maDMP = fileToJsonObject(file) // Translate a json file to json object
-        val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
-        val evaluations = evaluationService.generateTestsResults(benchmark, maDMP)
-        //TODO() // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
+    /*
+    * Function to generate test results based on the benchmark
+    * */
 
-        return evaluations
+    suspend fun gatewayEvaluationService(file: FilePart, benchmarkTitle: String, reportId: String?): List<Evaluation> {
+        try {
+            val report = getReportId(reportId)
+            if (report.reportId != null) {
+                val reportIdentifier = report.reportId
+                val maDMP = fileToJsonObject(file) // Translate a json file to json object
+                val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
+                val evaluations = evaluationService.generateTestsResults(benchmark, maDMP, reportIdentifier.toString())
+                val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
+                val updateReport = report.copy(
+                    evaluations = report.evaluations + savedEvaluations.map { it.evaluationId }
+                )
+                evaluationReportRepository.save(updateReport).awaitSingle()
+                //TODO()
+                // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
+                return savedEvaluations
+
+            }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
+        }catch (e: Exception) {
+            throw ResourceNotFoundException("Was not possible to generate the evaluation due $e")
+        }
+
     }
 
     suspend fun fileToJsonObject(file: FilePart): JsonObject {
@@ -105,17 +128,7 @@ class EvaluationManagerService(
         return Json.parseToJsonElement(content).jsonObject
     }
 
-//    suspend fun generateTestsResults(tests: List<TestRecord>){
-//        val evaluators = pluginManagerService.getEvaluators()
-//        val plguginsTests = tests.mapNotNull {
-//            val evaluatorId = it.evaluator ?: return@mapNotNull null
-//            val functionName =it.functionEvaluator ?: return@mapNotNull null
-//            val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
-//            val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
-//            println("Plugin for test ${it.title} the plugin is $plugin")
-//        }
-//        println("Evaluator -------- ${evaluators }")
-//    }
+
 
 
 

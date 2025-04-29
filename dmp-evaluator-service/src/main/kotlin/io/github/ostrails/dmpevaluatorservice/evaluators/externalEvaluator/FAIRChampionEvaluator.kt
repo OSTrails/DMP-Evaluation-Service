@@ -3,6 +3,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.externalEvaluator
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
+import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import org.springframework.stereotype.Component
 import java.util.*
@@ -40,26 +41,28 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
 
 
     fun evaluateStructure(
-        maDMP: Any
+        maDMP: Any,
+        reportId: String,
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = (1..10).random(),
+            result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
-            reportId = "Testeds",
+            reportId = reportId,
 
             //reportId = report.reportId
         )
     }
 
     fun evaluateMetadata(
-        maDMP: Any
+        maDMP: Any,
+        reportId: String,
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = (1..10).random(),
+            result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
-            reportId = "tested"
+            reportId = reportId
         )
     }
 

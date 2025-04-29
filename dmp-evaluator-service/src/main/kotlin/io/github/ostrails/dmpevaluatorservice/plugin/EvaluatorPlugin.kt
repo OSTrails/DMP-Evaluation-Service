@@ -13,7 +13,7 @@ interface EvaluatorPlugin: ConfigurablePlugin<String, PluginInfo> {
     ): List<Evaluation>
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
-    val functionMap: Map<String, (Any) -> Evaluation>
+    val functionMap: Map<String, (Any, String) -> Evaluation>
     //val functionMap: Map<String, (Map<String, Any>, Map<String, Any>, EvaluationReport) -> Evaluation>
 
 }

@@ -8,6 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/evaluations")
@@ -43,17 +44,17 @@ class EvaluationController(
   -F 'dimension=completeness' \
   -F 'tests=metadataCoverage' \
   -F 'tests=structure'
-
     * */
 
     @PostMapping("/benchmark", consumes = ["multipart/form-data"])
     suspend fun runBenchmark(
         @RequestPart("maDMP") maDMP: FilePart,
-        @RequestPart("benchmark") benchmark: String
+        @RequestPart("benchmark") benchmark: String,
+        @RequestPart(required = false) reportId: String?
     ): ResponseEntity<List<Evaluation>>{
             //kotlinx.serialization.json.JsonObject>
         println("Received benchmark. $benchmark")
-        val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark)
+        val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark, reportId)
         return ResponseEntity.ok(jsonResult)
     }
 }

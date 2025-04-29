@@ -3,6 +3,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
+import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import org.springframework.stereotype.Component
 import java.util.*
@@ -22,7 +23,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
         val evaluationsResults = tests.map { test ->
             Evaluation(
                     evaluationId = UUID.randomUUID().toString(),
-                    result = (1..10).random(),
+                    result = ResultTestEnum.PASS,
                     details = "Auto-generated evaluation of the test" + test ,
                     reportId = report.reportId
             )
@@ -44,26 +45,27 @@ class CompletenessEvaluator: EvaluatorPlugin {
 
     fun evaluateStructure(
         maDMP: Any,
-        //report: EvaluationReport
+        reportId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = (1..10).random(),
+            result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
-            reportId = "Tested"
+            reportId = reportId
             //reportId = report.reportId
         )
     }
 
     fun evaluateMetadata(
         maDMP: Any,
+        reportId: String,
         //report: EvaluationReport
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = (1..10).random(),
+            result = ResultTestEnum.FAIL,
             details = "Auto-generated evaluation of the test",
-            reportId = "tested"
+            reportId = reportId
         )
     }
 }
