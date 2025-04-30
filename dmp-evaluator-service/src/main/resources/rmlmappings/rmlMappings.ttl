@@ -1,0 +1,133 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dmp: <http://purl.org/dmp#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://purl.org/dmp#>.
+
+<#DMPMapping> a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp" .
+
+<#DMPTriplesMap> a rr:TriplesMap ;
+    rml:logicalSource <#DMPMapping> ;
+    rr:subjectMap [
+        rml:reference "dmp_id.identifier" ;
+        rr:termType rr:IRI ;
+        rr:class dmp:DataManagementPlan
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:title ;
+        rr:objectMap [ rml:reference "$.title" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:description ;
+        rr:objectMap [ rml:reference "$.description" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:language ;
+        rr:objectMap [ rml:reference "$.language" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:created ;
+        rr:objectMap [ rml:reference "$.created" ; rr:datatype xsd:dateTime ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:modified ;
+        rr:objectMap [ rml:reference "$.modified" ; rr:datatype xsd:dateTime ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:identifier_type ;
+        rr:objectMap [ rml:reference "$.dmp_id.type" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:contact ;
+        rr:objectMap [ rml:reference "$.contact.contact_id.identifier" ;
+                       rr:termType rr:IRI ]
+    ] .
+
+<#ContactMapping> a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}";
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.contact" .
+
+<#ContactTriplesMap> a rr:TriplesMap ;  
+    rml:logicalSource <#ContactMapping> ;
+    rr:subjectMap [
+        rml:reference "contact_id.identifier" ;
+        rr:termType rr:IRI ;
+        rr:class foaf:Person
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate foaf:name ;
+        rr:objectMap [ rml:reference "$.name" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate foaf:mbox ;
+        rr:objectMap [ rml:reference "$.mbox" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:contact_type ;
+        rr:objectMap [ rml:reference "$.contact_id.type" ]
+    ] .
+
+<#ContributorMapping> a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}";
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.contributor[*]" .
+
+<#ContributorTriplesMap> a rr:TriplesMap ;
+    rml:logicalSource <#ContributorMapping> ;
+    rr:subjectMap [
+        rml:reference "contributor_id.identifier" ;
+        rr:termType rr:IRI ;
+        rr:class foaf:Person
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate foaf:name ;
+        rr:objectMap [ rml:reference "$.name" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate foaf:mbox ;
+        rr:objectMap [ rml:reference "$.mbox" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dmp:role ;
+        rr:objectMap [ rml:reference "$.role" ]
+    ] .
+
+<#DatasetMapping> a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}";
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*]" .
+
+<#DatasetTriplesMap> a rr:TriplesMap ;
+    rml:logicalSource <#DatasetMapping> ;
+    rr:subjectMap [
+        rml:reference "dataset_id.identifier" ;
+        rr:termType rr:IRI ;
+        rr:class dcat:Dataset
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dcat:title ;
+        rr:objectMap [ rml:reference "$.title" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dcat:description ;
+        rr:objectMap [ rml:reference "$.description" ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dcat:issued ;
+        rr:objectMap [ rml:reference "$.issued" ; rr:datatype xsd:dateTime ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dcat:modified ;
+        rr:objectMap [ rml:reference "$.modified" ; rr:datatype xsd:dateTime ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate dcat:contactPoint ;
+        rr:objectMap [ rml:reference "$.contactPoint" ]
+    ] .

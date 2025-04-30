@@ -125,6 +125,7 @@ class EvaluationManagerService(
             .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
             .reduce { acc, text -> acc + text }
             .awaitFirst()
+
         return Json.parseToJsonElement(content).jsonObject
     }
 
