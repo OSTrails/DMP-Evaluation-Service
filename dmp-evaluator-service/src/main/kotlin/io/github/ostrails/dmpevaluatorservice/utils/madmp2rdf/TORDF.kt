@@ -7,12 +7,15 @@ import be.ugent.rml.store.QuadStore
 import be.ugent.rml.store.QuadStoreFactory
 import be.ugent.rml.store.RDF4JStore
 import be.ugent.rml.term.NamedNode
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStreamWriter
 import java.io.BufferedWriter
 
-class ToRDF {
+@Service
+class ToRDFService {
 
     suspend fun jsonToRDF(json: String) {
         try {
@@ -62,7 +65,8 @@ class ToRDF {
                 BufferedWriter(OutputStreamWriter(out_file.outputStream())).use { writer ->
                     it.write(writer, "turtle")
                 }
-            } ?: println("No RDF output was generated. 'result' was null.")
+
+            } ?: throw ResourceNotFoundException("Resource not found")
 
         } catch (e: Exception) {
             println("An error occurred during RDF generation: ${e.message}")

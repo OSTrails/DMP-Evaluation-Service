@@ -5,6 +5,7 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
+import kotlinx.serialization.json.Json
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.codec.multipart.FilePart
@@ -30,7 +31,7 @@ class EvaluationController(
 
     @GetMapping("/report/{reportid}/full")
     suspend fun getReport(@PathVariable reportid: String): ResponseEntity<EvaluationReportResponse> {
-        val evaluationreport = evaluationManagerService.getFullreport(reportid)
+        val evaluationreport = evaluationManagerService.getFullReport(reportid)
         //        System.out.println(evaluations)
         return ResponseEntity.ok(evaluationreport)
     }
@@ -52,9 +53,15 @@ class EvaluationController(
         @RequestPart("benchmark") benchmark: String,
         @RequestPart(required = false) reportId: String?
     ): ResponseEntity<List<Evaluation>>{
-            //kotlinx.serialization.json.JsonObject>
-        println("Received benchmark. $benchmark")
         val jsonResult = evaluationManagerService.gatewayEvaluationService(maDMP, benchmark, reportId)
         return ResponseEntity.ok(jsonResult)
+    }
+
+    @PostMapping("/mappingRDF", consumes = ["multipart/form-data"])
+    suspend fun runMapping(
+        @RequestPart("maDMP") maDMP: FilePart,
+    ): ResponseEntity<Any>{
+        val result = evaluationManagerService.mapToRDF(maDMP)
+        return ResponseEntity.ok().body(result)
     }
 }

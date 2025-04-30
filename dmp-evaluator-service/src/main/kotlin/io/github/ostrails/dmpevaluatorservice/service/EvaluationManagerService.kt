@@ -10,6 +10,7 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
+import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDFService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -26,7 +27,8 @@ class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
     private val evaluationReportRepository: EvaluationReportRepository,
     private val benchmarService: BenchmarService,
-    private val evaluationService: EvaluationService
+    private val evaluationService: EvaluationService,
+    private val toRDFService: ToRDFService
 ) {
 
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
@@ -83,7 +85,7 @@ class EvaluationManagerService(
     /*
     * Function to generate the evaluation report with all the evlauations
     * */
-    suspend fun getFullreport(reportId: String): EvaluationReportResponse? {
+    suspend fun getFullReport(reportId: String): EvaluationReportResponse? {
         val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: throw ResourceNotFoundException("There is exist report with the id $reportId")
         val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() }
         return EvaluationReportResponse(
@@ -125,8 +127,12 @@ class EvaluationManagerService(
             .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
             .reduce { acc, text -> acc + text }
             .awaitFirst()
-
         return Json.parseToJsonElement(content).jsonObject
+    }
+
+    suspend fun mapToRDF(maDMP: FilePart): Any {
+        toRDFService.jsonToRDF(maDMP.toString())
+        return true
     }
 
 
