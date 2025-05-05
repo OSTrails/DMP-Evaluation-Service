@@ -3,9 +3,11 @@ package io.github.ostrails.dmpevaluatorservice.controller
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.model.metric.metricsListsIDs
 import io.github.ostrails.dmpevaluatorservice.service.BenchmarService
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Benchmark APIs", description = "Manage benchmarks and associated metrics")
 @RestController
 @RequestMapping("/api/benchmarks")
 class BenchmarkController(

@@ -2,10 +2,11 @@ package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.service.MetricService
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-
+@Tag(name = "Metric APIs", description = "Manage metrics and associated tests")
 @RestController
 @RequestMapping("/api/metrics")
 class MetricController(

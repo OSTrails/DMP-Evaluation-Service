@@ -5,12 +5,14 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
+import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.serialization.json.Json
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.multipart.MultipartFile
 
+@Tag(name = "Evaluation APIs", description = "Manage evaluations for the maDMPs")
 @RestController
 @RequestMapping("/api/evaluations")
 class EvaluationController(

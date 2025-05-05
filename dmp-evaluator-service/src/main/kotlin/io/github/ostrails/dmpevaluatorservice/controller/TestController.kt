@@ -3,6 +3,7 @@ package io.github.ostrails.dmpevaluatorservice.controller
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.service.TestService
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "Test APIs", description = "Manage tests")
 @RestController
 @RequestMapping("/api/tests")
 class TestController(
