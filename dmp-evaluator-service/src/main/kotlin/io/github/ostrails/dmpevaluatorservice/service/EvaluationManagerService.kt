@@ -4,7 +4,6 @@ import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
-import io.github.ostrails.dmpevaluatorservice.exceptionHandler.GlobalExceptionHandler
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest

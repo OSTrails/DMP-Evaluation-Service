@@ -1,11 +1,9 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
-import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import io.github.ostrails.dmpevaluatorservice.service.PluginManagerService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
-import org.springframework.plugin.core.Plugin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping

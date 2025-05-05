@@ -34,7 +34,7 @@ class BenchmarkController(
 
     @DeleteMapping("/{benchmarkId}")
     suspend fun deleteBenchmark(@PathVariable benchmarkId: String): ResponseEntity<String> {
-        val benchmarkId = benchMarkService.deleteBenchmark(benchmarkId)
+        val benchmarkIdRecord = benchMarkService.deleteBenchmark(benchmarkId)
         return ResponseEntity.ok(benchmarkId)
     }
 
