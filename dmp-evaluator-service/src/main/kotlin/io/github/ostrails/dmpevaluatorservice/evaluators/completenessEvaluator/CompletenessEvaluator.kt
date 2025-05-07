@@ -24,6 +24,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
             Evaluation(
                     evaluationId = UUID.randomUUID().toString(),
                     result = ResultTestEnum.PASS,
+                    title = "Testing ",
                     details = "Auto-generated evaluation of the test" + test ,
                     reportId = report.reportId
             )
@@ -51,21 +52,21 @@ class CompletenessEvaluator: EvaluatorPlugin {
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
+            title = "Testing ",
             reportId = reportId
-            //reportId = report.reportId
         )
     }
 
     fun evaluateMetadata(
         maDMP: Any,
         reportId: String,
-        //report: EvaluationReport
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.FAIL,
             details = "Auto-generated evaluation of the test",
-            reportId = reportId
+            reportId = reportId,
+            title = "Testing ",
         )
     }
 }

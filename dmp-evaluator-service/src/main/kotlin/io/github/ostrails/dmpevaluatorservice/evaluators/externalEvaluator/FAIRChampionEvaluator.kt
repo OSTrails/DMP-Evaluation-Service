@@ -49,6 +49,8 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
             reportId = reportId,
+            title = TODO(),
+            timestamp = TODO(),
 
             //reportId = report.reportId
         )
@@ -62,6 +64,7 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
+            title = "Testin",
             reportId = reportId
         )
     }

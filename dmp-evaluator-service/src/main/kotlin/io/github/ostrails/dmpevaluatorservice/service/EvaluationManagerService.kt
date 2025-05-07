@@ -62,6 +62,7 @@ class EvaluationManagerService(
             Evaluation(
                 result = ResultTestEnum.FAIL,
                 details = "Auto-generated evaluation " + evaluation,
+                title = "Testing",
                 reportId = report.reportId
             )
         }
