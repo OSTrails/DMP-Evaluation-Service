@@ -14,5 +14,7 @@ class PostConstruct(
     fun run() {
         println("🚀 Mongo patcher starting up...")
         patchMongoCollection<BenchmarkRecord>(mongoTemplate, "benchmarks")
+        patchMongoCollection<BenchmarkRecord>(mongoTemplate, "metrics")
+        patchMongoCollection<BenchmarkRecord>(mongoTemplate, "tests")
     }
 }
