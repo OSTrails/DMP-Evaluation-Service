@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import javax.annotation.processing.Completion
+import javax.annotation.processing.Generated
 
 @Document(collection = "evaluations")
 data class Evaluation(
@@ -17,5 +18,5 @@ data class Evaluation(
     val log: String = "",
     val affectedElements: String? = null,
     val completion: String? = null,
-
+    val generated: String? = ""
 )

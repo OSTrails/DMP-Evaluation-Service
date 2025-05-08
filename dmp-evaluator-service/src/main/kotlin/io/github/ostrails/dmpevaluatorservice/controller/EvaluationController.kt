@@ -36,8 +36,6 @@ class EvaluationController(
         return ResponseEntity.ok(evaluationreport)
     }
 
-
-
     /*
     Example in how to call the benchmark with a file
     curl -X POST http://localhost:8080/api/evaluation/benchmark \
