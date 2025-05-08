@@ -8,6 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Service
 import org.springframework.plugin.core.PluginRegistry
 import org.slf4j.Logger
@@ -31,7 +32,7 @@ class EvaluationService(
     }
 
 
-    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: Any, reportId:String): List<Evaluation> = coroutineScope{
+    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
         val tests = testsToExecute(benchmark)
         val testsEvaluations = tests.mapNotNull { test ->
             val evaluatorId = test.evaluator ?: return@mapNotNull null

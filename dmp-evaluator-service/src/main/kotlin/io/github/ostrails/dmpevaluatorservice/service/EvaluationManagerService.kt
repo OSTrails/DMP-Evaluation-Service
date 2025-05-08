@@ -105,15 +105,16 @@ class EvaluationManagerService(
                 val reportIdentifier = report.reportId
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
-                val evaluations = evaluationService.generateTestsResults(benchmark, maDMP, reportIdentifier.toString())
-                val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
-                val updateReport = report.copy(
-                    evaluations = report.evaluations + savedEvaluations.map { it.evaluationId }
-                )
-                evaluationReportRepository.save(updateReport).awaitSingle()
-                //TODO()
-                // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
-                return savedEvaluations
+                    val evaluations = evaluationService.generateTestsResults(benchmark, maDMP, reportIdentifier.toString())
+                    val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
+                    val updateReport = report.copy(
+                        evaluations = report.evaluations + savedEvaluations.map { it.evaluationId }
+                    )
+                    evaluationReportRepository.save(updateReport).awaitSingle()
+                    //TODO()
+                    // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
+                    return savedEvaluations
+
 
             }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
         }catch (e: Exception) {

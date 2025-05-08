@@ -52,7 +52,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
-            reportId = reportId
+            reportId = reportId,
+            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance"
         )
     }
 

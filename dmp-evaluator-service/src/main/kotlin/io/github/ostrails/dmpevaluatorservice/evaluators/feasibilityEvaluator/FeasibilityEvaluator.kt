@@ -26,8 +26,9 @@ class FeasibilityEvaluator: EvaluatorPlugin {
     }
 
     override val functionMap = mapOf(
-        "evaluateCoherentLicense" to ::evaluateCoherentLicense,
+        "evaluateCoherentLicense" to  ::evaluateCoherentLicense
     )
+
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
         val evaluationsResults = tests.map { test ->
@@ -36,7 +37,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
                 result = ResultTestEnum.PASS,
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
-                reportId = report.reportId
+                reportId = report.reportId,
+                generated = "${this::class.qualifiedName}:: evaluate"
             )
         }
         return evaluationsResults
@@ -51,7 +53,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
-            reportId = reportId
+            reportId = reportId,
+            generated = "${this::class.qualifiedName}:: evaluateCoherentLicense"
         )
     }
 

@@ -51,8 +51,8 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             reportId = reportId,
             title = TODO(),
             timestamp = TODO(),
+            generated = "${this::class.qualifiedName}:: evaluateStructure"
 
-            //reportId = report.reportId
         )
     }
 
@@ -65,7 +65,8 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
             title = "Testin",
-            reportId = reportId
+            reportId = reportId,
+            generated = "${this::class.qualifiedName}:: evaluateMetadata"
         )
     }
 

@@ -26,7 +26,8 @@ class CompletenessEvaluator: EvaluatorPlugin {
                     result = ResultTestEnum.PASS,
                     title = "Testing ",
                     details = "Auto-generated evaluation of the test" + test ,
-                    reportId = report.reportId
+                    reportId = report.reportId,
+                    generated = "${this::class.qualifiedName}:: evaluate"
             )
         }
         return evaluationsResults
@@ -53,7 +54,8 @@ class CompletenessEvaluator: EvaluatorPlugin {
             result = ResultTestEnum.PASS,
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
-            reportId = reportId
+            reportId = reportId,
+            generated = "${this::class.qualifiedName}:: evaluateStructure"
         )
     }
 
@@ -67,6 +69,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             reportId = reportId,
             title = "Testing ",
+            generated = "${this::class.qualifiedName}:: evaluateMetadata"
         )
     }
 }
