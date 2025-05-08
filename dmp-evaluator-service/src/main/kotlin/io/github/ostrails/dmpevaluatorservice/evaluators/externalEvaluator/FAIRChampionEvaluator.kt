@@ -43,6 +43,7 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     fun evaluateStructure(
         maDMP: Any,
         reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -51,7 +52,8 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             reportId = reportId,
             title = TODO(),
             timestamp = TODO(),
-            generated = "${this::class.qualifiedName}:: evaluateStructure"
+            generated = "${this::class.qualifiedName}:: evaluateStructure",
+            outputFromTest = testId
 
         )
     }
@@ -59,6 +61,7 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     fun evaluateMetadata(
         maDMP: Any,
         reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -66,7 +69,8 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             title = "Testin",
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateMetadata"
+            generated = "${this::class.qualifiedName}:: evaluateMetadata",
+            outputFromTest = testId
         )
     }
 

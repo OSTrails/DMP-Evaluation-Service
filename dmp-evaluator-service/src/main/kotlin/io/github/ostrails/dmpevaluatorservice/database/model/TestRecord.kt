@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "tests")
 data class TestRecord(
-    @Id var id: String? = null,
+    @Id var id: String = "",
     val title: String,
     val description: String,
     val license: String,

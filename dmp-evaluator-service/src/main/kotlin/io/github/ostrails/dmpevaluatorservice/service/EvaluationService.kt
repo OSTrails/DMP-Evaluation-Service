@@ -41,7 +41,7 @@ class EvaluationService(
             val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
             async<Evaluation?> {
                 try {
-                    functionTest(maDMP, reportId)
+                    functionTest(maDMP, reportId, test.id)
                 }catch (e:Exception){
                     log.error("Error running test: ${test.title} ", e)
                     null

@@ -45,7 +45,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
 
     fun evaluateLicenseCompliance(
         maDMP: Any,
-        reportId: String
+        reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -53,7 +54,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance"
+            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
+            outputFromTest = testId
         )
     }
 

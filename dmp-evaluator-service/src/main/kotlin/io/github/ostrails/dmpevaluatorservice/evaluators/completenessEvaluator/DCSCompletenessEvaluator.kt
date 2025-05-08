@@ -52,10 +52,10 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
 
     fun evaluateStructure(
         maDMP: JsonObject,
-        reportId: String
+        reportId: String,
+        testId: String
     ): Evaluation {
         val validationmaDMP = Validator.validate(maDMP.toString())
-        println("The validationMaDMP object-------------------: $validationmaDMP")
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = if (validationmaDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
@@ -63,7 +63,8 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = "Testing ",
             reportId = reportId,
             log = validationmaDMP.toString(),
-            generated = "${this::class.qualifiedName}:: evaluateStructure"
+            generated = "${this::class.qualifiedName}:: evaluateStructure",
+            outputFromTest = testId
         )
     }
 

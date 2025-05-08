@@ -38,7 +38,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
                 reportId = report.reportId,
-                generated = "${this::class.qualifiedName}:: evaluate"
+                generated = "${this::class.qualifiedName}:: evaluate",
+
             )
         }
         return evaluationsResults
@@ -46,7 +47,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
 
     fun evaluateCoherentLicense(
         maDMP: Any,
-        reportId: String
+        reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -54,7 +56,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateCoherentLicense"
+            generated = "${this::class.qualifiedName}:: evaluateCoherentLicense",
+            outputFromTest = testId
         )
     }
 

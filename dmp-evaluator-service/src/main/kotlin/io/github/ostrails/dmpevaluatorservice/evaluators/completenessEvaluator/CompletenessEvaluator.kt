@@ -47,7 +47,8 @@ class CompletenessEvaluator: EvaluatorPlugin {
 
     fun evaluateStructure(
         maDMP: Any,
-        reportId: String
+        reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -55,13 +56,15 @@ class CompletenessEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             title = "Testing ",
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateStructure"
+            generated = "${this::class.qualifiedName}:: evaluateStructure",
+            outputFromTest = testId
         )
     }
 
     fun evaluateMetadata(
         maDMP: Any,
         reportId: String,
+        testId: String
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
@@ -69,7 +72,8 @@ class CompletenessEvaluator: EvaluatorPlugin {
             details = "Auto-generated evaluation of the test",
             reportId = reportId,
             title = "Testing ",
-            generated = "${this::class.qualifiedName}:: evaluateMetadata"
+            generated = "${this::class.qualifiedName}:: evaluateMetadata",
+            outputFromTest = testId
         )
     }
 }

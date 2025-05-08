@@ -17,6 +17,7 @@ data class Evaluation(
     val reportId: String?,  // Links back to EvaluationReport
     val log: String = "",
     val affectedElements: String? = null,
-    val completion: String? = null,
-    val generated: String? = ""
+    val completion: Int? = null,
+    val generated: String? = "",
+    val outputFromTest: String? = "",
 )
