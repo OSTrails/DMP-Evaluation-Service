@@ -1,0 +1,31 @@
+**DCS Compliance Benchmark:**
+
+  id: dcs-compliance-benchmark
+  title: "Compliance with DMP Common Standards"
+  narrative: >
+    Ensure that the machine-actionable Data Management Plan (maDMP) follows the 
+    structure and format defined by the DMP Common Standard (DCS) specification.
+  dimension: "Compliance"
+  type: "DCS Compliance Benchmark"
+  algorithm: "binary"
+  assessment_outcome:
+    type: "Score + Textual classification"
+
+  **Metrics:**
+    - id: dcs.1
+      title: "Valid JSON according to DCS schema"
+      description: "The DMP file must be a valid JSON that conforms to the latest DMP Common Standard JSON Schema."
+      test: validate_dcs_json_schema
+      mandatory: true
+
+    - id: dcs.2
+      title: "All required DCS fields present"
+      description: "Mandatory fields defined by the DMP Common Standard must be included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.3
+      title: "Field values follow expected formats"
+      description: "Values must follow the format and constraints defined in the DCS schema (e.g., ISO dates, controlled vocabularies)."
+      test: check_dcs_data_types
+      mandatory: true
