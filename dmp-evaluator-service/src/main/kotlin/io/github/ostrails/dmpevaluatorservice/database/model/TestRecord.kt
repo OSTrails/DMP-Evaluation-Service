@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.database.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.net.URL
 
 @Document(collection = "tests")
 data class TestRecord(
@@ -10,6 +11,7 @@ data class TestRecord(
     val description: String,
     val license: String,
     val version: String,
+    val endpointURL: URL? = null,
     val endpointDescription: String? = null,
     val keyword: String? = null,
     val abbreviation: String? = null,
