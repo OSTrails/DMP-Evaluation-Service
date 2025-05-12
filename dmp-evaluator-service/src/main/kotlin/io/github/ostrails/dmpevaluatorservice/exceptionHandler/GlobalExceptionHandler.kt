@@ -50,5 +50,15 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(InputvalidationException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun inputValidation(ex: Exception, exchange: ServerWebExchange): ErrorResponse{
+        return ErrorResponse(
+            code = "BAD_REQUEST",
+            message = ex.message.orEmpty(),
+            path = exchange.request.path.toString()
+        )
+    }
+
 
 }

@@ -2,16 +2,15 @@ package io.github.ostrails.dmpevaluatorservice.database.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.net.URL
 
 @Document(collection = "tests")
 data class TestRecord(
-    @Id var id: String = "",
+    @Id var id: String? = null,
     val title: String,
     val description: String,
     val license: String,
     val version: String,
-    val endpointURL: URL? = null,
+    val endpointURL: String? = "http://localhost:8080/api/evaluations/benchmark",
     val endpointDescription: String? = null,
     val keyword: String? = null,
     val abbreviation: String? = null,
@@ -25,5 +24,5 @@ data class TestRecord(
     val evaluator: String?,
     val functionEvaluator: String?,
 
-)
+    )
 

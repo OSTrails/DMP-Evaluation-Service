@@ -8,7 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 import org.springframework.stereotype.Service
 import org.springframework.plugin.core.PluginRegistry
 import org.slf4j.Logger
@@ -32,23 +32,29 @@ class EvaluationService(
     }
 
 
-    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
+    suspend fun generateTestsResultsFromBenchmark(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
         val tests = testsToExecute(benchmark)
-        val testsEvaluations = tests.mapNotNull { test ->
-            val evaluatorId = test.evaluator ?: return@mapNotNull null
-            val functionName = test.functionEvaluator ?: return@mapNotNull null
-            val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
-            val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
+        val testsEvaluations = tests.map { test ->
             async<Evaluation?> {
-                try {
-                    functionTest(maDMP, reportId, test.id)
-                }catch (e:Exception){
-                    log.error("Error running test: ${test.title} ", e)
-                    null
-                }
+                generateTestResultFromTest(test, maDMP, reportId)
             }
         }
         testsEvaluations.awaitAll().filterNotNull()
     }
+
+    suspend fun generateTestResultFromTest(test: TestRecord, maDMP: JsonObject, reportId:String): Evaluation? {
+        val evaluatorId = test.evaluator ?: return null
+        val functionName = test.functionEvaluator ?: return null
+        val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return null
+        val functionTest = plugin.functionMap[functionName] ?: return null
+        return try {
+            test.id?.let { functionTest(maDMP, reportId, it) }
+        }catch (e:Exception){
+            log.error("Error running test: ${test.title} ", e)
+            null
+        }
+    }
+
+
 
 }
