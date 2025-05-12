@@ -14,7 +14,7 @@ interface EvaluatorPlugin: ConfigurablePlugin<String, PluginInfo> {
     ): List<Evaluation>
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
-    val functionMap: Map<String, (JsonObject, String, testId: String) -> Evaluation>
+    val functionMap: Map<String, (JsonObject, reportId: String, testId: String) -> Evaluation>
     //val functionMap: Map<String, (Map<String, Any>, Map<String, Any>, EvaluationReport) -> Evaluation>
 
 }

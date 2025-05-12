@@ -32,23 +32,27 @@ class EvaluationService(
     }
 
 
-    suspend fun generateTestsResults(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
+    suspend fun generateTestsResultsFromBenchmark(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
         val tests = testsToExecute(benchmark)
-        val testsEvaluations = tests.mapNotNull { test ->
-            val evaluatorId = test.evaluator ?: return@mapNotNull null
-            val functionName = test.functionEvaluator ?: return@mapNotNull null
-            val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@mapNotNull null
-            val functionTest = plugin.functionMap[functionName] ?: return@mapNotNull null
+        val testsEvaluations = tests.map { test ->
             async<Evaluation?> {
-                try {
-                    functionTest(maDMP, reportId, test.id)
-                }catch (e:Exception){
-                    log.error("Error running test: ${test.title} ", e)
-                    null
-                }
+                generateTestResultFromTest(test, maDMP, reportId)
             }
         }
         testsEvaluations.awaitAll().filterNotNull()
+    }
+
+    suspend fun generateTestResultFromTest(test: TestRecord, maDMP: JsonObject, reportId:String): Evaluation? {
+        val evaluatorId = test.evaluator ?: return null
+        val functionName = test.functionEvaluator ?: return null
+        val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return null
+        val functionTest = plugin.functionMap[functionName] ?: return null
+        return try {
+                functionTest(maDMP, reportId, test.id)
+        }catch (e:Exception){
+            log.error("Error running test: ${test.title} ", e)
+            null
+        }
     }
 
 }
