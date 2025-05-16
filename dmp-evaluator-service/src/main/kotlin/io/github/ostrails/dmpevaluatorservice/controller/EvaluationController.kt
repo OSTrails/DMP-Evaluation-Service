@@ -51,6 +51,8 @@ class EvaluationController(
         @RequestPart("benchmark") benchmark: String,
         @RequestPart(required = false) reportId: String?
     ): ResponseEntity<List<Evaluation>>{
+        val filename = maDMP.filename().lowercase()
+        println("filename ---------------- $filename")
         val jsonResult = evaluationManagerService.gatewayBenchmarkEvaluationService(maDMP, benchmark, reportId)
         return ResponseEntity.ok(jsonResult)
     }

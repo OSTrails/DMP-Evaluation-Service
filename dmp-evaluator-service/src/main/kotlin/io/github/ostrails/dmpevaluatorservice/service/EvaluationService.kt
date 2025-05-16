@@ -8,7 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 import org.springframework.stereotype.Service
 import org.springframework.plugin.core.PluginRegistry
 import org.slf4j.Logger
@@ -48,11 +48,13 @@ class EvaluationService(
         val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return null
         val functionTest = plugin.functionMap[functionName] ?: return null
         return try {
-                functionTest(maDMP, reportId, test.id)
+            test.id?.let { functionTest(maDMP, reportId, it) }
         }catch (e:Exception){
             log.error("Error running test: ${test.title} ", e)
             null
         }
     }
+
+
 
 }

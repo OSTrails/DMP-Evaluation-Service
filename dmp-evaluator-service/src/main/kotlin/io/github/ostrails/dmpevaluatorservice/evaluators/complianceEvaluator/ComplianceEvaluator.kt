@@ -59,6 +59,21 @@ class ComplianceEvaluator: EvaluatorPlugin {
         )
     }
 
+    fun checkFormatFile(
+    maDMP: Any,
+    reportId: String,
+    testId: String
+    ): Evaluation {
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = ResultTestEnum.PASS,
+            details = "Verifies if the DMP is available in .json.",
+            title = "Machine-Actionable Format (Is the DMP available in a machine-actionable format?) ",
+            reportId = reportId,
+            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
+            outputFromTest = testId
+        )
+    }
 
 
 

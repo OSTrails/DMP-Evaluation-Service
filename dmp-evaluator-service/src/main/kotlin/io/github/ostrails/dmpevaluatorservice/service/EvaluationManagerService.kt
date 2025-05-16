@@ -5,8 +5,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationReportRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.EvaluationResultRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ApiException
-import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ErrorResponse
-import io.github.ostrails.dmpevaluatorservice.exceptionHandler.GlobalExceptionHandler
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.InputvalidationException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
@@ -107,6 +106,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
+                jsonFilevalidator(file)
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val benchmark = benchmarService.getbenchmarkByTitle(benchmarkTitle)
                     val evaluations = evaluationService.generateTestsResultsFromBenchmark(benchmark, maDMP, reportIdentifier.toString())
@@ -131,6 +131,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
+                jsonFilevalidator(file)
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val test = testService.getTest(testId)
                 val evaluation = evaluationService.generateTestResultFromTest(test, maDMP, reportIdentifier.toString())
@@ -161,6 +162,13 @@ class EvaluationManagerService(
     suspend fun mapToRDF(maDMP: FilePart): Any {
         toRDFService.jsonToRDF(maDMP.toString())
         return true
+    }
+
+    fun jsonFilevalidator(file: FilePart){
+        val filename = file.filename().lowercase()
+        if (!filename.endsWith(".json")) {
+            throw InputvalidationException("Invalid file type: $filename. Only .json files are allowed.")
+        }
     }
 
 
