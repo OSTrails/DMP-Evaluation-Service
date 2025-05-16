@@ -711,9 +711,364 @@
     ] .
 
 
-# #################################################################
-# # Mapping for DMP: dataset
-# #################################################################
+#################################################################
+# Mapping for DMP: dataset
+#################################################################
+<#DatasetMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*]" .
+
+<#DatasetMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#DatasetMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:Dataset ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "dataset_id.identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # dataset_id
+    rr:predicateObjectMap [
+        rr:predicate dcso:idIdentifier ;
+        rr:objectMap [ rr:parentTriplesMap <#DatasetIDMapping> ] ;
+    ] ;
+
+    # title
+    rr:predicateObjectMap [
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "title" ] ;
+    ] ;
+
+    # personal_data
+    rr:predicateObjectMap [
+        rr:predicate dcso:personalData ;
+        rr:objectMap [ rml:reference "personal_data" ] ;
+    ] ;
+
+    # sensitive_data
+    rr:predicateObjectMap [
+        rr:predicate dcso:sensitiveData ;
+        rr:objectMap [ rml:reference "sensitive_data" ] ;
+    ] ;
+
+    #type
+    rr:predicateObjectMap [
+        rr:predicate dcso:type ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] ;
+
+    # description
+    rr:predicateObjectMap [
+        rr:predicate dcterms:description ;
+        rr:objectMap [ rml:reference "description" ] ;
+    ] ;
+
+    # distribution
+    rr:predicateObjectMap [
+        rr:predicate dcat:distribution ;
+        rr:objectMap [ rr:parentTriplesMap <#DistributionMapping>] ;
+    ] .
 
 
+###################################################################
+# Mapping for DMP: dataset - dataset_id
+###################################################################
+<#DatasetIDMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*].dataset_id" .
+<#DatasetIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#DatasetIDMappingSource> ;
 
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:DatasetId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/datasetID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # identifier
+    rr:predicateObjectMap [
+        rr:predicate dcso:idIdentifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
+    ] ;
+
+    # type
+    rr:predicateObjectMap [
+        rr:predicate dcso:idType ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] .
+
+###################################################################
+# Mapping for DMP: dataset - distribution
+###################################################################
+<#DistributionMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*].distribution[*]" .
+<#DistributionMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#DistributionMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcat:Distribution ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "title" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # title
+    rr:predicateObjectMap [
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "title" ] ;
+    ] ;
+    # format
+    rr:predicateObjectMap [
+        rr:predicate dcat:format ;
+        rr:objectMap [ rml:reference "format" ] ;
+    ] ;
+    # byte_size
+    rr:predicateObjectMap [
+        rr:predicate dcat:byteSize ;
+        rr:objectMap [ rml:reference "byte_size" ] ;
+    ] ;
+    # data_access
+    rr:predicateObjectMap [
+        rr:predicate dcat:dataAccess ;
+        rr:objectMap [ rml:reference "data_access" ] ;
+    ] ;
+    # license
+    rr:predicateObjectMap [
+        rr:predicate dcat:license ;
+        rr:objectMap [ rr:parentTriplesMap <#LicenseMapping>] ;
+    ] ;
+    #host
+    rr:predicateObjectMap [
+        rr:predicate dcat:host ;
+        rr:objectMap [ rr:parentTriplesMap <#HostMapping>] ;
+    ] ;
+    # available_until
+    rr:predicateObjectMap [
+        rr:predicate dcat:availableUntil ;
+        rr:objectMap [ rml:reference "available_until" ; rr:datatype xsd:dateTime ] ;
+    ] .
+
+######################################################################
+# Mapping for DMP: dataset - distribution - license
+######################################################################
+<#LicenseMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*].distribution[*].license[*]" .
+<#LicenseMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#LicenseMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcat:License ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution/license" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "license_ref" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # license_name
+    rr:predicateObjectMap [
+        rr:predicate dcat:licenseName ;
+        rr:objectMap [ rml:reference "license_name" ] ;
+    ] ;
+
+    # license_ref
+    rr:predicateObjectMap [
+        rr:predicate dcat:licenseRef ;
+        rr:objectMap [ rml:reference "license_ref" ] ;
+    ] ;
+
+    # start_date
+    rr:predicateObjectMap [
+        rr:predicate dcat:startDate ;
+        rr:objectMap [ rml:reference "start_date" ; rr:datatype xsd:dateTime ] ;
+    ] .
+
+##########################################################################
+# Mapping for DMP: dataset - distribution - host
+##########################################################################
+<#HostMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dataset[*].distribution[*].host" .
+<#HostMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#HostMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:Host ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution/host" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "url" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # title
+    rr:predicateObjectMap [
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "title" ] ;
+    ] ;
+    # url
+    rr:predicateObjectMap [
+        rr:predicate dcat:url ;
+        rr:objectMap [ rml:reference "url" ] ;
+    ] ; 
+    # host_id_type
+    rr:predicateObjectMap [
+        rr:predicate dcso:hostIdType ;
+        rr:objectMap [ rml:reference "host_id_type" ] ;
+    ] ;
+    # description
+    rr:predicateObjectMap [
+        rr:predicate dcterms:description ;
+        rr:objectMap [ rml:reference "description" ] ;
+    ] ;
+
+    #supports_versioning
+    rr:predicateObjectMap [
+        rr:predicate dcso:supportsVersioning ;
+        rr:objectMap [ rml:reference "supports_versioning" ] ;
+    ] ;
+    # storage_type
+    rr:predicateObjectMap [
+        rr:predicate dcso:storageType ;
+        rr:objectMap [ rml:reference "storage_type" ] ;
+    ] ;
+    # pid_system
+    rr:predicateObjectMap [
+        rr:predicate dcso:pidSystem ;
+        rr:objectMap [ rml:reference "pid_system[*]" ] ;
+    ] .
