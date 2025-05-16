@@ -5,7 +5,10 @@ mvn install -DskipTests=true
 ```
 
 # How to execute
-In the root project directory `madmp2rd` run:
+In the root project directory `dmp-evaluator-serivce` run:
 ```
-java -jar rmlmapper-java/target/rmlmapper-7.3.3-r374-all.jar -m rmlmappings/rmlMappings.ttl -o madmps_rdf/ex9-dmp-long.ttl -s turtle
+mvn spring-boot:run
 ```
+
+Send a POST request, e.g. via postman, including the JSON dmp in the body of the request. 
+The TORDF util will create an RDF/turtle file for the provided dmp in the target/output directory.

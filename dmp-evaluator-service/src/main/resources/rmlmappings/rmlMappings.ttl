@@ -5,129 +5,458 @@
 @prefix dmp: <http://purl.org/dmp#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@base <http://purl.org/dmp#>.
+@prefix dcso: <https://w3id.org/dcso/ns/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix exf: <http://example.org/functions#> .
+@prefix idlab-fn: <https://w3id.org/imec/idlab/function#> .
 
-<#DMPMapping> a rml:LogicalSource ;
+@base <https://w3id.org/dcso/ns/core>.
+
+# Mappings based on ex9-dmp-long.json
+
+#################################################################
+# Logical Source for the JSON file
+#################################################################
+
+<#DMPSource>
+    a rml:LogicalSource ;
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp" .
 
-<#DMPTriplesMap> a rr:TriplesMap ;
-    rml:logicalSource <#DMPMapping> ;
+#################################################################
+# Mapping for the DMP
+#################################################################
+   
+<#DMPMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#DMPSource> ;
+
     rr:subjectMap [
-        rml:reference "dmp_id.identifier" ;
         rr:termType rr:IRI ;
-        rr:class dmp:DataManagementPlan
+        rr:class dcso:DMP ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "dmp_id.identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
     ] ;
+
+    # title
     rr:predicateObjectMap [
-        rr:predicate dmp:title ;
-        rr:objectMap [ rml:reference "$.title" ]
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "title" ] ;
     ] ;
+
+    # description
     rr:predicateObjectMap [
-        rr:predicate dmp:description ;
-        rr:objectMap [ rml:reference "$.description" ]
+        rr:predicate dcterms:description ;
+        rr:objectMap [ rml:reference "description" ] ;
     ] ;
+
+    # language
     rr:predicateObjectMap [
-        rr:predicate dmp:language ;
-        rr:objectMap [ rml:reference "$.language" ]
+        rr:predicate dcso:language ;
+        rr:objectMap [ rml:reference "language" ] ;
     ] ;
+
+    # created
     rr:predicateObjectMap [
-        rr:predicate dmp:created ;
-        rr:objectMap [ rml:reference "$.created" ; rr:datatype xsd:dateTime ]
+        rr:predicate dcso:created ;
+        rr:objectMap [ rml:reference "created" ; rr:datatype xsd:dateTime ] ;
     ] ;
+
+    # modified
     rr:predicateObjectMap [
-        rr:predicate dmp:modified ;
-        rr:objectMap [ rml:reference "$.modified" ; rr:datatype xsd:dateTime ]
+        rr:predicate dcso:modified ;
+        rr:objectMap [ rml:reference "modified" ; rr:datatype xsd:dateTime ] ;
     ] ;
+
+    # dmp_id
     rr:predicateObjectMap [
-        rr:predicate dmp:identifier_type ;
-        rr:objectMap [ rml:reference "$.dmp_id.type" ]
+        rr:predicate dcso:hasDMPId ;
+        rr:objectMap [ rr:parentTriplesMap <#DMPIDMapping> ] ;
     ] ;
+
+    # contact
     rr:predicateObjectMap [
-        rr:predicate dmp:contact ;
-        rr:objectMap [ rml:reference "$.contact.contact_id.identifier" ;
-                       rr:termType rr:IRI ]
+        rr:predicate dcso:hasContact ;
+        rr:objectMap [ rr:parentTriplesMap <#ContactMapping> ] ;
+    ] ;
+
+    # contributor
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasContributor ;
+        rr:objectMap [ rr:parentTriplesMap <#ContributorMapping> ] ;
+    ] ;
+
+    # ethical_issues_exist
+    rr:predicateObjectMap [
+        rr:predicate dcso:ethicalIssuesExist ;
+        rr:objectMap [ rml:reference "ethical_issues_exist" ] ;
+    ] ;
+
+    # ethical_issues_report
+    rr:predicateObjectMap [
+        rr:predicate dcso:ethicalIssuesDescription ;
+        rr:objectMap [ rml:reference "ethical_issues_description" ] ;
+    ] ;
+
+    # ethical_issues_description
+    rr:predicateObjectMap [
+        rr:predicate dcso:ethicalIssuesReport ;
+        rr:objectMap [ rml:reference "ethical_issues_report" ] ;
     ] .
 
-<#ContactMapping> a rml:LogicalSource ;
-    rml:source "{{madmp_json_path}}";
+    # project
+    #rr:predicateObjectMap [
+    #    rr:predicate dcso:hasProject ;
+    #    rr:objectMap [ rr:parentTriplesMap <#ProjectMapping> ] ;
+    #] ;
+
+    # dataset
+    #rr:predicateObjectMap [
+    #    rr:predicate dcso:hasDataset ;
+    #    rr:objectMap [ rr:parentTriplesMap <#DatasetMapping> ] ;
+    #] .
+
+
+#################################################################
+# Mapping for DMP: dmp_id
+#################################################################
+<#DMPIDMappingsSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.dmp_id" .
+
+
+<#DMPIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#DMPIDMappingsSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:DMPId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dmpID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # identifier
+    rr:predicateObjectMap [
+        rr:predicate dcso:identifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
+    ] ;
+
+    # type
+    rr:predicateObjectMap [
+        rr:predicate dcso:identifierType ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] .
+
+
+
+#################################################################
+# Mapping for DMP: contact
+#################################################################
+<#ContactMappingsSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.contact" .
 
-<#ContactTriplesMap> a rr:TriplesMap ;  
-    rml:logicalSource <#ContactMapping> ;
+
+<#ContactMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#ContactMappingsSource> ;
+
     rr:subjectMap [
-        rml:reference "contact_id.identifier" ;
         rr:termType rr:IRI ;
-        rr:class foaf:Person
+        rr:class dcso:Contact ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "name" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
     ] ;
+
+    # name
     rr:predicateObjectMap [
         rr:predicate foaf:name ;
-        rr:objectMap [ rml:reference "$.name" ]
+        rr:objectMap [ rml:reference "name" ] ;
     ] ;
+
+    # mbox
     rr:predicateObjectMap [
         rr:predicate foaf:mbox ;
-        rr:objectMap [ rml:reference "$.mbox" ]
+        rr:objectMap [ rml:reference "mbox" ] ;
     ] ;
+
+    # contact_id
     rr:predicateObjectMap [
-        rr:predicate dmp:contact_type ;
-        rr:objectMap [ rml:reference "$.contact_id.type" ]
+        rr:predicate dcso:hasContactId ;
+        rr:objectMap [ rr:parentTriplesMap <#ContactIDMapping> ] ;
     ] .
 
-<#ContributorMapping> a rml:LogicalSource ;
-    rml:source "{{madmp_json_path}}";
+
+
+#################################################################
+# Mapping for DMP: contact - contact_id
+#################################################################
+<#ContactIDMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.contact.contact_id" .
+
+<#ContactIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#ContactIDMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:ContactId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact/contactID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # identifier
+    rr:predicateObjectMap [
+        rr:predicate dcso:identifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
+    ] ;
+
+    # type
+    rr:predicateObjectMap [
+        rr:predicate dcso:identifierType ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] .
+
+# #################################################################
+# # Mapping for DMP: contributor
+# #################################################################
+<#ContributorMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.contributor[*]" .
 
-<#ContributorTriplesMap> a rr:TriplesMap ;
-    rml:logicalSource <#ContributorMapping> ;
+<#ContributorMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#ContributorMappingSource> ;
+
     rr:subjectMap [
-        rml:reference "contributor_id.identifier" ;
         rr:termType rr:IRI ;
-        rr:class foaf:Person
+        rr:class dcso:Contributor ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "name" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
     ] ;
+
+    # name
     rr:predicateObjectMap [
         rr:predicate foaf:name ;
-        rr:objectMap [ rml:reference "$.name" ]
+        rr:objectMap [ rml:reference "name" ] ;
     ] ;
+
+    # mbox
     rr:predicateObjectMap [
         rr:predicate foaf:mbox ;
-        rr:objectMap [ rml:reference "$.mbox" ]
+        rr:objectMap [ rml:reference "mbox" ] ;
     ] ;
+
+    # contributor_id
     rr:predicateObjectMap [
-        rr:predicate dmp:role ;
-        rr:objectMap [ rml:reference "$.role" ]
+        rr:predicate dcso:hasContributorId ;
+        rr:objectMap [ rr:parentTriplesMap <#ContributorIDMapping> ] ;
+    ] ;
+
+    # role
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasRole ;
+        rr:objectMap [ rml:reference "role[*]" ] ;
     ] .
 
-<#DatasetMapping> a rml:LogicalSource ;
-    rml:source "{{madmp_json_path}}";
+#################################################################
+# Mapping for DMP: contributor - contributor_id
+#################################################################
+<#ContributorIDMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
-    rml:iterator "$.dmp.dataset[*]" .
+    rml:iterator "$.dmp.contributor[*].contributor_id" .
 
-<#DatasetTriplesMap> a rr:TriplesMap ;
-    rml:logicalSource <#DatasetMapping> ;
+<#ContributorIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#ContributorIDMappingSource> ;
+
     rr:subjectMap [
-        rml:reference "dataset_id.identifier" ;
         rr:termType rr:IRI ;
-        rr:class dcat:Dataset
+        rr:class dcso:ContributorId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor/contributorID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
     ] ;
+
+    # identifier
     rr:predicateObjectMap [
-        rr:predicate dcat:title ;
-        rr:objectMap [ rml:reference "$.title" ]
+        rr:predicate dcso:identifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
+
+    # type
     rr:predicateObjectMap [
-        rr:predicate dcat:description ;
-        rr:objectMap [ rml:reference "$.description" ]
-    ] ;
-    rr:predicateObjectMap [
-        rr:predicate dcat:issued ;
-        rr:objectMap [ rml:reference "$.issued" ; rr:datatype xsd:dateTime ]
-    ] ;
-    rr:predicateObjectMap [
-        rr:predicate dcat:modified ;
-        rr:objectMap [ rml:reference "$.modified" ; rr:datatype xsd:dateTime ]
-    ] ;
-    rr:predicateObjectMap [
-        rr:predicate dcat:contactPoint ;
-        rr:objectMap [ rml:reference "$.contactPoint" ]
+        rr:predicate dcso:identifierType ;
+        rr:objectMap [ rml:reference "type" ] ;
     ] .
+    
+
+# #################################################################
+# # Mapping for DMP: project
+# #################################################################
+
+
+# #################################################################
+# # Mapping for DMP: dataset
+# #################################################################
+
+
+

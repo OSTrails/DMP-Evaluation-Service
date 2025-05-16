@@ -1,5 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf
 
+import be.ugent.idlab.knows.functions.agent.Agent
+import be.ugent.idlab.knows.functions.agent.AgentFactory
 import be.ugent.rml.Executor
 import be.ugent.rml.Utils
 import be.ugent.rml.records.RecordsFactory
@@ -44,13 +46,16 @@ class ToRDF {
             // Output store
             val outputStore = RDF4JStore()
 
+            //Functions
+            //val functionAgent = AgentFactory.createFromFnO("fno/functions_idlab.ttl", "fno/functions_idlab_test_classes_java_mapping.ttl");
+
             // Create the Executor
             val executor = Executor(
             rmlStore,
             factory,
             outputStore,
             Utils.getBaseDirectiveTurtleOrDefault(mappingStream, "http://purl.org/dmp#"),
-            null
+            null,
             )
 
             val result = executor.execute(null).get(NamedNode("rmlmapper://default.store"))
