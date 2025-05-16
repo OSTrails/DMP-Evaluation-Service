@@ -129,13 +129,13 @@
     rr:predicateObjectMap [
         rr:predicate dcso:ethicalIssuesReport ;
         rr:objectMap [ rml:reference "ethical_issues_report" ] ;
-    ] .
+    ] ;
 
     # project
-    #rr:predicateObjectMap [
-    #    rr:predicate dcso:hasProject ;
-    #    rr:objectMap [ rr:parentTriplesMap <#ProjectMapping> ] ;
-    #] ;
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasProject ;
+        rr:objectMap [ rr:parentTriplesMap <#ProjectMapping> ] ;
+    ] .
 
     # dataset
     #rr:predicateObjectMap [
@@ -233,7 +233,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "name" ]
+                rr:objectMap [ rml:reference "contact_id.identifier" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -353,7 +353,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "name" ]
+                rr:objectMap [ rml:reference "contributor_id.identifier" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -447,11 +447,268 @@
         rr:predicate dcso:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
-    
 
-# #################################################################
-# # Mapping for DMP: project
-# #################################################################
+
+#################################################################
+# Mapping for DMP: project
+#################################################################
+<#ProjectMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.project[*]" .
+
+<#ProjectMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#ProjectMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:Project ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "project_id" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # title
+    rr:predicateObjectMap [
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "title" ] ;
+    ] ;
+
+    # project_id
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasProjectId ;
+        rr:objectMap [ rml:reference "project_id" ] ;
+    ] ;
+
+    # project_id_type
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasProjectIdType ;
+        rr:objectMap [ rml:reference "project_id_type" ] ;
+    ] ;
+
+    # start
+    rr:predicateObjectMap [
+        rr:predicate dcso:start ;
+        rr:objectMap [ rml:reference "start" ; rr:datatype xsd:dateTime ] ;
+    ] ;
+
+    # end
+    rr:predicateObjectMap [
+        rr:predicate dcso:end ;
+        rr:objectMap [ rml:reference "end" ; rr:datatype xsd:dateTime ] ;
+    ] ;
+
+    # description
+    rr:predicateObjectMap [
+        rr:predicate dcterms:description ;
+        rr:objectMap [ rml:reference "description" ] ;
+    ] ;
+
+    # funding
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasFunding ;
+        rr:objectMap [ rr:parentTriplesMap <#FundingMapping> ] ;
+    ] .
+
+#################################################################
+# Mapping for DMP: project - funding
+#################################################################
+<#FundingMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.project[*].funding[*]" .
+
+<#FundingMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#FundingMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:Funding ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "grant_id.identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # funder_name
+    rr:predicateObjectMap [
+        rr:predicate dcterms:title ;
+        rr:objectMap [ rml:reference "funder_name" ] ;
+    ] ;
+
+    # funder_id
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasFunderId ;
+        rr:objectMap [ rr:parentTriplesMap <#FundingIDMapping> ] ;
+    ] ;
+
+    # grant_id
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasGrantId ;
+        rr:objectMap [ rr:parentTriplesMap <#GrantIDMapping> ] ;
+    ] .
+
+#################################################################
+# Mapping for DMP: project - funding - funding_id
+#################################################################
+<#FundingIDMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.project[*].funding[*].funder_id" .
+
+
+<#FundingIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#FundingIDMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:FundingId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/fundingID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # identifier
+    rr:predicateObjectMap [
+        rr:predicate dcso:identifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
+    ] ;
+
+    # type
+    rr:predicateObjectMap [
+        rr:predicate dcso:idType ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] .
+
+#################################################################
+# Mapping for DMP: project - funding - grant_id
+#################################################################
+<#GrantIDMappingSource>
+    a rml:LogicalSource ;
+    rml:source "{{madmp_json_path}}" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.dmp.project[*].funding[*].grant_id" .
+
+<#GrantIDMapping>
+    a rr:TriplesMap ;
+    rml:logicalSource <#GrantIDMappingSource> ;
+
+    rr:subjectMap [
+        rr:termType rr:IRI ;
+        rr:class dcso:GrantId ;
+        fnml:functionValue [
+          rr:predicateObjectMap [
+            rr:predicate fno:executes ;
+            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:iri ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/grantID" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:watchedProperty ;
+                rr:objectMap [ rml:reference "identifier" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:unique ;
+                rr:objectMap [ rr:constant "false" ]
+            ] ;
+
+            rr:predicateObjectMap [
+                rr:predicate idlab-fn:state ;
+                rr:objectMap [ rr:constant "unique_iri_state" ]
+            ]
+        ]
+    ] ;
+
+    # identifier
+    rr:predicateObjectMap [
+        rr:predicate dcso:idIdentifier ;
+        rr:objectMap [ rml:reference "identifier" ] ;
+    ] ;
+
+    # type
+    rr:predicateObjectMap [
+        rr:predicate dcso:idType ;
+        rr:objectMap [ rml:reference "type" ] ;
+    ] .
 
 
 # #################################################################
