@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.complianceEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
@@ -46,32 +47,32 @@ class ComplianceEvaluator: EvaluatorPlugin {
     fun evaluateLicenseCompliance(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Auto-generated evaluation of the test",
-            title = "Testing ",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 
     fun checkFormatFile(
     maDMP: Any,
     reportId: String,
-    testId: String
+    testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Verifies if the DMP is available in .json.",
-            title = "Machine-Actionable Format (Is the DMP available in a machine-actionable format?) ",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 

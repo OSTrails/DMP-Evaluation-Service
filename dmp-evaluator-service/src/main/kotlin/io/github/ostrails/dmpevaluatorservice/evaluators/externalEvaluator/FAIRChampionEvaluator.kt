@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.externalEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
@@ -43,17 +44,16 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     fun evaluateStructure(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Auto-generated evaluation of the test",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
-            title = TODO(),
-            timestamp = TODO(),
             generated = "${this::class.qualifiedName}:: evaluateStructure",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
 
         )
     }
@@ -61,16 +61,16 @@ class FAIRChampionEvaluator: EvaluatorPlugin {
     fun evaluateMetadata(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Auto-generated evaluation of the test",
-            title = "Testin",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             generated = "${this::class.qualifiedName}:: evaluateMetadata",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 

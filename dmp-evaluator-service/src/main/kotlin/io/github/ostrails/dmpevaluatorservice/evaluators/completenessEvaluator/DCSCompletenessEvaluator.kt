@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
@@ -53,18 +54,18 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
     fun evaluateStructure(
         maDMP: JsonObject,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         val validationmaDMP = Validator.validate(maDMP.toString())
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = if (validationmaDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
-            details = "Test to check the completness of a maDMP agains the RDA Commom standart ",
-            title = "Testing ",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             log = validationmaDMP.toString(),
             generated = "${this::class.qualifiedName}:: evaluateStructure",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 

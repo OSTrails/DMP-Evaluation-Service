@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
@@ -48,32 +49,32 @@ class CompletenessEvaluator: EvaluatorPlugin {
     fun evaluateStructure(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Auto-generated evaluation of the test",
-            title = "Testing ",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             generated = "${this::class.qualifiedName}:: evaluateStructure",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 
     fun evaluateMetadata(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.FAIL,
-            details = "Auto-generated evaluation of the test",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
-            title = "Testing ",
             generated = "${this::class.qualifiedName}:: evaluateMetadata",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 }
