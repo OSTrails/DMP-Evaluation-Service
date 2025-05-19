@@ -48,7 +48,7 @@ class EvaluationService(
         val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return null
         val functionTest = plugin.functionMap[functionName] ?: return null
         return try {
-            test.id?.let { functionTest(maDMP, reportId, it) }
+            test.let { functionTest(maDMP, reportId, it) }
         }catch (e:Exception){
             log.error("Error running test: ${test.title} ", e)
             null

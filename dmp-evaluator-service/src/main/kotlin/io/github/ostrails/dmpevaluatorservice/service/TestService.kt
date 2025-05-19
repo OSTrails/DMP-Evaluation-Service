@@ -8,7 +8,6 @@ import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 
 @Service
 class TestService(

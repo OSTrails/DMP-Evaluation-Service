@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.feasibilityEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
@@ -48,16 +49,16 @@ class FeasibilityEvaluator: EvaluatorPlugin {
     fun evaluateCoherentLicense(
         maDMP: Any,
         reportId: String,
-        testId: String
+        testRecord: TestRecord
     ): Evaluation {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = ResultTestEnum.PASS,
-            details = "Auto-generated evaluation of the test",
-            title = "Testing ",
+            details = testRecord.description,
+            title = testRecord.title,
             reportId = reportId,
             generated = "${this::class.qualifiedName}:: evaluateCoherentLicense",
-            outputFromTest = testId
+            outputFromTest = testRecord.id
         )
     }
 
