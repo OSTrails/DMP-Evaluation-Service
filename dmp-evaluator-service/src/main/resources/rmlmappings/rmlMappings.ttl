@@ -385,7 +385,12 @@
     # contributor_id
     rr:predicateObjectMap [
         rr:predicate dcso:hasContributorId ;
-        rr:objectMap [ rr:parentTriplesMap <#ContributorIDMapping> ] ;
+        rr:objectMap [ rr:parentTriplesMap <#ContributorIDMapping> ;
+                       rr:joinCondition [
+                           rr:child "contributor_id.identifier" ;
+                           rr:parent "identifier" ;
+                       ] ; 
+                    ] ;
     ] ;
 
     # role
@@ -760,7 +765,12 @@
     # dataset_id
     rr:predicateObjectMap [
         rr:predicate dcso:idIdentifier ;
-        rr:objectMap [ rr:parentTriplesMap <#DatasetIDMapping> ] ;
+        rr:objectMap [ rr:parentTriplesMap <#DatasetIDMapping> ;
+                       rr:joinCondition [
+                           rr:child "dataset_id.identifier" ;
+                           rr:parent "identifier" ;
+                       ] ; 
+                    ] ;
     ] ;
 
     # title
@@ -808,7 +818,7 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].dataset_id" .
-    
+
 <#DatasetIDMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#DatasetIDMappingSource> ;
