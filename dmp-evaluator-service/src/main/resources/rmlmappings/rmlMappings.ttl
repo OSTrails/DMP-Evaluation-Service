@@ -11,6 +11,7 @@
 @prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
 @prefix exf: <http://example.org/functions#> .
 @prefix idlab-fn: <https://w3id.org/imec/idlab/function#> .
+@prefix grel: 	<http://users.ugent.be/~bjdmeest/function/grel.ttl#> .
 
 @base <https://w3id.org/dcso/ns/core>.
 
@@ -343,30 +344,32 @@
         rr:termType rr:IRI ;
         rr:class dcso:Contributor ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contr_" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "contributor_id.identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "contributor_id.identifier" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -414,32 +417,51 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:ContributorId ;
+        rr:class dcso:contributorId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor/contributorID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contr_" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/contrID" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
