@@ -805,7 +805,7 @@
 
     # distribution
     rr:predicateObjectMap [
-        rr:predicate dcat:distribution ;
+        rr:predicate dcso:hasDistribution ;
         rr:objectMap [ rr:parentTriplesMap <#DistributionMapping>] ;
     ] .
 
@@ -936,7 +936,7 @@
     ] ;
     #host
     rr:predicateObjectMap [
-        rr:predicate dcat:host ;
+        rr:predicate dcso:hasHost ;
         rr:objectMap [ rr:parentTriplesMap <#HostMapping>] ;
     ] ;
     # available_until
