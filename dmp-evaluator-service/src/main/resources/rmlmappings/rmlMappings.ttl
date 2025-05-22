@@ -15,6 +15,8 @@
 @base <https://w3id.org/dcso/ns/core>.
 
 # Mappings based on ex9-dmp-long.json
+# Structure of the taxonomy can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
+
 
 #################################################################
 # Logical Source for the JSON file
@@ -135,13 +137,13 @@
     rr:predicateObjectMap [
         rr:predicate dcso:hasProject ;
         rr:objectMap [ rr:parentTriplesMap <#ProjectMapping> ] ;
-    ] .
+    ] ;
 
     # dataset
-    #rr:predicateObjectMap [
-    #    rr:predicate dcso:hasDataset ;
-    #    rr:objectMap [ rr:parentTriplesMap <#DatasetMapping> ] ;
-    #] .
+    rr:predicateObjectMap [
+        rr:predicate dcso:hasDataset ;
+        rr:objectMap [ rr:parentTriplesMap <#DatasetMapping> ] ;
+    ] .
 
 
 #################################################################
@@ -806,6 +808,7 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].dataset_id" .
+    
 <#DatasetIDMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#DatasetIDMappingSource> ;
