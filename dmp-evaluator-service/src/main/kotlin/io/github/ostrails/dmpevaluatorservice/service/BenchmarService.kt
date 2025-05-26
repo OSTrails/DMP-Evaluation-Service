@@ -6,9 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
 
@@ -22,7 +20,7 @@ class BenchmarService(
             description = benchmark.description,
             title = benchmark.title,
             version = benchmark.version,
-            metrics = benchmark.metrics,
+            hasAssociatedMetric = benchmark.hasAssociatedMetric,
         )
         return benchmarkRepository.save(newBenchmark).awaitSingle()
     }
@@ -38,18 +36,18 @@ class BenchmarService(
     suspend fun addMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
         val metricToAdd:List<String>
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
-        if (benchmark.metrics !=  null){
-            metricToAdd = metricsId.filterNot { it in benchmark.metrics }
+        if (benchmark.hasAssociatedMetric !=  null){
+            metricToAdd = metricsId.filterNot { it in benchmark.hasAssociatedMetric }
         }else metricToAdd = metricsId
-        val updateBenchmark = benchmark.copy(metrics = benchmark.metrics?.plus(metricToAdd) ?: metricsId)
+        val updateBenchmark = benchmark.copy(hasAssociatedMetric = benchmark.hasAssociatedMetric?.plus(metricToAdd) ?: metricsId)
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
     }
 
     suspend fun deleteMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $benchmarkId not found")
-        if (benchmark.metrics != null && benchmark.metrics.isNotEmpty()) {
-            val metricFiltered = benchmark.metrics.filterNot { it in metricsId }
-            val updateBenchmark = benchmark.copy(metrics = metricFiltered ?: null)
+        if (benchmark.hasAssociatedMetric != null && benchmark.hasAssociatedMetric.isNotEmpty()) {
+            val metricFiltered = benchmark.hasAssociatedMetric.filterNot { it in metricsId }
+            val updateBenchmark = benchmark.copy(hasAssociatedMetric = metricFiltered ?: null)
             return benchmarkRepository.save(updateBenchmark).awaitSingle()
         }else {
             throw ResourceNotFoundException("There is not metric to delete in this benchmark")

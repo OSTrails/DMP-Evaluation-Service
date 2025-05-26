@@ -17,4 +17,5 @@ data class MetricRecord(
     val status: String? = null,
     val isApplicableFor: String? = null, //Indicates the concept or information is applicable for specified context
     val supportedBy: String? = null,
+    val hasBenchmark: List<String>?
     )
