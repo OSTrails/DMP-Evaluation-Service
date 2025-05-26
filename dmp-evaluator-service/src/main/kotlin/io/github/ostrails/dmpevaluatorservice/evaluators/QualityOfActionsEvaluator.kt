@@ -60,6 +60,7 @@ class QualityOfActionsEvaluator(
         val datasets = extractDatasetIds(maDMP)
         if (datasets == null) {
             resulTest = ResultTestEnum.FAIL
+            logForTest += "There is no dataset in the DMP"
         }else {
             val isOpenAccess = datasets.let { openAccess(datasets = it) }
             resulTest = ResultTestEnum.PASS
@@ -101,7 +102,6 @@ class QualityOfActionsEvaluator(
                 return@mapNotNull identifier?.jsonPrimitive?.contentOrNull
             }
         }else return null
-
     }
 
 

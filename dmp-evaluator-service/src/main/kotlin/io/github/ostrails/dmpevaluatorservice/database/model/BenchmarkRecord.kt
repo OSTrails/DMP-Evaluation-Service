@@ -10,7 +10,7 @@ data class BenchmarkRecord(
     val title: String = "",
     val description: String= "",
     val version: String = "",
-    val metrics: List<String>? = emptyList(),
+    val hasAssociatedMetric: List<String>? = emptyList(),
     val algorithms: List<String>? = emptyList(),
     val keyword: String? = null ,
     val abbreviation: String? = null,

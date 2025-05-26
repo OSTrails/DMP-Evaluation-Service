@@ -24,7 +24,7 @@ class EvaluationService(
 
 
     suspend fun testsToExecute(benchmark: BenchmarkRecord): List<TestRecord> {
-        val metricsIds = benchmark.metrics ?: throw ResourceNotFoundException("Metrics for ${benchmark.title} is empty")
+        val metricsIds = benchmark.hasAssociatedMetric ?: throw ResourceNotFoundException("Metrics for ${benchmark.title} is empty")
         val metrics = metricService.findMultipleMetrics(metricsIds)
         val testsIds = metrics.mapNotNull { it.testAssociated }.flatten()
         val tests = testService.findMultipleTests(testsIds)

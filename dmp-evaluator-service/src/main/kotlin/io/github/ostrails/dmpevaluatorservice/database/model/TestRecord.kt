@@ -10,7 +10,7 @@ data class TestRecord(
     val description: String,
     val license: String,
     val version: String,
-    val endpointURL: String? = "http://localhost:8080/api/evaluations/benchmark",
+    val endpointURL: String? = "http://localhost:8080/api/evaluations/test",
     val endpointDescription: String? = null,
     val keyword: String? = null,
     val abbreviation: String? = null,
@@ -18,11 +18,11 @@ data class TestRecord(
     val type: String? = null,
     val theme: String? = null,
     val versionNotes: String? = null,
+    val status: String? = null,
     val isApplicableFor: String? = null,
     val supportedBy: String? = null,
     val metricImplemented: String?,
     val evaluator: String?,
     val functionEvaluator: String?,
-
     )
 
