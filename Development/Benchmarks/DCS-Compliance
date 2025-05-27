@@ -29,3 +29,74 @@
       description: "Values must follow the format and constraints defined in the DCS schema (e.g., ISO dates, controlled vocabularies)."
       test: check_dcs_data_types
       mandatory: true
+
+    - id: dcs.4
+      title: "Optional DCS fields present"
+      description: "Optional fields defined by the DMP Common Standard are included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.5
+      title: "Extension DCS fields present"
+      description: "Fields defined by extensions of the DMP Common Standard are included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+  **Test Sets:**
+    - id: dcs.1
+      title: "Valid JSON according to DCS schema"
+      description: "The DMP file must be a valid JSON that conforms to the latest DMP Common Standard JSON Schema."
+      test: validate_dcs_json_schema
+      mandatory: true
+
+    - id: dcs.2
+      title: "All required DCS fields present"
+      description: "Mandatory fields defined by the DMP Common Standard must be included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.3
+      title: "Field values follow expected formats"
+      description: "Values must follow the format and constraints defined in the DCS schema (e.g., ISO dates, controlled vocabularies)."
+      test: check_dcs_data_types
+      mandatory: true
+
+------------------------------------
+
+    - id: dcs.4
+      title: "Optional DCS fields present"
+      description: "Optional fields defined by the DMP Common Standard are included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.2
+      title: "All required DCS fields present"
+      description: "Mandatory fields defined by the DMP Common Standard must be included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.3
+      title: "Field values follow expected formats"
+      description: "Values must follow the format and constraints defined in the DCS schema (e.g., ISO dates, controlled vocabularies)."
+      test: check_dcs_data_types
+      mandatory: true
+
+---------------------------------------
+
+    - id: dcs.5
+      title: "Extension DCS fields present"
+      description: "Fields defined by extensions of the DMP Common Standard are included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.2
+      title: "All required DCS fields present"
+      description: "Mandatory fields defined by the DMP Common Standard must be included in the maDMP."
+      test: check_dcs_cardinality
+      mandatory: true
+
+    - id: dcs.3
+      title: "Field values follow expected formats"
+      description: "Values must follow the format and constraints defined in the DCS schema (e.g., ISO dates, controlled vocabularies)."
+      test: check_dcs_data_types
+      mandatory: true
