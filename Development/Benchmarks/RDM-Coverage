@@ -17,7 +17,7 @@ assessment_outcome:
 id: rdm-cov.1
 title: "RDM Lifecycle Stages Addressed"
 description: "The DMP describes each phase of the data lifecycle, including collection, processing, storage, sharing, and preservation."
-test: check_lifecycle_stages **This is not available in the maDMP**
+test: check_lifecycle_stages # This is not available in the maDMP
 mandatory: true
 
 id: rdm-cov.2
@@ -41,17 +41,61 @@ mandatory: true
 id: bpc
 title: "Best Practices Coverage"
 description: "The DMP references established best practices, including FAIR principles and Open Science approaches."
-test: check_distribution_data_access **This is the only available in the maDMP, but we also need openess of license etc**
+test: check_distribution_data_access # This is the only available in the maDMP, but we also need openess of license etc
 mandatory: true
 
 id: rep.1
 title: "Reproducibility"
 description: "The DMP includes qualified references to datasets, software, workflows, and publications that support reproducibility."
-test: check_dataset_id; check_technical_resource **These are the only available in the maDMP, but we also need software, publications etc**
+test: check_dataset_id; check_technical_resource # These are the only available in the maDMP, but we also need software, publications etc
 mandatory: true
 
 id: pol.1
 title: "Policy/ies Mentioned in DMP"
 description: "The DMP cites applicable policies from the funder, institution, or consortium."
-test: check_policy_references **This is not available in the maDMP, yet**
+test: check_policy_references # This is not available in the maDMP, yet
 mandatory: true
+
+**Tests:**
+id: check_lifecycle_stages
+description: "Checks that the DMP includes all key lifecycle stages: collection, processing, storage, sharing, and preservation."
+input: ".json maDMP"
+output: "pass/fail or weighted"
+
+id: check_cost
+description: "Checks for presence of a cost entity including title, value, description, and currency_code."
+input: ".json maDMP"
+output: "pass/fail or weighted"
+
+id: check_contributor_role
+description: "Checks that contributor roles related to data management responsibilities are defined."
+input: ".json maDMP"
+output: "pass/fail"
+
+id: check_dataset
+description: >
+        Checks that dataset metadata is complete, including:
+        dataset_id (identifier, type), personal_data, sensitive_data, title, type,
+        distribution (title, host (title, url), license (license_ref, start_date)).
+input: ".json maDMP"
+output: "pass/fail or weighted"
+
+id: check_distribution_data_access
+description: "Checks whether distribution includes data_access information indicating openness."
+input: ".json maDMP"
+output: "pass/fail"
+
+id: check_dataset_id
+description: "Checks that datasets are referenced with a valid identifier and type."
+input: ".json maDMP"
+output: "pass/fail"
+
+id: check_technical_resource
+description: "Checks whether technical resources related to reproducibility are included and named."
+input: ".json maDMP"
+output: "pass/fail"
+
+id: check_policy_references
+description: "Checks for the presence of references to relevant policies (funder, institutional, consortium)."
+input: ".json maDMP"
+output: "pass/fail"
