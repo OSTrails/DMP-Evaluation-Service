@@ -1,0 +1,191 @@
+**FAIRness Benchmark:**
+
+  id: dmp-fairness-benchmark
+  title: "DMP FAIRness"
+  narrative: >
+    FAIRness of outputs and services addressed in the DMP along with the DMP itself.
+  dimension: "FAIRness"
+  type: "FAIRness Benchmark"
+  algorithm: "Binary score (pass/fail), or weighted"
+  assessment_outcome:
+    type: "Score + Textual classification"
+
+ **Metrics:**
+    - id: fair.dmp
+      title: "FAIR DMP Output"
+      description: "The DMP is shared in a repository with a license and persistent identifier (PID)."
+      test: check_fair_dmp_output
+      mandatory: true
+
+    - id: fair.dat
+      title: "FAIR Datasets"
+      description: "Ensures datasets described in the DMP follow FAIR principles."
+      test: check_fair_datasets
+      mandatory: true
+
+    - id: fair.sof
+      title: "FAIR Software"
+      description: "Ensures software described in the DMP follows FAIR principles."
+      test: check_fair_software
+      mandatory: true
+
+    - id: fair.repo
+      title: "FAIR-enabling Repository"
+      description: "Verifies that repositories used support FAIR principles (e.g., certified, PID-enabled)."
+      test: check_fair_repository
+      mandatory: true
+
+    - id: fair.ser
+      title: "FAIR-enabling Services"
+      description: "Confirms that services used support FAIR workflows and standards (e.g., PID systems, metadata, licenses)."
+      test: check_fair_services
+      mandatory: true
+
+**Tests:**
+
+  # FAIR DMP Output
+  - id: check_dmp_id
+    description: "Checks that the DMP includes a persistent identifier (identifier, type)."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dmp_license
+    description: "Checks that the DMP includes a license (license_ref, start_date)."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dmp_host
+    description: "Checks that the DMP is hosted with title and URL of the repository."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  # FAIR Datasets
+  - id: check_dataset_id
+    description: "Checks that datasets have an identifier and type."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dataset_host
+    description: "Checks that dataset distributions include host title and URL."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dataset_access
+    description: "Checks that access conditions for datasets are described (e.g., data_access field)."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dataset_license
+    description: "Checks that datasets include license_ref and start_date."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  - id: check_dataset_metadata
+    description: "Checks that dataset metadata includes identifier and type."
+    input: ".json maDMP"
+    output: "pass/fail or weighted"
+
+  # FAIR Software
+  - id: check_software_identifier
+    description: "Checks that software includes a persistent identifier and type."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_software_license
+    description: "Checks that software includes a license with appropriate metadata."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_software_host
+    description: "Checks that software is deposited in a repository with a resolvable URL."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_software_metadata
+    description: "Checks that software metadata is provided following community standards."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  # FAIR Repositories
+  - id: check_repository_host
+    description: "Checks that datasets specify the host repository."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_repository_certification
+    description: "Checks that the repository is certified (e.g., CoreTrustSeal)."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  # FAIR Services
+  - id: check_pid_system
+    description: "Checks that a persistent identifier (PID) system is available for referenced services."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_machine_readable_license
+    description: "Checks that service licenses are provided in a machine-readable format."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_metadata_standards
+    description: "Checks that metadata standards are followed for service record registration."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+  - id: check_access_protocol
+    description: "Checks that protocols enable free access to data or metadata via the service."
+    input: ".json maDMP"
+    output: "pass/fail"
+
+**TestSets:**
+
+  - id: fair-dmp-tests
+    title: "FAIR DMP Output Tests"
+    metrics:
+      - fair.dmp
+    tests:
+      - check_dmp_id
+      - check_dmp_license
+      - check_dmp_host
+
+  - id: fair-dataset-tests
+    title: "FAIR Dataset Tests"
+    metrics:
+      - fair.dat
+    tests:
+      - check_dataset_id
+      - check_dataset_host
+      - check_dataset_access
+      - check_dataset_license
+      - check_dataset_metadata
+
+  - id: fair-software-tests
+    title: "FAIR Software Tests"
+    metrics:
+      - fair.sof
+    tests:
+      - check_software_identifier
+      - check_software_license
+      - check_software_host
+      - check_software_metadata
+
+  - id: fair-repository-tests
+    title: "FAIR Repository Tests"
+    metrics:
+      - fair.repo
+    tests:
+      - check_repository_host
+      - check_repository_certification
+
+  - id: fair-services-tests
+    title: "FAIR Services Tests"
+    metrics:
+      - fair.ser
+    tests:
+      - check_pid_system
+      - check_machine_readable_license
+      - check_metadata_standards
+      - check_access_protocol
+
+
