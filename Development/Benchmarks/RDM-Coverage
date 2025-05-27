@@ -1,0 +1,57 @@
+**RDM Coverage Benchmark:**
+
+id: rdm-coverage-benchmark
+title: "Comprehensive RDM Activities Coverage"
+  narrative: >
+    Ensure that the DMP addresses all key components of research data management,
+    including lifecycle coverage, roles and responsibilities, budgeting, description
+    of outputs, provenance, application of best practices, reproducibility, and
+    alignment with relevant policies.
+dimension: "Coverage"
+type: "RDM Coverage Benchmark"
+algorithm: "Binary score (pass/fail), or weighted"
+assessment_outcome:
+  type: "Score + Textual classification"
+
+**Metrics:**
+id: rdm-cov.1
+title: "RDM Lifecycle Stages Addressed"
+description: "The DMP describes each phase of the data lifecycle, including collection, processing, storage, sharing, and preservation."
+test: check_lifecycle_stages **This is not available in the maDMP**
+mandatory: true
+
+id: rdm-cov.2
+title: "Budget for RDM"
+description: "The DMP includes an explicit budget or cost estimation for data management services."
+test: check_cost (title, value, descipton and currency_code)
+mandatory: true
+
+id: rdm-cov.3
+title: "Roles in RDM"
+description: "The DMP defines roles and responsibilities for data management activities."
+test: check_contributor_role
+mandatory: true
+
+id: ouco.1
+title: "Outputs Coverage"
+description: "Research outputs are described with relevant metadata such as type, format, repository, and license."
+test: check_dataset (dataset_id (identifier, type), personal_data, sensitive_data, title, type, distribution (title, host (title, url), license (license_ref, start_date))
+mandatory: true
+
+id: bpc
+title: "Best Practices Coverage"
+description: "The DMP references established best practices, including FAIR principles and Open Science approaches."
+test: check_distribution_data_access **This is the only available in the maDMP, but we also need openess of license etc**
+mandatory: true
+
+id: rep.1
+title: "Reproducibility"
+description: "The DMP includes qualified references to datasets, software, workflows, and publications that support reproducibility."
+test: check_dataset_id; check_technical_resource **These are the only available in the maDMP, but we also need software, publications etc**
+mandatory: true
+
+id: pol.1
+title: "Policy/ies Mentioned in DMP"
+description: "The DMP cites applicable policies from the funder, institution, or consortium."
+test: check_policy_references **This is not available in the maDMP, yet**
+mandatory: true
