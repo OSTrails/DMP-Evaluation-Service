@@ -1,11 +1,15 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkGraphEntry
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.metric.metricsListsIDs
 import io.github.ostrails.dmpevaluatorservice.service.BenchmarService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @Tag(name = "Benchmark APIs", description = "Manage benchmarks and associated metrics")
 @RestController
@@ -42,6 +46,13 @@ class BenchmarkController(
     suspend fun getBenchmark(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkRecord> {
         val benchmark = benchMarkService.getBenchmarkDetail(benchmarkId)
         return ResponseEntity.ok(benchmark)
+    }
+
+    @GetMapping("/{benchmarkId}/json-ld")
+    suspend fun getBenchmarkJsonLD(@PathVariable benchmarkId: String): ResponseEntity<Any> {
+        val benchmark = benchMarkService.getBenchmarkDetail(benchmarkId)
+        val benchmarkJsonLD = benchMarkService.toJsonLD(benchmark)
+        return ResponseEntity.ok(benchmarkJsonLD)
     }
 
     @PostMapping("/{benchmarkId}/delete/metric")

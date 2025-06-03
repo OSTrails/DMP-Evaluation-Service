@@ -17,4 +17,5 @@ data class BenchmarkRecord(
     val landingPage: String? = null,
     val theme: String? = null,
     val status: String? = null,
+    val creator: List<String> = emptyList(),
 )

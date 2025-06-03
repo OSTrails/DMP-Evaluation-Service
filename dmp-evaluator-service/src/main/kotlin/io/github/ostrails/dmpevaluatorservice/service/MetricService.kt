@@ -3,9 +3,13 @@ package io.github.ostrails.dmpevaluatorservice.service
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import io.github.ostrails.dmpevaluatorservice.model.metric.IdWrapper
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricGraphEntry
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class MetricService(
@@ -68,6 +72,27 @@ class MetricService(
         }else benchmarkToAdd = benchMarkIds
         val updateMetric = metric.copy(hasBenchmark = metric.hasBenchmark?.plus(benchmarkToAdd) ?: benchMarkIds)
         return metricRepository.save(updateMetric).awaitSingle()
+    }
+
+    fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
+        val graphEntry = MetricGraphEntry(
+        id = metric.landingPage ?: "urn:uuid:${UUID.randomUUID()}",
+        title = metric.title,
+        description = metric.description,
+        version = metric.version,
+        label = metric.abbreviation,
+        abbreviation = metric.abbreviation,
+        landingPage = metric.landingPage?.let { IdWrapper(it) },
+        keyword = metric.keyword?.split(",")?.map { it.trim() },
+        hasTest = metric.testAssociated?.map { IdWrapper(it) },
+        hasBenchmark = metric.hasBenchmark?.map { IdWrapper(it) },
+        isApplicableFor = metric.isApplicableFor?.let { IdWrapper(it) },
+        supportedBy = metric.supportedBy?.let { IdWrapper(it) }
+        )
+
+        return MetricJsonLD(
+            graph = listOf(graphEntry)
+        )
     }
 }
 
