@@ -1,6 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.MetricService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
@@ -25,9 +26,23 @@ class MetricController(
         return ResponseEntity.ok(result)
     }
 
+    @GetMapping("/jsonLD")
+    suspend fun listJsonLD(): ResponseEntity<List<MetricJsonLD>> {
+        val metrics = metricService.listMetrics()
+        val result = metrics.map { it -> metricService.metricJsonLD(it) }
+        return ResponseEntity.ok(result)
+    }
+
     @GetMapping("/{metricId}")
     suspend fun detailMetric(@PathVariable metricId: String): ResponseEntity<MetricRecord> {
         val result =  metricService.metricDetail(metricId)
+        return ResponseEntity.ok(result)
+    }
+
+    @GetMapping("/{metricId}/json-ld")
+    suspend fun detailMetricJsonLD(@PathVariable metricId: String): ResponseEntity<MetricJsonLD> {
+        val metric =  metricService.metricDetail(metricId)
+        val result = metricService.metricJsonLD(metric)
         return ResponseEntity.ok(result)
     }
 

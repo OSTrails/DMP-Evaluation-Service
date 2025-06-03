@@ -4,11 +4,15 @@ import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkGraphEntry
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.IdWrapper
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class BenchmarService(
@@ -71,6 +75,25 @@ class BenchmarService(
 
     suspend fun getbenchmarkByTitle(title: String): BenchmarkRecord {
         return benchmarkRepository.findByTitle(title).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the title $title")
+    }
+
+    fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
+        val graphEntry = BenchmarkGraphEntry(
+            id = benchmark.landingPage ?: "urn:uuid:${UUID.randomUUID()}",
+            title = benchmark.title,
+            description = benchmark.description,
+            version = benchmark.version,
+            label = benchmark.abbreviation,
+            abbreviation = benchmark.abbreviation,
+            status = benchmark.status,
+            landingPage = benchmark.landingPage?.let { IdWrapper(it) },
+            keyword = benchmark.keyword?.split(",")?.map { it.trim() },
+            associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper(it) },
+            hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }
+        )
+
+        return BenchmarkJsonLD(graph = listOf(graphEntry))
+
     }
 
 }
