@@ -29,6 +29,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
 
     override val functionMap = mapOf(
         "evaluateCoherentLicense" to ::evaluateLicenseCompliance,
+        "checkFormatFile" to :: checkFormatFile
+
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
@@ -71,7 +73,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
+            generated = "${this::class.qualifiedName}:: checkFormatFile",
             outputFromTest = testRecord.id
         )
     }

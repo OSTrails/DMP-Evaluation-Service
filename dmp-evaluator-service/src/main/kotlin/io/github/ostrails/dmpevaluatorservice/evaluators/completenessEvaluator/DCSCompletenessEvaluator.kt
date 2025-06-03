@@ -56,14 +56,14 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         reportId: String,
         testRecord: TestRecord
     ): Evaluation {
-        val validationmaDMP = Validator.validate(maDMP.toString())
+        val validationDMP = Validator.validate(maDMP.toString())
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = if (validationmaDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
+            result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            log = validationmaDMP.toString(),
+            log = validationDMP.toString(),
             generated = "${this::class.qualifiedName}:: evaluateStructure",
             outputFromTest = testRecord.id
         )

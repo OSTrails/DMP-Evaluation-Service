@@ -59,5 +59,15 @@ class MetricService(
         val metrics = metricRepository.findByIdIn(metricIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Metrics with the ids ${metricIds} not found")
         return metrics
     }
+
+    suspend fun addBenchMark(metricId: String, benchMarkIds: List<String>): MetricRecord{
+        val benchmarkToAdd: List<String>
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        if (metric.hasBenchmark != null) {
+            benchmarkToAdd = benchMarkIds.filterNot { it in metric.hasBenchmark }
+        }else benchmarkToAdd = benchMarkIds
+        val updateMetric = metric.copy(hasBenchmark = metric.hasBenchmark?.plus(benchmarkToAdd) ?: benchMarkIds)
+        return metricRepository.save(updateMetric).awaitSingle()
+    }
 }
 
