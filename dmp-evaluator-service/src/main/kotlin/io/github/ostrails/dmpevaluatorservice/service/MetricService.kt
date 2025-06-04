@@ -76,7 +76,7 @@ class MetricService(
 
     fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
         val graphEntry = MetricGraphEntry(
-        id = metric.landingPage ?: "urn:uuid:${UUID.randomUUID()}",
+        id = metric.landingPage ?: "urn:dmpEvaluationService:${UUID.randomUUID()}",
         title = metric.title,
         description = metric.description,
         version = metric.version,

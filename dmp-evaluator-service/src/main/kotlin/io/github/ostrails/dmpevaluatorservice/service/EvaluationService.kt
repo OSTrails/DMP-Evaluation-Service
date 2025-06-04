@@ -4,6 +4,8 @@ import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import io.github.ostrails.dmpevaluatorservice.model.metric.IdWrapper
+import io.github.ostrails.dmpevaluatorservice.model.testResult.*
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service
 import org.springframework.plugin.core.PluginRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
 
 @Service
 class EvaluationService(
@@ -53,6 +56,42 @@ class EvaluationService(
             log.error("Error running test: ${test.title} ", e)
             null
         }
+    }
+
+    fun buildEvalutionResultJsonLD(evaluation: Evaluation): TestResultJsonLD {
+        val resultId = "urn:dmpEvaluationService:${evaluation.evaluationId}"
+        val testId = evaluation.outputFromTest ?: "https://example.org/test/default"
+        val resourceId = evaluation.generated ?: "https://example.org/resource/default"
+        val activityId = "urn:ostrails:testexecutionactivity:${UUID.randomUUID()}"
+
+        val testResult = TestResultGraph(
+            id = resultId,
+            identifier = IdWrapper(resultId),
+            title = LangLiteral(value = "${evaluation.title} OUTPUT"),
+            description = LangLiteral(value = evaluation.details),
+            license = IdWrapper("https://creativecommons.org/publicdomain/zero/1.0/"),
+            resultValue = LangLiteral(value = evaluation.result.name.lowercase()),
+            summary = LangLiteral(value = ""),
+            generatedAt = TypedLiteral("xsd:date", evaluation.timestamp.toString()),
+            log = LangLiteral(value = evaluation.log),
+            completion = TypedLiteral("xsd:int", (evaluation.completion ?: 100).toString()),
+            outputFromTest = IdWrapper(testId),
+            wasDerivedFrom = IdWrapper(resourceId)
+        )
+
+        val testExecution = TestExecutionActivity(
+            id = activityId,
+            associatedWith = IdWrapper(testId),
+            generated = IdWrapper(resultId),
+            used = IdWrapper(resourceId)
+        )
+
+        val resource = Entity(id = resourceId)
+
+        return TestResultJsonLD(
+            graph = listOf(testExecution, testResult, resource /* optionally also: test definition */)
+        )
+
     }
 
 

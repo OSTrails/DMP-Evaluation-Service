@@ -4,7 +4,9 @@ import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
+import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
+import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -15,6 +17,7 @@ import org.springframework.http.codec.multipart.FilePart
 @RequestMapping("/api/evaluations")
 class EvaluationController(
     private val evaluationManagerService: EvaluationManagerService,
+    private val evaluationService: EvaluationService,
 ) {
 
     @PostMapping
@@ -65,6 +68,18 @@ class EvaluationController(
     ): ResponseEntity<Evaluation>{
         val jsonResult = evaluationManagerService.gatewayTestsEvaluationService(maDMP, test, reportId)
         return ResponseEntity.ok(jsonResult)
+    }
+
+    @PostMapping("/test/JsonLD", consumes = ["multipart/form-data"])
+    suspend fun runTestJsonLD(
+        @RequestPart("maDMP") maDMP: FilePart,
+        @RequestPart("test") test: String,
+        @RequestPart(required = false) reportId: String?
+    ): ResponseEntity<TestResultJsonLD>{
+        val jsonResult = evaluationManagerService.gatewayTestsEvaluationService(maDMP, test, reportId)
+        val jsonLDResult = jsonResult?.let { evaluationService.buildEvalutionResultJsonLD(it) }
+
+        return ResponseEntity.ok(jsonLDResult)
     }
 
     @PostMapping("/mappingRDF", consumes = ["multipart/form-data"])

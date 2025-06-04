@@ -1,12 +1,11 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
-import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkGraphEntry
-import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkJsonLD
-import io.github.ostrails.dmpevaluatorservice.model.benchmark.IdWrapper
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -17,6 +16,7 @@ import java.util.*
 @Service
 class BenchmarService(
     private val benchmarkRepository: BenchmarkRepository,
+    private val metricService: MetricService,
 ){
 
     suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
@@ -73,13 +73,38 @@ class BenchmarService(
         return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
     }
 
-    suspend fun getbenchmarkByTitle(title: String): BenchmarkRecord {
+    suspend fun benchmarkByTitle(title: String): BenchmarkRecord {
         return benchmarkRepository.findByTitle(title).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the title $title")
     }
 
-    fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
+    suspend fun getBenchmarkDetailJsonLD(benchmarkId: String): BenchmarkJsonLD{
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val result = toJsonLD(benchmark)
+        return result
+    }
+
+
+
+    suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest): BenchmarkRecord {
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val updateBenchmark = benchmark.copy(
+            title = benchmarkRequest.title ?: benchmark.title,
+            version = benchmarkRequest.version ?: benchmark.version,
+            description = benchmarkRequest.description ?: benchmark.description,
+            keyword = benchmarkRequest.keyword ?: benchmark.keyword,
+            abbreviation = benchmarkRequest.abbreviation ?: benchmark.abbreviation,
+            landingPage = benchmarkRequest.landingPage ?: benchmark.landingPage,
+            theme = benchmarkRequest.theme ?: benchmark.theme,
+            status = benchmarkRequest.status ?: benchmark.status,
+            creator = benchmarkRequest.creator ?: benchmark.creator
+            )
+        return benchmarkRepository.save(updateBenchmark).awaitSingle()
+    }
+
+
+    suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
         val graphEntry = BenchmarkGraphEntry(
-            id = benchmark.landingPage ?: "urn:uuid:${UUID.randomUUID()}",
+            id = benchmark.landingPage ?: "urn:dmpEvaluationService:${benchmark.benchmarkId}",
             title = benchmark.title,
             description = benchmark.description,
             version = benchmark.version,
@@ -88,12 +113,28 @@ class BenchmarService(
             status = benchmark.status,
             landingPage = benchmark.landingPage?.let { IdWrapper(it) },
             keyword = benchmark.keyword?.split(",")?.map { it.trim() },
-            associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper(it) },
+            associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper("https://dmpEvaluationService/metric/${it}") },
             hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }
         )
 
-        return BenchmarkJsonLD(graph = listOf(graphEntry))
+        val metrics = benchmark.hasAssociatedMetric?.let { metricService.findMultipleMetrics(benchmark.hasAssociatedMetric) }
+        val metricsLD = metrics?.map(::toMetricLDEntry)
 
+        if (metricsLD != null) {
+            return BenchmarkJsonLD (graph = metricsLD + graphEntry)
+        }else {
+            return BenchmarkJsonLD (graph = listOf(graphEntry))
+        }
+    }
+
+    fun toMetricLDEntry(metric: MetricRecord): MetricLDEntry {
+        val id = "https://dmpEvaluationService/${metric.id}"
+        return MetricLDEntry(
+            id = id,
+            identifier = IdWrapper(id),
+            label = metric.title,
+            abbreviation = metric.abbreviation ?: metric.title
+        )
     }
 
 }

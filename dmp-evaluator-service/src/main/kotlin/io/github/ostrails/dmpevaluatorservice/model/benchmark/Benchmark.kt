@@ -8,7 +8,7 @@ data class BenchmarkJsonLD(
     val context: Map<String, String> = Companion.defaultContext,
 
     @JsonProperty("@graph")
-    val graph: List<BenchmarkGraphEntry>
+    val graph: List<Any>
 ){
     companion object {
         val defaultContext = mapOf(
@@ -72,4 +72,32 @@ data class IdWrapper(
     @JsonProperty("@id")
     val id: String
 )
+
+
+data class CreatorLD(
+    @JsonProperty("@id") val id: String,
+    @JsonProperty("@type") val type: String = "vcard:Individual",
+    @JsonProperty("vcard:fn") val name: String,
+    @JsonProperty("vcard:hasEmail") val email: IdWrapper
+)
+
+data class Creator(
+    val id: String,
+    val name: String,
+    val email: String
+)
+
+// ==== Metric ====
+
+data class MetricLDEntry(
+    @JsonProperty("@id") val id: String,
+    @JsonProperty("@type") val type: String = "dqv:Metric",
+    @JsonProperty("dcterms:identifier") val identifier: IdWrapper,
+    @JsonProperty("rdfs:label") val label: String,
+    @JsonProperty("vivo:abbreviation") val abbreviation: String
+)
+
+
+
+
 
