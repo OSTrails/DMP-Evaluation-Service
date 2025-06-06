@@ -8,7 +8,7 @@ data class MetricJsonLD(
     val context: Map<String, String> = defaultContext,
 
     @JsonProperty("@graph")
-    val graph: List<MetricGraphEntry>
+    val graph: List<Any>
 
 ){
     companion object {
@@ -32,13 +32,13 @@ data class MetricGraphEntry(
     val id: String,
 
     @JsonProperty("@type")
-    val type: String = "dqv:Metric",
+    val type: Any = "dqv:Metric", // String or List<String>
 
     @JsonProperty("dcterms:title")
-    val title: String,
+    val title: LangLiteral,
 
     @JsonProperty("dcterms:description")
-    val description: String,
+    val description: LangLiteral,
 
     @JsonProperty("dcat:version")
     val version: String,
@@ -53,22 +53,68 @@ data class MetricGraphEntry(
     val landingPage: IdWrapper? = null,
 
     @JsonProperty("dcat:keyword")
-    val keyword: List<String>? = null,
+    val keyword: List<LangLiteral>? = null,
 
     @JsonProperty("ftr:hasTest")
-    val hasTest: List<IdWrapper>? = null,
+    val hasTest: List<IdWrapper>,
 
     @JsonProperty("ftr:hasBenchmark")
-    val hasBenchmark: List<IdWrapper>? = null,
+    val hasBenchmark: List<IdWrapper> ,
 
     @JsonProperty("ftr:isApplicableFor")
     val isApplicableFor: IdWrapper? = null,
 
     @JsonProperty("ftr:supportedBy")
-    val supportedBy: IdWrapper? = null
+    val supportedBy: IdWrapper? = null,
+
+    @JsonProperty("dcat:contactPoint")
+    val contactPoint: IdWrapper? = null,
+
+    @JsonProperty("dcterms:creator")
+    val creator: List<IdWrapper>? = null,
+
+    @JsonProperty("dcterms:publisher")
+    val publisher: IdWrapper? = null,
+
+    @JsonProperty("dqv:inDimension")
+    val inDimension: IdWrapper? = null,
+
+    @JsonProperty("dcterms:license")
+    val license: IdWrapper? = null,
+
+    @JsonProperty("http://semanticscience.org/resource/SIO_000233")
+    val sio233: IdWrapper? = null
 )
 
 data class IdWrapper(
     @JsonProperty("@id")
     val id: String
 )
+
+data class LangLiteral(
+    @JsonProperty("@language") val language: String,
+    @JsonProperty("@value") val value: String
+)
+
+data class BenchmarkMini(
+    @JsonProperty("@id") val id: String,
+    @JsonProperty("@type") val type:String =  "ftr:Benchmark",
+    val title: String,
+    val description: String
+)
+
+data class Creator(
+    @JsonProperty("@id") val id: String,
+    val name: String,
+    val email: String
+)
+
+data class Organization(val id: String)
+
+data class FAIRPrinciple(
+    @JsonProperty("@id")val id: String,
+    val label: String,
+    val abbreviation: String,
+    val description: String
+)
+

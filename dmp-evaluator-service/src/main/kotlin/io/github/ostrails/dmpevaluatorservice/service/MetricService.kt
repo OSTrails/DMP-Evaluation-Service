@@ -1,11 +1,10 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
+import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
-import io.github.ostrails.dmpevaluatorservice.model.metric.IdWrapper
-import io.github.ostrails.dmpevaluatorservice.model.metric.MetricGraphEntry
-import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.metric.*
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
@@ -13,7 +12,8 @@ import java.util.*
 
 @Service
 class MetricService(
-    val metricRepository: MetricRepository
+    val metricRepository: MetricRepository,
+    val benchmarkRepository: BenchmarkRepository,
 ) {
 
     suspend fun createMetric(metric: MetricRecord): MetricRecord {
@@ -74,25 +74,40 @@ class MetricService(
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
-    fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
-        val graphEntry = MetricGraphEntry(
-        id = metric.landingPage ?: "urn:dmpEvaluationService:${UUID.randomUUID()}",
-        title = metric.title,
-        description = metric.description,
-        version = metric.version,
-        label = metric.abbreviation,
-        abbreviation = metric.abbreviation,
-        landingPage = metric.landingPage?.let { IdWrapper(it) },
-        keyword = metric.keyword?.split(",")?.map { it.trim() },
-        hasTest = metric.testAssociated?.map { IdWrapper(it) },
-        hasBenchmark = metric.hasBenchmark?.map { IdWrapper(it) },
-        isApplicableFor = metric.isApplicableFor?.let { IdWrapper(it) },
-        supportedBy = metric.supportedBy?.let { IdWrapper(it) }
-        )
 
-        return MetricJsonLD(
-            graph = listOf(graphEntry)
-        )
+    suspend fun getMetricDetailJsonLD(metricId: String): MetricJsonLD {
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $metricId")
+        val result = metricJsonLD(metric)
+        return result
+    }
+
+    suspend fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
+        val benchMarksIds = metric.hasBenchmark
+        val benchmarks = benchMarksIds?.let { benchmarkRepository.findAllByBenchmarkIdIn(it).collectList().awaitSingle() }
+            ?: listOf()
+        val graphEntry = metric.let {
+            MetricGraphEntry(
+                id = "urn:dmpEvaluationService:${it.id}",
+                type = "dqv:Metric",
+                title = LangLiteral("en", metric.title),
+                description = LangLiteral("en", metric.description),
+                version = metric.version,
+                label = metric.abbreviation,
+                abbreviation = metric.abbreviation,
+                landingPage = (it.landingPage ?: it.landingPage)?.let { it1 -> IdWrapper(it1) },
+                keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
+                hasTest = metric.testAssociated?.map { IdWrapper(it) } ?: listOf(),
+                hasBenchmark = metric.hasBenchmark?.map { IdWrapper(it)  } ?: listOf()  ,
+                license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
+            )
+        }
+        val benchmarkgrapgh = benchmarks.map { BenchmarkMini(
+            id = "urn:dmpEvaluationService:${it.benchmarkId}",
+            title = "benchmark ${it.title}",
+            description = it.description,
+        )  }
+
+        return MetricJsonLD (graph = benchmarkgrapgh + graphEntry)
     }
 }
 
