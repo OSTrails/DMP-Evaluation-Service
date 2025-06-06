@@ -59,6 +59,12 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmark)
     }
 
+    @PostMapping("/filter")
+    suspend fun getBenchmarkById(@RequestBody benchmarkIds: List<String>): ResponseEntity<List<BenchmarkRecord>> {
+        val benchmark = benchMarkService.getBenchmarskDetail(benchmarkIds)
+        return ResponseEntity.ok(benchmark)
+    }
+
     @GetMapping("/{benchmarkId}/json-ld")
     suspend fun getBenchmarkJsonLD(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkJsonLD> {
         val benchmarkJsonLD = benchMarkService.getBenchmarkDetailJsonLD(benchmarkId)
@@ -70,6 +76,8 @@ class BenchmarkController(
         val result = benchMarkService.deleteMetric(benchmarkId, metrics)
         return ResponseEntity.ok(result)
     }
+
+
 
 
 
