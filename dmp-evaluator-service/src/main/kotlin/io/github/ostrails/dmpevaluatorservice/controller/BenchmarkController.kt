@@ -40,12 +40,12 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmarks)
     }
 
-//    @GetMapping("/json-ld")
-//    suspend fun getBenchmarksJsonLD (): ResponseEntity<List<BenchmarkJsonLD>> {
-//        val benchmarks = benchMarkService.getBenchmarks()
-//        val result = benchmarks.map { benchmark -> benchMarkService.toJsonLD(benchmark) }
-//        return ResponseEntity.ok(result)
-//    }
+    @GetMapping("/json-ld")
+    suspend fun getBenchmarksJsonLD (): ResponseEntity<List<BenchmarkJsonLD>> {
+        val benchmarks = benchMarkService.getBenchmarks()
+        val result = benchmarks.map { benchmark -> benchMarkService.toJsonLD(benchmark) }
+        return ResponseEntity.ok(result)
+    }
 
     @DeleteMapping("/{benchmarkId}")
     suspend fun deleteBenchmark(@PathVariable benchmarkId: String): ResponseEntity<String> {
