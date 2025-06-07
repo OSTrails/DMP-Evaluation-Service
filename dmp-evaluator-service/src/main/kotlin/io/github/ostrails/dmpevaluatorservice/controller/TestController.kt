@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
+import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
@@ -46,6 +47,12 @@ class TestController(
     @GetMapping("/{testId}")
     suspend fun getTest(@PathVariable testId: String): ResponseEntity<TestRecord>{
         val result = testService.getTest(testId)
+        return ResponseEntity.ok(result)
+    }
+
+    @GetMapping("/{testId}/json-ld")
+    suspend fun getTestJsonLD(@PathVariable testId: String): ResponseEntity<TestJsonLD> {
+        val result = testService.testJsonLD(testId)
         return ResponseEntity.ok(result)
     }
 
