@@ -26,12 +26,12 @@ class MetricController(
         return ResponseEntity.ok(result)
     }
 
-//    @GetMapping("/jsonLD")
-//    suspend fun listJsonLD(): ResponseEntity<List<MetricJsonLD?>> {
-//        val metrics = metricService.listMetrics()
-//        val result = metrics.map { it -> it.id?.let { it1 -> metricService.getMetricDetailJsonLD(it1) } }
-//        return ResponseEntity.ok(result)
-//    }
+    @GetMapping("/jsonLD")
+    suspend fun listJsonLD(): ResponseEntity<List<MetricJsonLD?>> {
+        val metrics = metricService.listMetrics()
+        val result = metrics.map { it -> it.id?.let { it1 -> metricService.getMetricDetailJsonLD(it1) } }
+        return ResponseEntity.ok(result)
+    }
 
     @GetMapping("/{metricId}")
     suspend fun detailMetric(@PathVariable metricId: String): ResponseEntity<MetricRecord> {
@@ -42,7 +42,6 @@ class MetricController(
     @GetMapping("/{metricId}/json-ld")
     suspend fun detailMetricJsonLD(@PathVariable metricId: String): ResponseEntity<MetricJsonLD> {
         val metric = metricService.metricDetail(metricId)
-        //val benchmarks = benchmarService.
         val result =  metricService.getMetricDetailJsonLD(metricId)
         return ResponseEntity.ok(result)
     }
