@@ -1,6 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
+import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.TestService
@@ -27,8 +28,8 @@ class TestController(
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("/{testId}")
-    suspend fun updateTest(@PathVariable testId: String,@RequestBody test: TestUpdateRequest): ResponseEntity<TestRecord>{
+    @PostMapping("/{testId}/addEvaluator")
+    suspend fun updateTestEvaluator(@PathVariable testId: String,@RequestBody test: TestAddMetricRequest): ResponseEntity<TestRecord>{
         val result = testService.addMetric(testId, test)
         if (result != null){
             return ResponseEntity.ok(result)
@@ -37,6 +38,14 @@ class TestController(
         }
 
     }
+
+    @PostMapping("/{testId}")
+    suspend fun updateTest(@PathVariable testId: String,@RequestBody test: TestUpdateRequest): ResponseEntity<TestRecord>{
+        val result = testService.updateTest(testId, test)
+        return ResponseEntity.ok(result)
+    }
+
+
 
     @GetMapping
     suspend fun getTests(): ResponseEntity<List<TestRecord>>{

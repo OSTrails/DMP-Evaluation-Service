@@ -42,7 +42,6 @@ class MetricController(
 
     @GetMapping("/{metricId}/json-ld")
     suspend fun detailMetricJsonLD(@PathVariable metricId: String): ResponseEntity<MetricJsonLD> {
-        val metric = metricService.metricDetail(metricId)
         val result =  metricService.getMetricDetailJsonLD(metricId)
         return ResponseEntity.ok(result)
     }

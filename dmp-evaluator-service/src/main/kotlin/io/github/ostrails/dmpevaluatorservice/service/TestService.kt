@@ -4,6 +4,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.TestRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.model.test.FullTestLDEntry
 import io.github.ostrails.dmpevaluatorservice.model.test.IdWrapper
@@ -32,17 +33,13 @@ class TestService(
         return test
     }
 
-   suspend fun addMetric(testId: String, testInfo: TestUpdateRequest): TestRecord? {
+   suspend fun addMetric(testId: String, testInfo: TestAddMetricRequest): TestRecord? {
        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
 
-       if (testInfo.metricImplemented != null) {
+       if (testInfo.evaluator != null) {
            val updateTest = test.copy(
-               title = testInfo.title ?: test.title,
-               description = testInfo.description ?: test.description,
-               license = testInfo.license ?: test.license,
-               version = testInfo.version ?: test.version,
                metricImplemented = testInfo.metricImplemented,
-               evaluator = testInfo.evaluator ?: testInfo.evaluator,
+               evaluator = testInfo.evaluator,
                functionEvaluator = testInfo.functionEvaluator ?: testInfo.functionEvaluator, )
            metricService.addTests(testInfo.metricImplemented, listOf(testId))
            val testSaved = testRepository.save(updateTest).awaitSingle()
@@ -72,12 +69,34 @@ class TestService(
         return tests
     }
 
+    suspend fun updateTest (testId: String, newTestData: TestUpdateRequest): TestRecord {
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        val updateTest = test.copy(
+            title = newTestData.title ?: test.title,
+            description = newTestData.description ?: test.description,
+            license = newTestData.license ?: test.license,
+            version =  newTestData.version ?: test.version,
+            endpointURL = newTestData.endpointURL ?: test.endpointURL,
+            endpointDescription = newTestData.description ?: test.description,
+            keyword = newTestData.keyword ?: test.keyword,
+            abbreviation = newTestData.abbreviation ?: test.abbreviation,
+            repository = newTestData.repository ?: test.repository,
+            type = newTestData.type ?: test.type,
+            theme = newTestData.theme ?: test.theme,
+            versionNotes = newTestData.versionNotes ?: test.versionNotes,
+            status = newTestData.status ?: test.status,
+            isApplicableFor = newTestData.isApplicableFor ?: test.isApplicableFor,
+            supportedBy = newTestData.supportedBy ?: test.supportedBy,
+        )
+        return testRepository.save(updateTest).awaitSingle()
+  }
+
     suspend fun testJsonLD(testId: String): TestJsonLD {
         val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
         val keywords = test.keyword?.split(",")?.map { LangLiteral(value = it.trim()) }
 
         val mainTest = FullTestLDEntry(
-            id = "urn:dmpEvaluationService:${test.id}" ?: "urn:uuid:test-id",
+            id = "urn:dmpEvaluationService:${test.id}",
             identifier = IdWrapper(test.id ?: "urn:uuid:test-id"),
             title = LangLiteral(value = test.title),
             description = LangLiteral(value = test.description),

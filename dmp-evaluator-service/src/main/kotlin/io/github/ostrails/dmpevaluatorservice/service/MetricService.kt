@@ -8,7 +8,6 @@ import io.github.ostrails.dmpevaluatorservice.model.metric.*
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class MetricService(
@@ -34,13 +33,13 @@ class MetricService(
             title = metricRequest.title ?: metric.title,
             version = metricRequest.version ?: metric.version,
             description = metricRequest.description ?: metric.description,
-//            keyword = metricRequest.keyword ?: metric.keyword,
-//            abbreviation = metricRequest.abbreviation ?: metric.abbreviation,
-//            landingPage = metricRequest.landingPage ?: metric.landingPage,
-//            theme = metricRequest.theme ?: metric.theme,
-//            status = metricRequest.status ?: metric.status,
-//            isApplicableFor = metricRequest.isApplicableFor ?: metric.isApplicableFor,
-//            supportedBy = metricRequest.supportedBy ?: metric.supportedBy,
+            keyword = metricRequest.keyword ?: metric.keyword,
+            abbreviation = metricRequest.abbreviation ?: metric.abbreviation,
+            landingPage = metricRequest.landingPage ?: metric.landingPage,
+            theme = metricRequest.theme ?: metric.theme,
+            status = metricRequest.status ?: metric.status,
+            isApplicableFor = metricRequest.isApplicableFor ?: metric.isApplicableFor,
+            supportedBy = metricRequest.supportedBy ?: metric.supportedBy,
         )
         return metricRepository.save(updateMetric).awaitSingle()
     }
