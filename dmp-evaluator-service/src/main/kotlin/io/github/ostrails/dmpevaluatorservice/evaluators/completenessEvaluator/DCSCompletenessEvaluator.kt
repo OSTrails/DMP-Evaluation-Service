@@ -27,6 +27,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
 
     override val functionMap = mapOf(
         "evaluateStructure" to ::evaluateStructure,
+        "evaluateFormats" to :: evaluateFormats
     )
 
     override fun getPluginInformation(): PluginInfo {
@@ -57,16 +58,35 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         testRecord: TestRecord
     ): Evaluation {
         val validationDMP = Validator.validateRequiredValues(maDMP.toString())
-
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            log = formattedLog(validationDMP),
+            log = formattedLog(validationDMP, "All required fields are present."),
             generated = "${this::class.qualifiedName}:: evaluateStructure",
-            outputFromTest = testRecord.id
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+    }
+
+    fun evaluateFormats(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val validationDMP = Validator.validateFormatValues(maDMP.toString())
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
+            details = testRecord.description,
+            title = testRecord.title,
+            reportId = reportId,
+            log = formattedLog(validationDMP, "All required fields are in format."),
+            generated = "${this::class.qualifiedName}:: evaluateFormats",
+            outputFromTest = testRecord.id,
+            completion = 100
         )
     }
 
@@ -91,9 +111,23 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                 }
             }
         }
+
+        fun validateFormatValues(inputJson: String): List<String> {
+            return try {
+                val jsonObject = JSONObject(inputJson)
+                schema.validate(jsonObject)
+                emptyList()
+            } catch (e: ValidationException) {
+                e.allMessages.filter { msg ->
+                    !msg.contains("required key", ignoreCase = true) &&
+                            (msg.contains("not a valid") ||
+                                    msg.contains("expected type", ignoreCase = true))
+                }
+            }
+        }
     }
 
-    fun   formattedLog (validationDMP: List<String>): String {
+    fun   formattedLog (validationDMP: List<String>, feedbackMessage: String): String {
         if (validationDMP.isNotEmpty()) {
             return buildString {
                 appendLine("Missing required fields detected: ")
@@ -102,7 +136,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                 }
             }
         } else {
-            return "All required fields are present."
+            return feedbackMessage
         }
     }
 
