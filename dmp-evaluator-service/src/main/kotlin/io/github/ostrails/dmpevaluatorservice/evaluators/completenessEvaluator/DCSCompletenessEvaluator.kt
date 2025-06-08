@@ -56,14 +56,15 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         reportId: String,
         testRecord: TestRecord
     ): Evaluation {
-        val validationDMP = Validator.validate(maDMP.toString())
+        val validationDMP = Validator.validateRequiredValues(maDMP.toString())
+
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            log = validationDMP.toString(),
+            log = formattedLog(validationDMP),
             generated = "${this::class.qualifiedName}:: evaluateStructure",
             outputFromTest = testRecord.id
         )
@@ -79,16 +80,33 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             SchemaLoader.load(rawSchema)
         }
 
-        fun validate(inputJson: String): List<String> {
+        fun validateRequiredValues(inputJson: String): List<String> {
             return try {
                 val jsonObject = JSONObject(inputJson)
                 schema.validate(jsonObject)
                 emptyList()
             } catch (e: ValidationException) {
-                e.allMessages
+                e.allMessages.filter { msg ->
+                    msg.contains("required key", ignoreCase = true)
+                }
             }
         }
     }
+
+    fun   formattedLog (validationDMP: List<String>): String {
+        if (validationDMP.isNotEmpty()) {
+            return buildString {
+                appendLine("Missing required fields detected: ")
+                validationDMP.forEachIndexed { index, msg ->
+                    appendLine("${index + 1}. $msg")
+                }
+            }
+        } else {
+            return "All required fields are present."
+        }
+    }
+
+
 
 
 
