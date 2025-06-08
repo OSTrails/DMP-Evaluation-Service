@@ -6,6 +6,9 @@ import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -67,18 +70,35 @@ class ComplianceEvaluator: EvaluatorPlugin {
     reportId: String,
     testRecord: TestRecord
     ): Evaluation {
+        val json = maDMP as? JsonObject
+            ?: return Evaluation(
+                evaluationId = UUID.randomUUID().toString(),
+                result = ResultTestEnum.INDERTERMINATED,
+                title = testRecord.title,
+                details = "Input is not a valid JsonObject",
+                reportId = reportId,
+                generated = "${this::class.qualifiedName}::checkFormatFile",
+                outputFromTest = testRecord.id,
+                log = "The provided maDMP could not be parsed as a JsonObject."
+            )
+        val extension = json["fileExtension"]?.jsonPrimitive?.contentOrNull?.lowercase()
+
+        val result = if (extension == "json") ResultTestEnum.PASS else ResultTestEnum.FAIL
+        val logMessage = if (extension != "json") {
+            "File extension is '$extension'. Expected: 'json'."
+        } else {
+            "File extension is a valid json."
+        }
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
+            result = result,
             title = testRecord.title,
+            details = testRecord.description,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: checkFormatFile",
-            outputFromTest = testRecord.id
+            generated = "${this::class.qualifiedName}::checkFormatFile",
+            outputFromTest = testRecord.id,
+            log = logMessage
         )
     }
-
-
-
 
 }
