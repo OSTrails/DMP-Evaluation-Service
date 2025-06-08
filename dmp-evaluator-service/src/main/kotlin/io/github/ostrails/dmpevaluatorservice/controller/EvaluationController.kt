@@ -60,6 +60,18 @@ class EvaluationController(
         return ResponseEntity.ok(jsonResult)
     }
 
+    @PostMapping("/benchmark/json-ld", consumes = ["multipart/form-data"])
+    suspend fun runBenchmarkJsonLD(
+        @RequestPart("maDMP") maDMP: FilePart,
+        @RequestPart("benchmark") benchmark: String,
+        @RequestPart(required = false) reportId: String?
+    ): ResponseEntity<List<TestResultJsonLD>>{
+        val filename = maDMP.filename().lowercase()
+        val jsonResult = evaluationManagerService.gatewayBenchmarkEvaluationService(maDMP, benchmark, reportId)
+        val jsonLDResult: List<TestResultJsonLD> = jsonResult.map { evaluationService.buildEvalutionResultJsonLD(it) }
+        return ResponseEntity.ok(jsonLDResult)
+    }
+
     @PostMapping("/test", consumes = ["multipart/form-data"])
     suspend fun runTest(
         @RequestPart("maDMP") maDMP: FilePart,

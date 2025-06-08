@@ -17,9 +17,7 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.*
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 
@@ -106,7 +104,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
-                jsonFilevalidator(file)
+                //jsonFilevalidator(file)
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val benchmark = benchmarService.benchmarkByTitle(benchmarkTitle)
                     val evaluations = evaluationService.generateTestsResultsFromBenchmark(benchmark, maDMP, reportIdentifier.toString())
@@ -116,9 +114,8 @@ class EvaluationManagerService(
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
                     //TODO()
-                    // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
+                    // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluator and test.function.
                     return savedEvaluations
-
 
             }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
         }catch (e: Exception) {
@@ -131,7 +128,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
-                jsonFilevalidator(file)
+                //jsonFilevalidator(file)
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val test = testService.getTest(testId)
                 val evaluation = evaluationService.generateTestResultFromTest(test, maDMP, reportIdentifier.toString())
@@ -156,7 +153,22 @@ class EvaluationManagerService(
             .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
             .reduce { acc, text -> acc + text }
             .awaitFirst()
-        return Json.parseToJsonElement(content).jsonObject
+
+        val original = Json.parseToJsonElement(content).jsonObject
+
+
+        val extension = file.filename().substringAfterLast('.', "").lowercase()
+        val fileName = file.filename()
+
+        return buildJsonObject {
+            original.forEach { (key, value) ->
+                put(key, value)
+            }
+            put("fileExtension", JsonPrimitive(extension))
+            put("fileName", JsonPrimitive(fileName))
+        }
+
+        //return Json.parseToJsonElement(content).jsonObject
     }
 
     suspend fun mapToRDF(maDMP: FilePart): Any {

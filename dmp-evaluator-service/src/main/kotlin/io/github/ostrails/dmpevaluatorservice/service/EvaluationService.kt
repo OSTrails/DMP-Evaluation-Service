@@ -75,18 +75,18 @@ class EvaluationService(
             generatedAt = TypedLiteral("xsd:date", evaluation.timestamp.toString()),
             log = LangLiteral(value = evaluation.log),
             completion = TypedLiteral("xsd:int", (evaluation.completion ?: 100).toString()),
-            outputFromTest = IdWrapper(testId),
-            wasDerivedFrom = IdWrapper(resourceId)
+            outputFromTest = IdWrapper("urn:dmpEvaluationService:${testId}"),
+            wasDerivedFrom = IdWrapper("urn:dmpEvaluationService:${resourceId}")
         )
 
         val testExecution = TestExecutionActivity(
             id = activityId,
-            associatedWith = IdWrapper(testId),
-            generated = IdWrapper(resultId),
-            used = IdWrapper(resourceId)
+            associatedWith = IdWrapper("urn:dmpEvaluationService:${testId}"),
+            generated = IdWrapper("urn:dmpEvaluationService:${resultId}"),
+            used = IdWrapper("urn:dmpEvaluationService:${resourceId}")
         )
 
-        val resource = Entity(id = resourceId)
+        val resource = Entity(id = "urn:dmpEvaluationService:${resourceId}")
 
         return TestResultJsonLD(
             graph = listOf(testExecution, testResult, resource /* optionally also: test definition */)

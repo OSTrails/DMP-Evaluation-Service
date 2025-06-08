@@ -115,7 +115,7 @@ class BenchmarService(
             label = benchmark.abbreviation,
             abbreviation = benchmark.abbreviation,
             status = benchmark.status,
-            landingPage = benchmark.landingPage?.let { IdWrapper(it) },
+            landingPage = benchmark.landingPage?.let { IdWrapper("urn:dmpEvaluationService:${it}") },
             keyword = benchmark.keyword?.split(",")?.map { it.trim() },
             associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper("https://dmpEvaluationService/metric/${it}") },
             hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }

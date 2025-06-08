@@ -96,8 +96,8 @@ class MetricService(
                 abbreviation = metric.abbreviation,
                 landingPage = (it.landingPage ?: it.landingPage)?.let { it1 -> IdWrapper(it1) },
                 keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
-                hasTest = metric.testAssociated?.map { IdWrapper(it) } ?: listOf(),
-                hasBenchmark = metric.hasBenchmark?.map { IdWrapper(it)  } ?: listOf()  ,
+                hasTest = metric.testAssociated?.map { IdWrapper("urn:dmpEvaluationService:${it}") } ?: listOf(),
+                hasBenchmark = metric.hasBenchmark?.map { IdWrapper("urn:dmpEvaluationService:${it}")  } ?: listOf()  ,
                 license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
             )
         }
