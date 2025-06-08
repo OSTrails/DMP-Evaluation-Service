@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.service.MetricService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
@@ -44,6 +45,12 @@ class MetricController(
         val metric = metricService.metricDetail(metricId)
         val result =  metricService.getMetricDetailJsonLD(metricId)
         return ResponseEntity.ok(result)
+    }
+
+    @PostMapping("/update/{metricId}")
+    suspend fun updateMetric(@PathVariable metricId: String, @RequestBody metric: MetricUpdateRequest): ResponseEntity<MetricRecord> {
+        val result = metricService.updateMetric(metricId, metric)
+        return  ResponseEntity.ok(result)
     }
 
     @PostMapping("/addTests/{metricId}")

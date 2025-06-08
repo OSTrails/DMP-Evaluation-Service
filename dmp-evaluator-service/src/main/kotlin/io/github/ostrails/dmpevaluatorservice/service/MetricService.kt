@@ -28,6 +28,42 @@ class MetricService(
         return metricRepository.findById(metricId).awaitSingle() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
     }
 
+    suspend fun updateMetric(metricId: String, metricRequest: MetricUpdateRequest): MetricRecord {
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        val updateMetric = metric.copy(
+            title = metricRequest.title ?: metric.title,
+            version = metricRequest.version ?: metric.version,
+            description = metricRequest.description ?: metric.description,
+//            keyword = metricRequest.keyword ?: metric.keyword,
+//            abbreviation = metricRequest.abbreviation ?: metric.abbreviation,
+//            landingPage = metricRequest.landingPage ?: metric.landingPage,
+//            theme = metricRequest.theme ?: metric.theme,
+//            status = metricRequest.status ?: metric.status,
+//            isApplicableFor = metricRequest.isApplicableFor ?: metric.isApplicableFor,
+//            supportedBy = metricRequest.supportedBy ?: metric.supportedBy,
+        )
+        return metricRepository.save(updateMetric).awaitSingle()
+    }
+
+    /*
+    *     suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest): BenchmarkRecord {
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val updateBenchmark = benchmark.copy(
+            title = benchmarkRequest.title ?: benchmark.title,
+            version = benchmarkRequest.version ?: benchmark.version,
+            description = benchmarkRequest.description ?: benchmark.description,
+            keyword = benchmarkRequest.keyword ?: benchmark.keyword,
+            abbreviation = benchmarkRequest.abbreviation ?: benchmark.abbreviation,
+            landingPage = benchmarkRequest.landingPage ?: benchmark.landingPage,
+            theme = benchmarkRequest.theme ?: benchmark.theme,
+            status = benchmarkRequest.status ?: benchmark.status,
+            creator = benchmarkRequest.creator ?: benchmark.creator
+            )
+        return benchmarkRepository.save(updateBenchmark).awaitSingle()
+    }
+    *
+    * */
+
     suspend fun deleteMetric(metricId: String): String? {
         val record = metricRepository.findById(metricId).awaitFirstOrNull()
         if (record != null) {
