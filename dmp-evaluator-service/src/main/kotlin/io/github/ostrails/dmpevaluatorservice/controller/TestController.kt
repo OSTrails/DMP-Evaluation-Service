@@ -28,17 +28,6 @@ class TestController(
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("/{testId}/addEvaluator")
-    suspend fun updateTestEvaluator(@PathVariable testId: String,@RequestBody test: TestAddMetricRequest): ResponseEntity<TestRecord>{
-        val result = testService.addMetric(testId, test)
-        if (result != null){
-            return ResponseEntity.ok(result)
-        }else{
-            return ResponseEntity.notFound().build()
-        }
-
-    }
-
     @PostMapping("/{testId}")
     suspend fun updateTest(@PathVariable testId: String,@RequestBody test: TestUpdateRequest): ResponseEntity<TestRecord>{
         val result = testService.updateTest(testId, test)
@@ -75,6 +64,16 @@ class TestController(
     suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestRecord>>{
         val result = testService.getTestsByMetrics(metricId)
         return ResponseEntity.ok(result)
+    }
+
+    @PostMapping("/{testId}/addEvaluator")
+    suspend fun updateTestEvaluator(@PathVariable testId: String,@RequestBody test: TestAddMetricRequest): ResponseEntity<TestRecord>{
+        val result = testService.addMetric(testId, test)
+        if (result != null){
+            return ResponseEntity.ok(result)
+        }else{
+            return ResponseEntity.notFound().build()
+        }
     }
 
 

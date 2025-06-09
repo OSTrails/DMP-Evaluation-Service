@@ -27,7 +27,7 @@ class MetricController(
         return ResponseEntity.ok(result)
     }
 
-    @GetMapping("/jsonLD")
+    @GetMapping("/list/jsonLD")
     suspend fun listJsonLD(): ResponseEntity<List<MetricJsonLD?>> {
         val metrics = metricService.listMetrics()
         val result = metrics.map { it -> it.id?.let { it1 -> metricService.getMetricDetailJsonLD(it1) } }
@@ -46,7 +46,7 @@ class MetricController(
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("/update/{metricId}")
+    @PutMapping("/update/{metricId}")
     suspend fun updateMetric(@PathVariable metricId: String, @RequestBody metric: MetricUpdateRequest): ResponseEntity<MetricRecord> {
         val result = metricService.updateMetric(metricId, metric)
         return  ResponseEntity.ok(result)

@@ -22,7 +22,7 @@ class BenchmarkController(
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("/edit/metrics/{benchmarkId}")
+    @PostMapping("/metrics/{benchmarkId}")
     suspend fun addMetric(@PathVariable benchmarkId: String, @RequestBody newMetrics: metricsListsIDs): ResponseEntity<BenchmarkRecord> {
         val benchmark = benchMarkService.addMetric(benchmarkId, newMetrics.metrics)
         return ResponseEntity.ok(benchmark)
@@ -40,7 +40,7 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmarks)
     }
 
-    @GetMapping("/json-ld")
+    @GetMapping("/list/json-ld")
     suspend fun getBenchmarksJsonLD (): ResponseEntity<List<BenchmarkJsonLD>> {
         val benchmarks = benchMarkService.getBenchmarks()
         val result = benchmarks.map { benchmark -> benchMarkService.toJsonLD(benchmark) }
@@ -59,7 +59,7 @@ class BenchmarkController(
         return ResponseEntity.ok(benchmark)
     }
 
-    @PostMapping("/filter")
+    @PostMapping("/list/filter")
     suspend fun getBenchmarkById(@RequestBody benchmarkIds: List<String>): ResponseEntity<List<BenchmarkRecord>> {
         val benchmark = benchMarkService.getBenchmarskDetail(benchmarkIds)
         return ResponseEntity.ok(benchmark)
