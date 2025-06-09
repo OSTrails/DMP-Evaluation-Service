@@ -54,6 +54,13 @@ class TestController(
         return ResponseEntity.ok(result)
     }
 
+    @GetMapping("/list/json-ld")
+    suspend fun getTestsJsonLD(): ResponseEntity<List<TestJsonLD?>> {
+        val result = testService.listAllTests()
+        val resultJsonLD = result.map { it.id?.let { it1 -> testService.testJsonLD(it1) } }
+        return ResponseEntity.ok(resultJsonLD)
+    }
+
     @DeleteMapping("/{testId}")
     suspend fun deleteTest(@PathVariable testId: String): ResponseEntity<String>{
         val result = testService.deleteTest(testId)
