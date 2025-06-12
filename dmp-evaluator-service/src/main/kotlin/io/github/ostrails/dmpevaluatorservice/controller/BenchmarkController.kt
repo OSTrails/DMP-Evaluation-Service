@@ -44,8 +44,8 @@ class BenchmarkController(
     )
     @PostMapping("/edit/{benchmarkId}")
     suspend fun updateBenchmark(@PathVariable benchmarkId: String, @RequestBody benchmark: BenchmarkUpdateRequest): ResponseEntity<BenchmarkRecord> {
-        val benchmark = benchMarkService.updateBenchmark(benchmarkId, benchmark)
-        return ResponseEntity.ok(benchmark)
+        val benchmarkResult = benchMarkService.updateBenchmark(benchmarkId, benchmark)
+        return ResponseEntity.ok(benchmarkResult)
     }
 
     @Operation(
