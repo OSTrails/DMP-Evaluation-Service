@@ -1,0 +1,151 @@
+package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
+
+import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
+import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
+import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
+import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
+import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import kotlinx.serialization.json.JsonObject
+import org.everit.json.schema.Schema
+import org.everit.json.schema.ValidationException
+import org.everit.json.schema.loader.SchemaLoader
+import org.json.JSONObject
+import org.json.JSONTokener
+import org.springframework.stereotype.Component
+import java.io.InputStream
+import java.util.*
+
+@Component
+class DCSCompletenessEvaluator: EvaluatorPlugin {
+
+    override fun supports(t: String): Boolean = t == getPluginIdentifier()
+
+    override fun getPluginIdentifier(): String {
+        return "DCSCompletenessEvaluator"
+    }
+
+    override val functionMap = mapOf(
+        "evaluateStructure" to ::evaluateStructure,
+        "evaluateFormats" to :: evaluateFormats
+    )
+
+    override fun getPluginInformation(): PluginInfo {
+        return PluginInfo(
+            pluginId = getPluginIdentifier(),
+            description = "Evaluator to perform completeness tests",
+            tests = listOf()
+        )
+    }
+
+    override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
+        val evaluationsResults = tests.map { test ->
+            Evaluation(
+                evaluationId = UUID.randomUUID().toString(),
+                result = ResultTestEnum.PASS,
+                title = "Testing ",
+                details = "Auto-generated evaluation of the test" + test ,
+                reportId = report.reportId,
+                generated = "${this::class.qualifiedName}:: evaluate"
+            )
+        }
+        return evaluationsResults
+    }
+
+    fun evaluateStructure(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val validationDMP = Validator.validateRequiredValues(maDMP.toString())
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
+            details = testRecord.description,
+            title = testRecord.title,
+            reportId = reportId,
+            log = formattedLog(validationDMP, "All required fields are present."),
+            generated = "${this::class.qualifiedName}:: evaluateStructure",
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+    }
+
+    fun evaluateFormats(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val validationDMP = Validator.validateFormatValues(maDMP.toString())
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
+            details = testRecord.description,
+            title = testRecord.title,
+            reportId = reportId,
+            log = formattedLog(validationDMP, "All required fields are in format."),
+            generated = "${this::class.qualifiedName}:: evaluateFormats",
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+    }
+
+
+    object Validator {
+        private val schema: Schema by lazy {
+            val inputStream: InputStream = javaClass.classLoader
+                .getResourceAsStream("maDMPSchemas/maDMP-schema-1.2.json")
+                ?: throw IllegalStateException("Schema file not found")
+            val rawSchema = JSONObject(JSONTokener(inputStream))
+            SchemaLoader.load(rawSchema)
+        }
+
+        fun validateRequiredValues(inputJson: String): List<String> {
+            return try {
+                val jsonObject = JSONObject(inputJson)
+                schema.validate(jsonObject)
+                emptyList()
+            } catch (e: ValidationException) {
+                e.allMessages.filter { msg ->
+                    msg.contains("required key", ignoreCase = true)
+                }
+            }
+        }
+
+        fun validateFormatValues(inputJson: String): List<String> {
+            return try {
+                val jsonObject = JSONObject(inputJson)
+                schema.validate(jsonObject)
+                emptyList()
+            } catch (e: ValidationException) {
+                e.allMessages.filter { msg ->
+                    !msg.contains("required key", ignoreCase = true) &&
+                            (msg.contains("not a valid") ||
+                                    msg.contains("expected type", ignoreCase = true))
+                }
+            }
+        }
+    }
+
+    fun   formattedLog (validationDMP: List<String>, feedbackMessage: String): String {
+        if (validationDMP.isNotEmpty()) {
+            return buildString {
+                appendLine("Missing required fields detected: ")
+                validationDMP.forEachIndexed { index, msg ->
+                    appendLine("${index + 1}. $msg")
+                }
+            }
+        } else {
+            return feedbackMessage
+        }
+    }
+
+
+
+
+
+
+
+
+
+}
