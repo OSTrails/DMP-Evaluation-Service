@@ -8,6 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.codec.multipart.FilePart
@@ -20,18 +21,30 @@ class EvaluationController(
     private val evaluationService: EvaluationService,
 ) {
 
+    @Operation(
+        summary = "Create a generic evaluation",
+        description = "Create a evaluation and return a evaluation record "
+    )
     @PostMapping
     suspend fun evaluate(@RequestBody requestBody: EvaluationRequest): ResponseEntity<EvaluationResult> {
         val result = evaluationManagerService.generateEvaluations(requestBody)
         return ResponseEntity.ok(result)
     }
 
+    @Operation(
+        summary = "List all evaluations in the system",
+        description = "List all the evaluations in the system"
+    )
     @GetMapping()
     suspend fun getAllEvaluations(): ResponseEntity<List<Evaluation>> {
         val evaluations = evaluationManagerService.getEvaluations()
         return ResponseEntity.ok(evaluations)
     }
 
+    @Operation(
+        summary = "List all the evaluations of a specific report",
+        description = "List of evaluations results"
+    )
     @GetMapping("/report/{reportid}/full")
     suspend fun getReport(@PathVariable reportid: String): ResponseEntity<EvaluationReportResponse> {
         val evaluationreport = evaluationManagerService.getFullReport(reportid)
@@ -48,6 +61,11 @@ class EvaluationController(
   -F 'tests=structure'
     * */
 
+
+    @Operation(
+        summary = "List all the evaluations of a specific report",
+        description = "List of evaluations results"
+    )
     @PostMapping("/benchmark", consumes = ["multipart/form-data"])
     suspend fun runBenchmark(
         @RequestPart("maDMP") maDMP: FilePart,
@@ -60,6 +78,11 @@ class EvaluationController(
         return ResponseEntity.ok(jsonResult)
     }
 
+
+    @Operation(
+        summary = "Run a benchmark evaluaion and return the list of results in json-ld",
+        description = "Run all the tests that are associated wiht a benchmark"
+    )
     @PostMapping("/benchmark/json-ld", consumes = ["multipart/form-data"])
     suspend fun runBenchmarkJsonLD(
         @RequestPart("maDMP") maDMP: FilePart,
@@ -72,6 +95,10 @@ class EvaluationController(
         return ResponseEntity.ok(jsonLDResult)
     }
 
+    @Operation(
+        summary = "Run a specific test",
+        description = "Return the result of a specific test evaluation"
+    )
     @PostMapping("/test", consumes = ["multipart/form-data"])
     suspend fun runTest(
         @RequestPart("maDMP") maDMP: FilePart,
@@ -82,6 +109,10 @@ class EvaluationController(
         return ResponseEntity.ok(jsonResult)
     }
 
+    @Operation(
+        summary = "Run the evaluation for a specific test",
+        description = "Return the evaluation for a specific test in json-ld format"
+    )
     @PostMapping("/test/JsonLD", consumes = ["multipart/form-data"])
     suspend fun runTestJsonLD(
         @RequestPart("maDMP") maDMP: FilePart,
@@ -94,6 +125,9 @@ class EvaluationController(
         return ResponseEntity.ok(jsonLDResult)
     }
 
+    @Operation(
+        summary = "Mapping a maDMP into a RDF format"
+    )
     @PostMapping("/mappingRDF", consumes = ["multipart/form-data"])
     suspend fun runMapping(
         @RequestPart("maDMP") maDMP: FilePart,
