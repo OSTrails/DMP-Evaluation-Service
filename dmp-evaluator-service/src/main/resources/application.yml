@@ -17,3 +17,9 @@ logging:
     root: info
     org.springframework: DEBUG
     io.github.ostrails.dmpevaluatorservice: DEBUG
+
+dmp:
+  test:
+    endpointURL: "http://localhost:8080/api/tests"
+    repository: "https://github.com/OSTrails/DMP-Evaluation-Service"
+    mitLicense: "https://opensource.org/license/mit"

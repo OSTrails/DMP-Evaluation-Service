@@ -8,13 +8,7 @@ import io.github.ostrails.dmpevaluatorservice.service.TestService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Test APIs", description = "Manage tests")
 @RestController
@@ -44,10 +38,20 @@ class TestController(
     }
 
     @Operation(
+        summary = "get the list of tests ids",
+        description = "Return the list of tests ids that are in the system"
+    )
+    @GetMapping
+    suspend fun getTestsIds(): ResponseEntity<List<String?>>{
+        val result = testService.listAllTestUIDs()
+        return ResponseEntity.ok(result)
+    }
+
+    @Operation(
         summary = "get the list of tests",
         description = "Return the list of tests that are in the system"
     )
-    @GetMapping
+    @GetMapping("/info")
     suspend fun getTests(): ResponseEntity<List<TestRecord>>{
         val result = testService.listAllTests()
         return ResponseEntity.ok(result)
@@ -57,17 +61,29 @@ class TestController(
         summary = "Get a specific test",
         description = "Receives the id of a test and return the test record"
     )
-    @GetMapping("/{testId}")
+    @GetMapping("/{testId}", produces = ["application/json"])
     suspend fun getTest(@PathVariable testId: String): ResponseEntity<TestRecord>{
         val result = testService.getTest(testId)
         return ResponseEntity.ok(result)
+    }
+
+
+
+    @Operation(
+        summary = "Get a specific test",
+        description = "Receives the id of a test and return the test record"
+    )
+    @GetMapping("/test")
+    suspend fun getTestById(@RequestParam("testid") testId: String): ResponseEntity<TestRecord> {
+        val test = testService.getTest(testId)
+        return ResponseEntity.ok(test)
     }
 
     @Operation(
         summary = "Get a test in json - ld ",
         description = "Return a test in json ld format "
     )
-    @GetMapping("/{testId}/json-ld")
+    @GetMapping("/{testId}/ld", produces =   ["application/ld+json"])
     suspend fun getTestJsonLD(@PathVariable testId: String): ResponseEntity<TestJsonLD> {
         val result = testService.testJsonLD(testId)
         return ResponseEntity.ok(result)
@@ -77,7 +93,7 @@ class TestController(
         summary = "List the test in json ld ",
         description = "retunr a list of tests in json-ld "
     )
-    @GetMapping("/list/json-ld")
+    @GetMapping("/list", produces =   ["application/ld+json"])
     suspend fun getTestsJsonLD(): ResponseEntity<List<TestJsonLD?>> {
         val result = testService.listAllTests()
         val resultJsonLD = result.map { it.id?.let { it1 -> testService.testJsonLD(it1) } }

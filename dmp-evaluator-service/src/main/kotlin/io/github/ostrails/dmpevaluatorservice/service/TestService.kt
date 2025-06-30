@@ -10,32 +10,47 @@ import io.github.ostrails.dmpevaluatorservice.model.test.FullTestLDEntry
 import io.github.ostrails.dmpevaluatorservice.model.test.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.test.LangLiteral
 import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
 
+
+
 @Service
 class TestService(
     val testRepository: TestRepository,
+    val configurationTestVariables: ConfigurationTestVariables,
     private val metricService: MetricService
 ) {
 
     suspend fun createTest(test: TestRecord): TestRecord {
-        return testRepository.save(test).awaitSingle()
+        val enrichedTest = test.copy(repository = configurationTestVariables.repository,
+            endpointURL = configurationTestVariables.endpointURL +"/"+ test.id)
+        return testRepository.save(enrichedTest).awaitSingle()
     }
 
     suspend fun listAllTests(): List<TestRecord> {
-        return testRepository.findAll().collectList().awaitSingle()
+        val tests =  testRepository.findAll().collectList().awaitSingle()
+        val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository,
+            endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
+        return enrichedTests
+    }
+
+    suspend fun listAllTestUIDs(): List<String?> {
+        val tests =  testRepository.findAll().collectList().awaitSingle()
+        val idTests = tests.map {  configurationTestVariables.endpointURL +"/" + it.id }
+        return idTests
     }
 
     suspend fun getTest(testId: String): TestRecord {
         val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
-        return test
+        val enrichedTest = test.copy(endpointURL = configurationTestVariables.endpointURL +"/"+ test.id)
+        return enrichedTest
     }
 
    suspend fun addMetric(testId: String, testInfo: TestAddMetricRequest): TestRecord? {
        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
-
        if (testInfo.evaluator != null) {
            val updateTest = test.copy(
                metricImplemented = testInfo.metricImplemented,
@@ -61,12 +76,14 @@ class TestService(
 
     suspend fun findMultipleTests(testsIds: List<String>): List<TestRecord> {
             val tests = testRepository.findByIdIn(testsIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests with the ids ${testsIds} not found")
-            return tests
+            val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
+            return enrichedTests
     }
 
     suspend fun getTestsByMetrics(metricId: String):List<TestRecord>{
         val tests = testRepository.findBymetricImplemented(metricId).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests associated with the metric id $metricId not found")
-        return tests
+        val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id)}
+        return enrichedTests
     }
 
     suspend fun updateTest (testId: String, newTestData: TestUpdateRequest): TestRecord {
@@ -88,7 +105,9 @@ class TestService(
             isApplicableFor = newTestData.isApplicableFor ?: test.isApplicableFor,
             supportedBy = newTestData.supportedBy ?: test.supportedBy,
         )
-        return testRepository.save(updateTest).awaitSingle()
+        val updatedTestSaved = testRepository.save(updateTest).awaitSingle()
+        val enrichedTest = updatedTestSaved.copy(endpointURL = configurationTestVariables.endpointURL +"/"+ updatedTestSaved.id)
+        return enrichedTest
   }
 
     suspend fun testJsonLD(testId: String): TestJsonLD {
@@ -101,7 +120,7 @@ class TestService(
             title = LangLiteral(value = test.title),
             description = LangLiteral(value = test.description),
             license = IdWrapper(test.license),
-            endpointURL = IdWrapper(test.endpointURL ?: ""),
+            endpointURL = IdWrapper("${configurationTestVariables.endpointURL}/${test.id}" ?: ""),
             endpointDescription = test.endpointDescription?.let { IdWrapper(it) },
             version = LangLiteral(value = test.version),
             keyword = keywords,
