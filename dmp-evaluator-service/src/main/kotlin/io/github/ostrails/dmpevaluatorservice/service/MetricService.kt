@@ -5,6 +5,10 @@ import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepos
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.metric.*
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationMetricVariables
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
@@ -13,6 +17,10 @@ import org.springframework.stereotype.Service
 class MetricService(
     val metricRepository: MetricRepository,
     val benchmarkRepository: BenchmarkRepository,
+    val configurationMetricVariables: ConfigurationMetricVariables,
+    val configurationTestVariables: ConfigurationTestVariables,
+    val configurationGlobalVariables: ConfigurationGlobalVariables,
+    val configurationBenchmarkVariables: ConfigurationBenchmarkVariables
 ) {
 
     suspend fun createMetric(metric: MetricRecord): MetricRecord {
@@ -20,7 +28,19 @@ class MetricService(
     }
 
     suspend fun listMetrics(): List<MetricRecord> {
-        return metricRepository.findAll().collectList().awaitSingle()
+        val metrics = metricRepository.findAll().collectList().awaitSingle()
+        val enrichedMetrics = metrics.map {it.copy(
+            id = configurationMetricVariables.endpointURL + "/" + it.id,
+            hasBenchmark = it.hasBenchmark?.map { configurationBenchmarkVariables.endpointURL + "/" + it },
+            testAssociated = it.testAssociated?.map { configurationTestVariables.endpointURL + "/" + it }
+        )}
+        return enrichedMetrics
+    }
+
+    suspend fun listMetricsIds(): List<String?> {
+        val metrics = metricRepository.findAll().collectList().awaitSingle()
+        val metricsIds = metrics.map { configurationMetricVariables.endpointURL + "/" + it.id }
+        return metricsIds
     }
 
     suspend fun metricDetail(metricId: String): MetricRecord {
@@ -109,6 +129,12 @@ class MetricService(
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
+    suspend fun getMetricsJsonLD(): List<MetricJsonLD?> {
+        val metrics = metricRepository.findAll().collectList().awaitSingle()
+        val result = metrics.map { it -> it.id?.let { it1 -> getMetricDetailJsonLD(it1) } }
+        return result
+    }
+
 
     suspend fun getMetricDetailJsonLD(metricId: String): MetricJsonLD {
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $metricId")
@@ -122,7 +148,7 @@ class MetricService(
             ?: listOf()
         val graphEntry = metric.let {
             MetricGraphEntry(
-                id = "urn:dmpEvaluationService:${it.id}",
+                id = configurationMetricVariables.endpointURL + "/" + it.id ,
                 type = "dqv:Metric",
                 title = LangLiteral("en", metric.title),
                 description = LangLiteral("en", metric.description),
@@ -131,13 +157,13 @@ class MetricService(
                 abbreviation = metric.abbreviation,
                 landingPage = (it.landingPage ?: it.landingPage)?.let { it1 -> IdWrapper(it1) },
                 keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
-                hasTest = metric.testAssociated?.map { IdWrapper("urn:dmpEvaluationService:${it}") } ?: listOf(),
+                hasTest = metric.testAssociated?.map { IdWrapper(configurationTestVariables.endpointURL + "/" + it) } ?: listOf(),
                 hasBenchmark = metric.hasBenchmark?.map { IdWrapper("urn:dmpEvaluationService:${it}")  } ?: listOf()  ,
                 license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
             )
         }
         val benchmarkgrapgh = benchmarks.map { BenchmarkMini(
-            id = "urn:dmpEvaluationService:${it.benchmarkId}",
+            id =  configurationBenchmarkVariables.endpointURL + "/" + it.benchmarkId,
             title = "benchmark ${it.title}",
             description = it.description,
         )  }

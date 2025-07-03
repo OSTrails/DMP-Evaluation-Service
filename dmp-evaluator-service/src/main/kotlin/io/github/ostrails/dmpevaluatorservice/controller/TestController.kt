@@ -64,8 +64,8 @@ class TestController(
         summary = "Get a specific test",
         description = "Receives the id of a test and return the test record"
     )
-    @GetMapping("/info/", produces =   ["application/json"])
-    suspend fun getTestById(@RequestParam("testId") testId: String): ResponseEntity<TestRecord> {
+    @GetMapping("/info/{testId}", produces =   ["application/json"])
+    suspend fun getTestById(@PathVariable testId: String): ResponseEntity<TestRecord> {
         val test = testService.getTest(testId)
         return ResponseEntity.ok(test)
     }

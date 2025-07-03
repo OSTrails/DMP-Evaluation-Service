@@ -27,11 +27,21 @@ class MetricController(
     }
 
     @Operation(
+        summary = "List the ids of metrics",
+        description = "List all the ids of the metrics"
+    )
+    @GetMapping(produces =   ["application/json"])
+    suspend fun getMetricsIds(): ResponseEntity<List<String?>> {
+        val result = metricService.listMetricsIds()
+        return ResponseEntity.ok(result)
+    }
+
+    @Operation(
         summary = "List the metrics",
         description = "List all the metrics"
     )
-    @GetMapping
-    suspend fun list(): ResponseEntity<List<MetricRecord>> {
+    @GetMapping("/list", produces =   ["application/json"])
+    suspend fun getMetrics(): ResponseEntity<List<MetricRecord>> {
         val result = metricService.listMetrics()
         return ResponseEntity.ok(result)
     }
@@ -41,10 +51,9 @@ class MetricController(
         summary = "List the metrics in Json-ld ",
         description = "List all the metrics"
     )
-    @GetMapping("/list/jsonLD")
+    @GetMapping("/list/jsonLD", produces =   ["application/ld+json"])
     suspend fun listJsonLD(): ResponseEntity<List<MetricJsonLD?>> {
-        val metrics = metricService.listMetrics()
-        val result = metrics.map { it -> it.id?.let { it1 -> metricService.getMetricDetailJsonLD(it1) } }
+        val result = metricService.getMetricsJsonLD()
         return ResponseEntity.ok(result)
     }
 
@@ -52,7 +61,7 @@ class MetricController(
         summary = "Detail of a  metric",
         description = "Detail of a specific metric from the system"
     )
-    @GetMapping("/{metricId}")
+    @GetMapping("/info/{metricId}", produces =   ["application/json"])
     suspend fun detailMetric(@PathVariable metricId: String): ResponseEntity<MetricRecord> {
         val result =  metricService.metricDetail(metricId)
         return ResponseEntity.ok(result)
@@ -62,8 +71,18 @@ class MetricController(
         summary = "Detail metric in json-ld",
         description = "Detail a metric from the system"
     )
-    @GetMapping("/{metricId}/json-ld")
+    @GetMapping("/{metricId}")
     suspend fun detailMetricJsonLD(@PathVariable metricId: String): ResponseEntity<MetricJsonLD> {
+        val result =  metricService.getMetricDetailJsonLD(metricId)
+        return ResponseEntity.ok(result)
+    }
+
+    @Operation(
+        summary = "Detail metric in json-ld using the request param",
+        description = "Detail a metric from the system"
+    )
+    @GetMapping("/")
+    suspend fun detailMetricJsonLDFromRequest(@RequestParam("metricId") metricId: String): ResponseEntity<MetricJsonLD> {
         val result =  metricService.getMetricDetailJsonLD(metricId)
         return ResponseEntity.ok(result)
     }
