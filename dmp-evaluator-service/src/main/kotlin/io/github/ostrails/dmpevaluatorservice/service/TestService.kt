@@ -10,6 +10,7 @@ import io.github.ostrails.dmpevaluatorservice.model.test.FullTestLDEntry
 import io.github.ostrails.dmpevaluatorservice.model.test.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.test.LangLiteral
 import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
@@ -21,18 +22,19 @@ import org.springframework.stereotype.Service
 class TestService(
     val testRepository: TestRepository,
     val configurationTestVariables: ConfigurationTestVariables,
+    val configurationGlobalVariables: ConfigurationGlobalVariables,
     private val metricService: MetricService
 ) {
 
     suspend fun createTest(test: TestRecord): TestRecord {
-        val enrichedTest = test.copy(repository = configurationTestVariables.repository,
+        val enrichedTest = test.copy(repository = configurationGlobalVariables.repository,
             endpointURL = configurationTestVariables.endpointURL +"/"+ test.id)
         return testRepository.save(enrichedTest).awaitSingle()
     }
 
     suspend fun listAllTests(): List<TestRecord> {
         val tests =  testRepository.findAll().collectList().awaitSingle()
-        val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository,
+        val enrichedTests = tests.map { it.copy(repository = configurationGlobalVariables.repository,
             endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
         return enrichedTests
     }
@@ -76,13 +78,13 @@ class TestService(
 
     suspend fun findMultipleTests(testsIds: List<String>): List<TestRecord> {
             val tests = testRepository.findByIdIn(testsIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests with the ids ${testsIds} not found")
-            val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
+            val enrichedTests = tests.map { it.copy(repository = configurationGlobalVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
             return enrichedTests
     }
 
     suspend fun getTestsByMetrics(metricId: String):List<TestRecord>{
         val tests = testRepository.findBymetricImplemented(metricId).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests associated with the metric id $metricId not found")
-        val enrichedTests = tests.map { it.copy(repository = configurationTestVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id)}
+        val enrichedTests = tests.map { it.copy(repository = configurationGlobalVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id)}
         return enrichedTests
     }
 

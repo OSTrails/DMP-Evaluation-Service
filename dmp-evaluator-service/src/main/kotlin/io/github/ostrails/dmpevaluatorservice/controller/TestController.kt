@@ -7,6 +7,9 @@ import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -61,37 +64,39 @@ class TestController(
         summary = "Get a specific test",
         description = "Receives the id of a test and return the test record"
     )
-    @GetMapping("/{testId}", produces = ["application/json"])
-    suspend fun getTest(@PathVariable testId: String): ResponseEntity<TestRecord>{
-        val result = testService.getTest(testId)
-        return ResponseEntity.ok(result)
-    }
-
-
-
-    @Operation(
-        summary = "Get a specific test",
-        description = "Receives the id of a test and return the test record"
-    )
-    @GetMapping("/test")
-    suspend fun getTestById(@RequestParam("testid") testId: String): ResponseEntity<TestRecord> {
+    @GetMapping("/info/", produces =   ["application/json"])
+    suspend fun getTestById(@RequestParam("testId") testId: String): ResponseEntity<TestRecord> {
         val test = testService.getTest(testId)
         return ResponseEntity.ok(test)
     }
 
     @Operation(
-        summary = "Get a test in json - ld ",
+        summary = "Get a test in json - ld using the pathvariable ",
         description = "Return a test in json ld format "
     )
-    @GetMapping("/{testId}/ld", produces =   ["application/ld+json"])
+    @GetMapping("/{testId}", produces =   ["application/ld+json"])
     suspend fun getTestJsonLD(@PathVariable testId: String): ResponseEntity<TestJsonLD> {
         val result = testService.testJsonLD(testId)
-        return ResponseEntity.ok(result)
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.valueOf("application/ld+json")
+        return ResponseEntity(result, headers, HttpStatus.OK )
+    }
+
+    @Operation(
+        summary = "Get a test in json - ld using the Requestparam testId",
+        description = "Return a test in json ld format "
+    )
+    @GetMapping("/", produces =   ["application/ld+json"])
+    suspend fun getTestJsonLDFrom(@RequestParam("testId") testId: String): ResponseEntity<TestJsonLD> {
+        val result = testService.testJsonLD(testId)
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.valueOf("application/ld+json")
+        return ResponseEntity(result, headers, HttpStatus.OK )
     }
 
     @Operation(
         summary = "List the test in json ld ",
-        description = "retunr a list of tests in json-ld "
+        description = "return a list of tests in json-ld "
     )
     @GetMapping("/list", produces =   ["application/ld+json"])
     suspend fun getTestsJsonLD(): ResponseEntity<List<TestJsonLD?>> {
