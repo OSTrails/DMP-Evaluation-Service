@@ -52,9 +52,19 @@ class BenchmarkController(
         summary = "Get all the benchmarks",
         description = "Return all the benchmarks supported by the system"
     )
-    @GetMapping
+    @GetMapping("/list")
     suspend fun getBenchmarks(): ResponseEntity<List<BenchmarkRecord>> {
         val benchmarks = benchMarkService.getBenchmarks()
+        return ResponseEntity.ok(benchmarks)
+    }
+
+    @Operation(
+        summary = "Get all the benchmarks ids",
+        description = "Return all the benchmarks supported by the system"
+    )
+    @GetMapping
+    suspend fun getBenchmarksIds(): ResponseEntity<List<String>> {
+        val benchmarks = benchMarkService.getBenchmarksIds()
         return ResponseEntity.ok(benchmarks)
     }
 
@@ -63,7 +73,7 @@ class BenchmarkController(
         summary = "Get all the benchmarks in json-ld format",
         description = "Return all the benchmarks supported by the system in json-ld format"
     )
-    @GetMapping("/list/json-ld")
+    @GetMapping("/list/jsonLD")
     suspend fun getBenchmarksJsonLD (): ResponseEntity<List<BenchmarkJsonLD>> {
         val benchmarks = benchMarkService.getBenchmarks()
         val result = benchmarks.map { benchmark -> benchMarkService.toJsonLD(benchmark) }
@@ -85,7 +95,7 @@ class BenchmarkController(
         summary = "Get a specific benchmark",
         description = "Send a benchmark if and Return a specific benchmark record"
     )
-    @GetMapping("/{benchmarkId}")
+    @GetMapping("/info/{benchmarkId}")
     suspend fun getBenchmark(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkRecord> {
         val benchmark = benchMarkService.getBenchmarkDetail(benchmarkId)
         return ResponseEntity.ok(benchmark)
@@ -105,8 +115,18 @@ class BenchmarkController(
         summary = "Get a specific benchmark in json-ld",
         description = "Send an id of a benchmark and Return a specific benchmark record"
     )
-    @GetMapping("/{benchmarkId}/json-ld")
+    @GetMapping("/{benchmarkId}")
     suspend fun getBenchmarkJsonLD(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkJsonLD> {
+        val benchmarkJsonLD = benchMarkService.getBenchmarkDetailJsonLD(benchmarkId)
+        return ResponseEntity.ok(benchmarkJsonLD)
+    }
+
+    @Operation(
+        summary = "Get a specific benchmark in json-ld",
+        description = "Send an id of a benchmark and Return a specific benchmark record"
+    )
+    @GetMapping("/")
+    suspend fun getBenchmarkJsonLDRequestParam(@RequestParam ("benchmarkId") benchmarkId: String): ResponseEntity<BenchmarkJsonLD> {
         val benchmarkJsonLD = benchMarkService.getBenchmarkDetailJsonLD(benchmarkId)
         return ResponseEntity.ok(benchmarkJsonLD)
     }

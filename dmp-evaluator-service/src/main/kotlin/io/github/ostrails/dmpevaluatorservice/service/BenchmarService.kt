@@ -6,6 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepos
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.*
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -17,6 +18,7 @@ import java.util.*
 class BenchmarService(
     private val benchmarkRepository: BenchmarkRepository,
     private val metricService: MetricService,
+    val configurationBenchmarkVariables: ConfigurationBenchmarkVariables
 ){
 
     suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
@@ -32,6 +34,15 @@ class BenchmarService(
     suspend fun getBenchmarks():List<BenchmarkRecord> {
         try {
             return benchmarkRepository.findAll().asFlow().toList()
+        }catch (e:Exception){
+            throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
+        }
+    }
+
+    suspend fun getBenchmarksIds():List<String> {
+        try {
+            val benchmarks =  benchmarkRepository.findAll().asFlow().toList()
+            return benchmarks.map { configurationBenchmarkVariables.endpointURL + "/" + it.benchmarkId.toString() }
         }catch (e:Exception){
             throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
         }
