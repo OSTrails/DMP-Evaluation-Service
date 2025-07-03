@@ -19,7 +19,13 @@ logging:
     io.github.ostrails.dmpevaluatorservice: DEBUG
 
 dmp:
-  test:
-    endpointURL: "http://localhost:8080/api/tests"
+  global:
     repository: "https://github.com/OSTrails/DMP-Evaluation-Service"
     mitLicense: "https://opensource.org/license/mit"
+  test:
+    endpointURL: "http://localhost:8080/api/tests"
+  metric:
+    endpointURL: "http://localhost:8080/api/metrics"
+  benchmark:
+    endpointURL: "http://localhost:8080/api/benchmarks"
+
