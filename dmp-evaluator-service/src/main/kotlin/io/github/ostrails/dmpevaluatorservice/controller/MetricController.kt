@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Metric APIs", description = "Manage metrics and associated tests")
 @RestController
-@RequestMapping("/api/metrics")
+@RequestMapping("/metrics")
 class MetricController(
     val metricService: MetricService
 ) {

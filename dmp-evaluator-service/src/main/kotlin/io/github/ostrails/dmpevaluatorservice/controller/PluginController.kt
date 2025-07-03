@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Plugin APIs", description = "Manage plugin APIs")
 @RestController
-@RequestMapping("/api/plugins")
+@RequestMapping("/plugins")
 class PluginController(
     val pluginManagerService: PluginManagerService
 ) {

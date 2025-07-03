@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Benchmark APIs", description = "Manage benchmarks and associated metrics")
 @RestController
-@RequestMapping("/api/benchmarks")
+@RequestMapping("/benchmarks")
 class BenchmarkController(
     val benchMarkService: BenchmarService
 ) {

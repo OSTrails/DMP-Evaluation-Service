@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Test APIs", description = "Manage tests")
 @RestController
-@RequestMapping("/api/tests")
+@RequestMapping("/tests")
 class TestController(
     val testService: TestService,
 ) {

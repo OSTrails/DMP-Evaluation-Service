@@ -15,7 +15,7 @@ import org.springframework.http.codec.multipart.FilePart
 
 @Tag(name = "Evaluation APIs", description = "Manage evaluations for the maDMPs")
 @RestController
-@RequestMapping("/api/evaluations")
+@RequestMapping("/assess")
 class EvaluationController(
     private val evaluationManagerService: EvaluationManagerService,
     private val evaluationService: EvaluationService,
