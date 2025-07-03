@@ -7,6 +7,7 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.*
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationMetricVariables
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -18,7 +19,8 @@ import java.util.*
 class BenchmarService(
     private val benchmarkRepository: BenchmarkRepository,
     private val metricService: MetricService,
-    val configurationBenchmarkVariables: ConfigurationBenchmarkVariables
+    val configurationBenchmarkVariables: ConfigurationBenchmarkVariables,
+    val configurationMetricVariables: ConfigurationMetricVariables,
 ){
 
     suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
@@ -119,7 +121,7 @@ class BenchmarService(
 
     suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
         val graphEntry = BenchmarkGraphEntry(
-            id = benchmark.landingPage ?: "urn:dmpEvaluationService:${benchmark.benchmarkId}",
+            id = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId,
             title = benchmark.title,
             description = benchmark.description,
             version = benchmark.version,
@@ -128,7 +130,7 @@ class BenchmarService(
             status = benchmark.status,
             landingPage = benchmark.landingPage?.let { IdWrapper("urn:dmpEvaluationService:${it}") },
             keyword = benchmark.keyword?.split(",")?.map { it.trim() },
-            associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper("https://dmpEvaluationService/metric/${it}") },
+            associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper(configurationMetricVariables.endpointURL + "/" + it) },
             hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }
         )
 
@@ -143,7 +145,7 @@ class BenchmarService(
     }
 
     fun toMetricLDEntry(metric: MetricRecord): MetricLDEntry {
-        val id = "https://dmpEvaluationService/${metric.id}"
+        val id = configurationMetricVariables.endpointURL + "/" + metric.id
         return MetricLDEntry(
             id = id,
             identifier = IdWrapper(id),
