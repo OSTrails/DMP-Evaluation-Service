@@ -1,6 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.model.benchmark
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.ostrails.dmpevaluatorservice.model.metric.LangLiteral
 
 
 data class BenchmarkJsonLD(
@@ -35,10 +36,10 @@ data class BenchmarkGraphEntry(
     val type: String = "ftr:Benchmark",
 
     @JsonProperty("dcterms:title")
-    val title: String,
+    val title: LangLiteral,
 
     @JsonProperty("dcterms:description")
-    val description: String,
+    val description: LangLiteral,
 
     @JsonProperty("dcat:version")
     val version: String,
@@ -56,7 +57,7 @@ data class BenchmarkGraphEntry(
     val landingPage: IdWrapper? = null,
 
     @JsonProperty("dcat:keyword")
-    val keyword: List<String>? = null,
+    val keyword: List<LangLiteral>? = null,
 
     @JsonProperty("ftr:associatedMetric")
     val associatedMetric: List<IdWrapper>? = null,
@@ -71,6 +72,11 @@ data class BenchmarkGraphEntry(
 data class IdWrapper(
     @JsonProperty("@id")
     val id: String
+)
+
+data class LangLiteral(
+    @JsonProperty("@language") val language: String,
+    @JsonProperty("@value") val value: String
 )
 
 

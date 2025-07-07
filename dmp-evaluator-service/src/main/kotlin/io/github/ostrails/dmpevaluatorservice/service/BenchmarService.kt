@@ -6,6 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepos
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.*
+import io.github.ostrails.dmpevaluatorservice.model.metric.LangLiteral
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationMetricVariables
 import kotlinx.coroutines.flow.toList
@@ -122,14 +123,14 @@ class BenchmarService(
     suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
         val graphEntry = BenchmarkGraphEntry(
             id = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId,
-            title = benchmark.title,
-            description = benchmark.description,
+            title = LangLiteral("en",  benchmark.title),
+            description = LangLiteral("en", benchmark.description),
             version = benchmark.version,
             label = benchmark.abbreviation,
             abbreviation = benchmark.abbreviation,
             status = benchmark.status,
             landingPage = benchmark.landingPage?.let { IdWrapper("urn:dmpEvaluationService:${it}") },
-            keyword = benchmark.keyword?.split(",")?.map { it.trim() },
+            keyword = benchmark.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
             associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper(configurationMetricVariables.endpointURL + "/" + it) },
             hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }
         )
