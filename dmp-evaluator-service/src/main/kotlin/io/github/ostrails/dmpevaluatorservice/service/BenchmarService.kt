@@ -25,13 +25,7 @@ class BenchmarService(
 ){
 
     suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
-        val newBenchmark = BenchmarkRecord(
-            description = benchmark.description,
-            title = benchmark.title,
-            version = benchmark.version,
-            hasAssociatedMetric = benchmark.hasAssociatedMetric,
-        )
-        return benchmarkRepository.save(newBenchmark).awaitSingle()
+        return benchmarkRepository.save(benchmark).awaitSingle()
     }
 
     suspend fun getBenchmarks():List<BenchmarkRecord> {
