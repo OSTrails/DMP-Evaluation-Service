@@ -120,7 +120,7 @@
 			},
 			{
 				"dataset_id": {
-					"identifier": "https://hdl.handle.net/0000/00.00000",
+					"identifier": "https://hdl.handle.net/0000/00.00001",
 					"type": "handle"
 				},
 				"title": "Image collection",
@@ -139,7 +139,7 @@
 			},
 			{
 				"dataset_id": {
-					"identifier": "https://hdl.handle.net/0000/00.00000",
+					"identifier": "https://hdl.handle.net/0000/00.00002",
 					"type": "handle"
 				},
 				"title": "Interviews",

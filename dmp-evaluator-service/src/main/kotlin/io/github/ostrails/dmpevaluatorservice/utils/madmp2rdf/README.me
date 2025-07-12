@@ -12,3 +12,89 @@ mvn spring-boot:run
 
 Send a POST request, e.g. via postman, including the JSON dmp in the body of the request. 
 The TORDF util will create an RDF/turtle file for the provided dmp in the target/output directory.
+
+# Status:
+dmp:
+* class assignment: mapped
+* properties:
+    * description: mapped
+    * title: mapped
+    * language: mapped
+    * created: mapped
+    * modified: mapped
+    * dmp_id: mapped
+        * identifier: mapped
+        * doi: mapped
+    * contact: mapped
+        * name: mapped
+        * mbox: mapped
+        * contactId: mapped
+            * identifier: mapped
+            * type: mapped
+    * contributor: mapped
+        * name: mapped
+        * mbox: mapped
+        * contributor_id: mapped
+            * identifier: mapped
+            * type: mapped
+        * role:
+    * ethical_issues_exist: mapped
+    * ethical_issues_report: mapped
+    * ethical_issues_description: mapped
+    * project: mapped
+        * title: mapped
+        * description: mapped
+        * start: mapped
+        * end: mapped
+        * project_id: mapped (not in ontology)
+        * project_id_type (not in ontology)
+        * funding: mapped
+            * funder_name: mapped
+            * funder_id: mapped
+                * identifier: mapped
+                * type: mapped
+            * grant_id: mapped
+                * identifier: mapped
+                * type: mapped
+    * dataset: mapped
+        * dataset_id: mapped
+            * identifier: mapped    
+            * type: mapped
+        * title: mapped
+        * personal_data: mapped
+        * sensitive_data: mapped
+        * type: mapped
+        * description: mapped
+        * distribution:
+            * title: mapped
+            * format: mapped
+            * byte_size: mapped
+            * data_access: mapped
+            * license:
+                * license_name: mapped (not in ontology)
+                * license_ref: mapped
+                * start_date: mapped
+            * host:
+                * title: mapped
+                * url: mapped
+                * host_id_type: mapped
+                * description: mapped
+                * supports_versioning: mapped
+                * storage_type: mapped
+                * pid_system: mapped
+            * available_until: mapped
+
+# Improvements
+mapped host_id_type to dcso:identifierType
+
+ex9-dmp-long.json has the same dataset identifiers for every dataset. I changed 
+the handle IDs so that they can be distinguished. it is important for the ID 
+generation.
+
+# Unsolved issues
+hasProjectId and hasProjectIdType do not exist in the dcso.4.0.0.ttl core ontology.
+
+no licenseName datatype property in the dcso.4.0.0.ttl core ontology.
+
+the range of the datatype property dcterms:format is a string but a list of strings is given.
+

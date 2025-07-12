@@ -17,7 +17,7 @@
 
 # Mappings based on ex9-dmp-long.json
 # Structure of the taxonomy can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
-
+# Ontology can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/blob/master/ontologies/core/dcso.4.0.0.ttl
 
 #################################################################
 # Logical Source for the JSON file
@@ -39,32 +39,34 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:DMP ;
+        rr:class dcso:Dmp ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "dmp_id.identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "dmp_id.identifier" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -124,7 +126,7 @@
 
     # ethical_issues_report
     rr:predicateObjectMap [
-        rr:predicate dcso:ethicalIssuesDescription ;
+        rr:predicate dcso:ethicalIssueDescription ;
         rr:objectMap [ rml:reference "ethical_issues_description" ] ;
     ] ;
 
@@ -224,30 +226,32 @@
         rr:termType rr:IRI ;
         rr:class dcso:Contact ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "contact_id.identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "contact_id.identifier" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -288,30 +292,49 @@
         rr:termType rr:IRI ;
         rr:class dcso:ContactId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact/contactID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/contactId" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -351,7 +374,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contr_" ]
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor#" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -426,7 +449,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contr_" ]
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor#" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -617,7 +640,7 @@
     # funder_id
     rr:predicateObjectMap [
         rr:predicate dcso:hasFunderId ;
-        rr:objectMap [ rr:parentTriplesMap <#FundingIDMapping> ] ;
+        rr:objectMap [ rr:parentTriplesMap <#funderIDMapping> ] ;
     ] ;
 
     # grant_id
@@ -629,20 +652,20 @@
 #################################################################
 # Mapping for DMP: project - funding - funding_id
 #################################################################
-<#FundingIDMappingSource>
+<#funderIDMappingSource>
     a rml:LogicalSource ;
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.project[*].funding[*].funder_id" .
 
 
-<#FundingIDMapping>
+<#funderIDMapping>
     a rr:TriplesMap ;
-    rml:logicalSource <#FundingIDMappingSource> ;
+    rml:logicalSource <#funderIDMappingSource> ;
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:FundingId ;
+        rr:class dcso:FunderId ;
         fnml:functionValue [
           rr:predicateObjectMap [
             rr:predicate fno:executes ;
@@ -651,7 +674,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/fundingID" ]
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/funderID" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -679,7 +702,7 @@
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:idType ;
+        rr:predicate dcso:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -729,13 +752,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:idIdentifier ;
+        rr:predicate dcso:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:idType ;
+        rr:predicate dcso:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -757,36 +780,38 @@
         rr:termType rr:IRI ;
         rr:class dcso:Dataset ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "dataset_id.identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "dataset_id.identifier" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
     # dataset_id
     rr:predicateObjectMap [
-        rr:predicate dcso:idIdentifier ;
+        rr:predicate dcso:hasDatasetId ;
         rr:objectMap [ rr:parentTriplesMap <#DatasetIDMapping> ;
                        rr:joinCondition [
                            rr:child "dataset_id.identifier" ;
@@ -815,7 +840,7 @@
 
     #type
     rr:predicateObjectMap [
-        rr:predicate dcso:type ;
+        rr:predicate dcso:datasetType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] ;
 
@@ -849,42 +874,61 @@
         rr:termType rr:IRI ;
         rr:class dcso:DatasetId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/datasetID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/datasetId" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:idIdentifier ;
+        rr:predicate dcso:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:idType ;
+        rr:predicate dcso:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -938,8 +982,8 @@
     ] ;
     # format
     rr:predicateObjectMap [
-        rr:predicate dcat:format ;
-        rr:objectMap [ rml:reference "format" ] ;
+        rr:predicate dcterms:format ;
+        rr:objectMap [ rml:reference "format[*]" ] ;
     ] ;
     # byte_size
     rr:predicateObjectMap [
@@ -948,12 +992,12 @@
     ] ;
     # data_access
     rr:predicateObjectMap [
-        rr:predicate dcat:dataAccess ;
+        rr:predicate dcso:dataAccess ;
         rr:objectMap [ rml:reference "data_access" ] ;
     ] ;
     # license
     rr:predicateObjectMap [
-        rr:predicate dcat:license ;
+        rr:predicate dcso:hasLicense ;
         rr:objectMap [ rr:parentTriplesMap <#LicenseMapping>] ;
     ] ;
     #host
@@ -963,7 +1007,7 @@
     ] ;
     # available_until
     rr:predicateObjectMap [
-        rr:predicate dcat:availableUntil ;
+        rr:predicate dcso:availableUntil ;
         rr:objectMap [ rml:reference "available_until" ; rr:datatype xsd:dateTime ] ;
     ] .
 
@@ -1012,19 +1056,19 @@
 
     # license_name
     rr:predicateObjectMap [
-        rr:predicate dcat:licenseName ;
+        rr:predicate dcso:licenseName ;
         rr:objectMap [ rml:reference "license_name" ] ;
     ] ;
 
     # license_ref
     rr:predicateObjectMap [
-        rr:predicate dcat:licenseRef ;
+        rr:predicate dcso:licenseRef ;
         rr:objectMap [ rml:reference "license_ref" ] ;
     ] ;
 
     # start_date
     rr:predicateObjectMap [
-        rr:predicate dcat:startDate ;
+        rr:predicate dcso:startDate ;
         rr:objectMap [ rml:reference "start_date" ; rr:datatype xsd:dateTime ] ;
     ] .
 
@@ -1078,12 +1122,12 @@
     ] ;
     # url
     rr:predicateObjectMap [
-        rr:predicate dcat:url ;
+        rr:predicate dcso:url ;
         rr:objectMap [ rml:reference "url" ] ;
     ] ; 
     # host_id_type
     rr:predicateObjectMap [
-        rr:predicate dcso:hostIdType ;
+        rr:predicate dcso:identifierType ;
         rr:objectMap [ rml:reference "host_id_type" ] ;
     ] ;
     # description
@@ -1094,7 +1138,7 @@
 
     #supports_versioning
     rr:predicateObjectMap [
-        rr:predicate dcso:supportsVersioning ;
+        rr:predicate dcso:supportVersioning ;
         rr:objectMap [ rml:reference "supports_versioning" ] ;
     ] ;
     # storage_type
