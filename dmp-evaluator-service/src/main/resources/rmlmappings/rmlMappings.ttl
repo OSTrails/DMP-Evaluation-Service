@@ -165,32 +165,51 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:DMPId ;
+        rr:class dcso:DmpId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dmpID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/dmpId" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -518,30 +537,32 @@
         rr:termType rr:IRI ;
         rr:class dcso:Project ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project#" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "project_id" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "project_id" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
