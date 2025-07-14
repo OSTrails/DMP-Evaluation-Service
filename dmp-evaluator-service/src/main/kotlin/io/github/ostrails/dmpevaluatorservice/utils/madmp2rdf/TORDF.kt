@@ -61,11 +61,34 @@ class ToRDF {
             val result = executor.execute(null).get(NamedNode("rmlmapper://default.store"))
 
             result?.let {
-            val out_file = File(outputDir, "madmp.ttl")
+                val out_file = File(outputDir, "madmp.ttl")
                 println("RDF output file will be saved at: ${out_file.absolutePath}")
                 out_file.parentFile.mkdirs()
+
+                // Extract RDF4J model and set namespaces
+                val modelField = RDF4JStore::class.java.getDeclaredField("model")
+                modelField.isAccessible = true
+                val model = modelField.get(it) as org.eclipse.rdf4j.model.Model
+
+                // Set namespaces
+                model.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
+                model.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+                model.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+                model.setNamespace("dcat", "http://www.w3.org/ns/dcat#")
+                model.setNamespace("dmp", "http://purl.org/dmp#")
+                model.setNamespace("foaf", "http://xmlns.com/foaf/0.1/")
+                model.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+                model.setNamespace("dcso", "https://w3id.org/dcso/ns/core#")
+                model.setNamespace("dcterms", "http://purl.org/dc/terms/")
+                model.setNamespace("fno", "https://w3id.org/function/ontology#")
+                model.setNamespace("fnml", "http://semweb.mmlab.be/ns/fnml#")
+                model.setNamespace("exf", "http://example.org/functions#")
+                model.setNamespace("idlab-fn", "https://w3id.org/imec/idlab/function#")
+                model.setNamespace("grel", "http://users.ugent.be/~bjdmeest/function/grel.ttl#")
+
+                // Write the model using RDF4J's Rio API (not it.write)
                 BufferedWriter(OutputStreamWriter(out_file.outputStream())).use { writer ->
-                    it.write(writer, "turtle")
+                    org.eclipse.rdf4j.rio.Rio.write(model, writer, org.eclipse.rdf4j.rio.RDFFormat.TURTLE)
                 }
             } ?: println("No RDF output was generated. 'result' was null.")
 

@@ -48,7 +48,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp#" ]
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -174,7 +174,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp#" ]
+                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -252,7 +252,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/contact/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -318,7 +318,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contact#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/contact/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -393,7 +393,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/contributor/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -468,7 +468,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/contributor#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/contributor/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -544,7 +544,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/project/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -632,7 +632,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding" ]
+                rr:objectMap [ rr:constant "dcso:dmp/project/funding" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -688,30 +688,49 @@
         rr:termType rr:IRI ;
         rr:class dcso:FunderId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/funderID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "dcso:dmp/project/funding/" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/funderID" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -744,30 +763,49 @@
         rr:termType rr:IRI ;
         rr:class dcso:GrantId ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/project/funding/grantID" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "dcso:dmp/project/funding/" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "identifier" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:concat ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:str ;
+                            rr:objectMap [              
+                                fnml:functionValue [
+                                    rr:predicateObjectMap [
+                                        rr:predicate fno:executes ;
+                                        rr:objectMap [ rr:constant grel:string_md5 ]
+                                    ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                                    rr:predicateObjectMap [
+                                        rr:predicate grel:valueParameter ;
+                                        rr:objectMap [ rml:reference "identifier" ]
+                                    ]             
+                                ]
+                            ]
+                        ] ;
+
+                        rr:predicateObjectMap [
+                            rr:predicate idlab-fn:otherStr ;
+                            rr:objectMap [ rr:constant "/grantId" ]  
+                        ]
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -808,7 +846,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/dataset/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -902,7 +940,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset#" ]
+                rr:objectMap [ rr:constant "dcso:dmp/dataset/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -961,38 +999,36 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*]" .
+
 <#DistributionMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#DistributionMappingSource> ;
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcat:Distribution ;
+        rr:class dcso:Distribution ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "dcso:dmp/dataset/distribution/" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "title" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant idlab-fn:random ]
+                        ]         
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -1040,38 +1076,41 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*].license[*]" .
+    
 <#LicenseMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#LicenseMappingSource> ;
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcat:License ;
+        rr:class dcso:License ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution/license" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "dcso:dmp/dataset/distribution/license/" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "license_ref" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "license_ref" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
@@ -1101,6 +1140,7 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*].host" .
+
 <#HostMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#HostMappingSource> ;
@@ -1109,30 +1149,32 @@
         rr:termType rr:IRI ;
         rr:class dcso:Host ;
         fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
+            rr:predicateObjectMap [
+                rr:predicate fno:executes ;
+                rr:objectMap [ rr:constant idlab-fn:concat ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/dataset/distribution/host" ]
+                rr:predicate idlab-fn:str ;
+                rr:objectMap [ rr:constant "dcso:dmp/dataset/distribution/host/" ]
             ] ;
 
             rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "url" ]
-            ] ;
+                rr:predicate idlab-fn:otherStr ;
+                rr:objectMap [ 
+                    fnml:functionValue [
+                        rr:predicateObjectMap [
+                            rr:predicate fno:executes ;
+                            rr:objectMap [ rr:constant grel:string_md5 ]
+                        ] ;
 
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
+                        rr:predicateObjectMap [
+                            rr:predicate grel:valueParameter ;
+                            rr:objectMap [ rml:reference "url" ]
+                        ]             
+                    ]
+                ]
+            ]          
         ]
     ] ;
 
