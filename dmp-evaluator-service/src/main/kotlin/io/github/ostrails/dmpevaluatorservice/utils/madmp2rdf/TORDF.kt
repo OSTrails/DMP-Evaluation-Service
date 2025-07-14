@@ -14,6 +14,13 @@ import java.io.FileInputStream
 import java.io.OutputStreamWriter
 import java.io.BufferedWriter
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonArray
+
 class ToRDF {
 
     suspend fun jsonToRDF(json: String) {
@@ -22,9 +29,55 @@ class ToRDF {
             val outputDir = File("target/output")
             outputDir.mkdirs()
 
-            // Save the json String to a file in the output directory
+            // Create a file in the output directory to store the madmp JSON
             val madmp_file = File(outputDir, "madmp_file.json")
-            madmp_file.writeText(json)
+
+            // Generate random IDs for all distributions (dmp.dataset[*].distribution[*]) and inject into JSON
+            val jsonObject = kotlinx.serialization.json.Json.parseToJsonElement(json).jsonObject.toMutableMap()
+            val dmp = jsonObject["dmp"]?.jsonObject?.toMutableMap()
+
+            val datasets = dmp?.get("dataset")?.jsonArray?.map { it.jsonObject.toMutableMap() }?.toMutableList()
+            if (datasets != null) {
+                for (dataset in datasets) {
+                    val distributions = dataset["distribution"]?.jsonArray?.map { it.jsonObject.toMutableMap() }?.toMutableList()
+                    if (distributions != null) {
+                        for (distribution in distributions) {
+                            distribution["generated_id"] = kotlinx.serialization.json.JsonPrimitive(java.util.UUID.randomUUID().toString())
+                        }
+                        dataset["distribution"] = kotlinx.serialization.json.JsonArray(distributions.map { kotlinx.serialization.json.JsonObject(it) })
+                    }
+                }
+                dmp["dataset"] = kotlinx.serialization.json.JsonArray(datasets.map { kotlinx.serialization.json.JsonObject(it) })
+            }
+
+            // Generate random IDs for all fundings (dmp.project[*].funding[*]) and inject into JSON
+            val projects = dmp?.get("project")?.jsonArray?.map { it.jsonObject.toMutableMap() }?.toMutableList()
+            if (projects != null) {
+                for (project in projects) {
+                    val fundings = project["funding"]?.jsonArray?.map { it.jsonObject.toMutableMap() }?.toMutableList()
+                    if (fundings != null) {
+                        for (funding in fundings) {
+                            funding["generated_id"] = kotlinx.serialization.json.JsonPrimitive(java.util.UUID.randomUUID().toString())
+                        }
+                        project["funding"] = kotlinx.serialization.json.JsonArray(fundings.map { kotlinx.serialization.json.JsonObject(it) })
+                    }
+                }
+                dmp["project"] = kotlinx.serialization.json.JsonArray(projects.map { kotlinx.serialization.json.JsonObject(it) })
+            }
+
+            if (dmp != null) {
+                jsonObject["dmp"] = kotlinx.serialization.json.JsonObject(dmp)
+            }
+            val updatedJson = kotlinx.serialization.json.Json.encodeToString(
+                kotlinx.serialization.json.JsonObject.serializer(),
+                kotlinx.serialization.json.JsonObject(jsonObject)
+            )
+            madmp_file.writeText(updatedJson)
+
+
+            // TODO: generate random IDs for all fundings (dmp.project[*].funding[*]) and inject into JSON
+
+
             val madmp_file_path = madmp_file.absolutePath
             println("File created at: ${madmp_file.absolutePath}")
 

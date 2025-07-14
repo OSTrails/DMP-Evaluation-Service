@@ -605,7 +605,9 @@
     # funding
     rr:predicateObjectMap [
         rr:predicate dcso:hasFunding ;
-        rr:objectMap [ rr:parentTriplesMap <#FundingMapping> ] ;
+        rr:objectMap [
+            rr:template "dcso:dmp/project/funding/{funding[*].generated_id}"
+        ]
     ] .
 
 #################################################################
@@ -624,32 +626,7 @@
     rr:subjectMap [
         rr:termType rr:IRI ;
         rr:class dcso:Funding ;
-        fnml:functionValue [
-          rr:predicateObjectMap [
-            rr:predicate fno:executes ;
-            rr:objectMap [ rr:constant idlab-fn:generateUniqueIRI ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:iri ;
-                rr:objectMap [ rr:constant "dcso:dmp/project/funding" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:watchedProperty ;
-                rr:objectMap [ rml:reference "grant_id.identifier" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:unique ;
-                rr:objectMap [ rr:constant "false" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:state ;
-                rr:objectMap [ rr:constant "unique_iri_state" ]
-            ]
-        ]
+        rr:template "dcso:dmp/project/funding/{generated_id}"
     ] ;
 
     # funder_name
@@ -912,8 +889,7 @@
     # distribution
     rr:predicateObjectMap [
         rr:predicate dcso:hasDistribution ;
-        rr:objectMap [ rr:parentTriplesMap <#DistributionMapping>                                
-        ] ;
+        rr:objectMap [ rr:template "dcso:dmp/dataset/distribution/{distribution[*].generated_id}" ]
     ] .
 
 
@@ -1008,29 +984,7 @@
     rr:subjectMap [
         rr:termType rr:IRI ;
         rr:class dcso:Distribution ;
-        fnml:functionValue [
-            rr:predicateObjectMap [
-                rr:predicate fno:executes ;
-                rr:objectMap [ rr:constant idlab-fn:concat ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "dcso:dmp/dataset/distribution/" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:otherStr ;
-                rr:objectMap [ 
-                    fnml:functionValue [
-                        rr:predicateObjectMap [
-                            rr:predicate fno:executes ;
-                            rr:objectMap [ rr:constant idlab-fn:random ]
-                        ]         
-                    ]
-                ]
-            ]          
-        ]
+        rr:template "dcso:dmp/dataset/distribution/{generated_id}"
     ] ;
 
     # title
@@ -1060,11 +1014,7 @@
     # license
     rr:predicateObjectMap [
         rr:predicate dcso:hasLicense ;
-        rr:objectMap [ rr:parentTriplesMap <#LicenseMapping> ;
-                        rr:joinCondition [
-                           rr:child "license[*].license_ref" ;
-                           rr:parent "license_ref" ;
-                       ] ; ] ;
+        rr:objectMap [ rml:reference "license[*].license_ref" ; rr:termType rr:IRI ]
     ] ;
 
     # host
@@ -1101,34 +1051,7 @@
     rr:subjectMap [
         rr:termType rr:IRI ;
         rr:class dcso:License ;
-        fnml:functionValue [
-            rr:predicateObjectMap [
-                rr:predicate fno:executes ;
-                rr:objectMap [ rr:constant idlab-fn:concat ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "dcso:dmp/dataset/distribution/license/" ]
-            ] ;
-
-            rr:predicateObjectMap [
-                rr:predicate idlab-fn:otherStr ;
-                rr:objectMap [ 
-                    fnml:functionValue [
-                        rr:predicateObjectMap [
-                            rr:predicate fno:executes ;
-                            rr:objectMap [ rr:constant grel:string_md5 ]
-                        ] ;
-
-                        rr:predicateObjectMap [
-                            rr:predicate grel:valueParameter ;
-                            rr:objectMap [ rml:reference "license_ref" ]
-                        ]             
-                    ]
-                ]
-            ]          
-        ]
+        rml:reference "license_ref"
     ] ;
 
     # license_name
