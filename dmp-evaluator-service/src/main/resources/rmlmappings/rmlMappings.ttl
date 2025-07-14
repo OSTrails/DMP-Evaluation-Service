@@ -999,6 +999,7 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*]" .
+#   rml:iterator "$.dmp.dataset[*].distribution[*]" .
 
 <#DistributionMapping>
     a rr:TriplesMap ;
@@ -1055,13 +1056,23 @@
     # license
     rr:predicateObjectMap [
         rr:predicate dcso:hasLicense ;
-        rr:objectMap [ rr:parentTriplesMap <#LicenseMapping>] ;
+        rr:objectMap [ rr:parentTriplesMap <#LicenseMapping> ;
+                        rr:joinCondition [
+                           rr:child "license[*].license_ref" ;
+                           rr:parent "license_ref" ;
+                       ] ; ] ;
     ] ;
     #host
     rr:predicateObjectMap [
         rr:predicate dcso:hasHost ;
-        rr:objectMap [ rr:parentTriplesMap <#HostMapping>] ;
+        rr:objectMap [ rr:parentTriplesMap <#HostMapping> ;
+                       rr:joinCondition [
+                           rr:child "host.url" ;
+                           rr:parent "url" ;
+                       ] ; 
+        ] ;
     ] ;
+
     # available_until
     rr:predicateObjectMap [
         rr:predicate dcso:availableUntil ;
@@ -1076,7 +1087,7 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*].license[*]" .
-    
+
 <#LicenseMapping>
     a rr:TriplesMap ;
     rml:logicalSource <#LicenseMappingSource> ;
