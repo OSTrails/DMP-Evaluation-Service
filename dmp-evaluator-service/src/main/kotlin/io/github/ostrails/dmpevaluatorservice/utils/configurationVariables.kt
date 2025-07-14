@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component
 @ConfigurationProperties(prefix = "dmp.global")
 class ConfigurationGlobalVariables(
     var repository: String = "",
-    var mitLicense: String = ""
+    var mitLicense: String = "",
+    var unpayWallEndPoint: String = "",
+    var unpayWallEmail: String = ""
 ) {}
 
 @Component
