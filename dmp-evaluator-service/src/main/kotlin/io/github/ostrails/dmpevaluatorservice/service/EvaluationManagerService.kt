@@ -41,9 +41,7 @@ class EvaluationManagerService(
         )
     }
 
-    /*
-    * Function to fetch or create the report for the evaluations
-    * */
+
     suspend fun getReportId(request: String?): EvaluationReport {
         val report = request.let {
             if (it != null) {
@@ -53,9 +51,6 @@ class EvaluationManagerService(
         return report
     }
 
-    /*
-    * Function to generate the evaluations for a specific request
-    * */
     suspend fun evaluationResults(report: EvaluationReport, evaluationRequest: EvaluationRequest): List<Evaluation> {
         val evaluators = evaluationRequest.evaluationParams as? List<String> ?: emptyList()
 
@@ -75,17 +70,13 @@ class EvaluationManagerService(
         return (savedEvaluations)
     }
 
-    /*
-    * Funtion to return all the evaluations
-    * */
+
     suspend fun getEvaluations(): List<Evaluation> {
         val evaluations = resultEvaluationResultRepository.findAll().asFlow().toList()
         return evaluations
     }
 
-    /*
-    * Function to generate the evaluation report with all the evlauations
-    * */
+
     suspend fun getFullReport(reportId: String): EvaluationReportResponse? {
         val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: throw ResourceNotFoundException("There is exist report with the id $reportId")
         val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() }
@@ -95,9 +86,6 @@ class EvaluationManagerService(
         )
     }
 
-    /*
-    * Function to generate test results based on the benchmark
-    * */
 
     suspend fun gatewayBenchmarkEvaluationService(file: FilePart, benchmarkTitle: String, reportId: String?): List<Evaluation> {
         try {
@@ -167,8 +155,6 @@ class EvaluationManagerService(
             put("fileExtension", JsonPrimitive(extension))
             put("fileName", JsonPrimitive(fileName))
         }
-
-        //return Json.parseToJsonElement(content).jsonObject
     }
 
     suspend fun mapToRDF(maDMP: FilePart): Any {
@@ -182,9 +168,5 @@ class EvaluationManagerService(
             throw InputvalidationException("Invalid file type: $filename. Only .json files are allowed.")
         }
     }
-
-
-
-
 
 }
