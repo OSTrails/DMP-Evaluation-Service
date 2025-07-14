@@ -912,7 +912,8 @@
     # distribution
     rr:predicateObjectMap [
         rr:predicate dcso:hasDistribution ;
-        rr:objectMap [ rr:parentTriplesMap <#DistributionMapping>] ;
+        rr:objectMap [ rr:parentTriplesMap <#DistributionMapping>                                
+        ] ;
     ] .
 
 
@@ -999,7 +1000,6 @@
     rml:source "{{madmp_json_path}}" ;
     rml:referenceFormulation ql:JSONPath ;
     rml:iterator "$.dmp.dataset[*].distribution[*]" .
-#   rml:iterator "$.dmp.dataset[*].distribution[*]" .
 
 <#DistributionMapping>
     a rr:TriplesMap ;
@@ -1038,21 +1038,25 @@
         rr:predicate dcterms:title ;
         rr:objectMap [ rml:reference "title" ] ;
     ] ;
+
     # format
     rr:predicateObjectMap [
         rr:predicate dcterms:format ;
         rr:objectMap [ rml:reference "format[*]" ] ;
     ] ;
+
     # byte_size
     rr:predicateObjectMap [
         rr:predicate dcat:byteSize ;
         rr:objectMap [ rml:reference "byte_size" ] ;
     ] ;
+
     # data_access
     rr:predicateObjectMap [
         rr:predicate dcso:dataAccess ;
         rr:objectMap [ rml:reference "data_access" ] ;
     ] ;
+
     # license
     rr:predicateObjectMap [
         rr:predicate dcso:hasLicense ;
@@ -1062,7 +1066,8 @@
                            rr:parent "license_ref" ;
                        ] ; ] ;
     ] ;
-    #host
+
+    # host
     rr:predicateObjectMap [
         rr:predicate dcso:hasHost ;
         rr:objectMap [ rr:parentTriplesMap <#HostMapping> ;
@@ -1078,6 +1083,7 @@
         rr:predicate dcso:availableUntil ;
         rr:objectMap [ rml:reference "available_until" ; rr:datatype xsd:dateTime ] ;
     ] .
+
 
 ######################################################################
 # Mapping for DMP: dataset - distribution - license
