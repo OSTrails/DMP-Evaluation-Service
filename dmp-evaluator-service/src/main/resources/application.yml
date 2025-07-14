@@ -22,9 +22,9 @@ dmp:
   global:
     repository: "https://github.com/OSTrails/DMP-Evaluation-Service"
     mitLicense: "https://opensource.org/license/mit"
-    unpayWallEndPoint: "https://api.unpaywall.org/v2/",
+    unpayWallEndPoint: "https://api.unpaywall.org/v2/"
     unpayWallEmail: "dmpEvalutionService@test.com"
-
+    fairChampionEndPoint: "https://tests.ostrails.eu/assess/test/"
   test:
     endpointURL: "http://localhost:8080/tests"
   metric:
