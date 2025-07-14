@@ -9,7 +9,8 @@ class ConfigurationGlobalVariables(
     var repository: String = "",
     var mitLicense: String = "",
     var unpayWallEndPoint: String = "",
-    var unpayWallEmail: String = ""
+    var unpayWallEmail: String = "",
+    var fairChampionEndPoint: String = "",
 ) {}
 
 @Component

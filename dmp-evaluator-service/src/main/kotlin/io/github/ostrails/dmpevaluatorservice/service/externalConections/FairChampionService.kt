@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.service.externalConections
 
+import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.serialization.json.*
 import kotlinx.serialization.json.buildJsonObject
@@ -10,11 +11,12 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Service
 class FairChampionService(
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    val globalVariables: ConfigurationGlobalVariables
 ) {
 
     suspend fun assessTest(testName: String, resourceUrl: String): JsonObject {
-        val endpoint = "https://tests.ostrails.eu/assess/test/$testName"
+        val endpoint = globalVariables.fairChampionEndPoint + testName
 
         val requestBody = buildJsonObject {
             put("resource_identifier", resourceUrl)
