@@ -71,7 +71,7 @@ class QualityOfActionsEvaluator(
                 if (isOa != true) {
                     resulTest = ResultTestEnum.FAIL
                 }
-                logForTest += log
+                logForTest += log + "the resource is open access based in the unpaywall service - "
             }
 
         }
