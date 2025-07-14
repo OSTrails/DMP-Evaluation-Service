@@ -1,3 +1,4 @@
+@prefix dcso: <https://w3id.org/dcso/ns/core#> .
 @prefix rr: <http://www.w3.org/ns/r2rml#> .
 @prefix rml: <http://semweb.mmlab.be/ns/rml#> .
 @prefix ql: <http://semweb.mmlab.be/ns/ql#> .
@@ -5,7 +6,6 @@
 @prefix dmp: <http://purl.org/dmp#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dcso: <https://w3id.org/dcso/ns/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix fno: <https://w3id.org/function/ontology#> .
 @prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
@@ -48,7 +48,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/" ]
+                rr:objectMap [ rr:constant "dcso:dmp/" ]
             ] ;
 
             rr:predicateObjectMap [
@@ -174,7 +174,7 @@
 
             rr:predicateObjectMap [
                 rr:predicate idlab-fn:str ;
-                rr:objectMap [ rr:constant "https://w3id.org/dcso/ns/core/dmp/" ]
+                rr:objectMap [ rr:constant "dcso:dmp/" ]
             ] ;
 
             rr:predicateObjectMap [
