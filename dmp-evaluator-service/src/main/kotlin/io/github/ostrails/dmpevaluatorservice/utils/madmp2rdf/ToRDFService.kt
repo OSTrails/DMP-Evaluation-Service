@@ -23,7 +23,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonArray
 
-class ToRDF {
+@Service
+class ToRDFService {
 
     suspend fun jsonToRDF(json: String) {
         try {

@@ -20,6 +20,9 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.serialization.json.*
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.core.io.buffer.DataBufferUtils
 
 @Service
 class EvaluationManagerService(
@@ -158,7 +161,11 @@ class EvaluationManagerService(
     }
 
     suspend fun mapToRDF(maDMP: FilePart): Any {
-        toRDFService.jsonToRDF(maDMP.toString())
+        val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
+        val json = dataBuffer.toString(StandardCharsets.UTF_8)
+        DataBufferUtils.release(dataBuffer) 
+
+        toRDFService.jsonToRDF(json)
         return true
     }
 
