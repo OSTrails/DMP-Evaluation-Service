@@ -603,6 +603,7 @@
     ] ;
 
     # funding
+    # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for funding
     rr:predicateObjectMap [
         rr:predicate dcso:hasFunding ;
         rr:objectMap [
@@ -623,6 +624,7 @@
     a rr:TriplesMap ;
     rml:logicalSource <#FundingMappingSource> ;
 
+    # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for funding
     rr:subjectMap [
         rr:termType rr:IRI ;
         rr:class dcso:Funding ;
@@ -887,6 +889,7 @@
     ] ;
 
     # distribution
+    # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for distribution
     rr:predicateObjectMap [
         rr:predicate dcso:hasDistribution ;
         rr:objectMap [ rr:template "dcso:dmp/dataset/distribution/{distribution[*].generated_id}" ]
@@ -981,6 +984,7 @@
     a rr:TriplesMap ;
     rml:logicalSource <#DistributionMappingSource> ;
 
+    # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for distribution
     rr:subjectMap [
         rr:termType rr:IRI ;
         rr:class dcso:Distribution ;
