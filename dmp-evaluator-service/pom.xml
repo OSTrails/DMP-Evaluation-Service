@@ -139,6 +139,7 @@
             <artifactId>everit-json-schema</artifactId>
             <version>1.14.2</version>
         </dependency>
+        
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
