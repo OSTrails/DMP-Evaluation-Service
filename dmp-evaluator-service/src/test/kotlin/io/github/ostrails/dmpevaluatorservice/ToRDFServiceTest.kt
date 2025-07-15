@@ -2,19 +2,26 @@ package io.github.ostrails.dmpevaluatorservice
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.core.io.ClassPathResource
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ToRDFServiceTest {
+
+    @Autowired
+    lateinit var webTestClient: WebTestClient
 
     @Test
     fun ex9LongToRDFTest() {
-        // This test should load a JSON maDMP from src/main/kotlin/io/github/ostrails/dmpevaluatorservice/utils/madmp2rdf/madmps_json/ex9-dmp-long.json
-        // It should send it via a POST request to http://localhost:8080/assess/mappingRDF 
-        // it should send it as a multipart/form-data with the key "maDMP"
-        // The response should be a 200 OK with the RDF representation of the maDMP
-        // It should basically execute curl -X POST http://localhost:8080/assess/mappingRDF -F 'maDMP=@src/main/kotlin/io/github/ostrails/dmpevaluatorservice/utils/madmp2rdf/madmps_json/ex9-dmp-long.json;type=application/json'
+        val resource = ClassPathResource("ex9-dmp-long.json")
 
-
+        webTestClient.post()
+            .uri("/assess/mappingRDF")
+            .bodyValue(org.springframework.util.LinkedMultiValueMap<String, Any>().apply {
+                add("maDMP", resource)
+            })
+            .exchange()
+            .expectStatus().isOk
     }
-
 }
