@@ -9,6 +9,8 @@ import be.ugent.rml.store.QuadStore
 import be.ugent.rml.store.QuadStoreFactory
 import be.ugent.rml.store.RDF4JStore
 import be.ugent.rml.term.NamedNode
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
+import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStreamWriter
