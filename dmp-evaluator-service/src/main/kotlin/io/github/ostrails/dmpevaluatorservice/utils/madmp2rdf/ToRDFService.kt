@@ -107,7 +107,7 @@ class ToRDFService {
             val tBoxAndABox = LinkedHashModel().apply { addAll(model) }
             var ontologyNamespaces: Set<org.eclipse.rdf4j.model.Namespace>? = null
 
-            this::class.java.classLoader.getResource("rmlmappings/dcso-4.0.0.ttl")?.let {
+            this::class.java.classLoader.getResource("rmlmappings/dcso-4.0.1.ttl")?.let {
                 val ontologyFile = File(it.toURI())
                 if (ontologyFile.exists()) {
                     val ontologyModel = Rio.parse(ontologyFile.inputStream(), ontologyFile.toURI().toString(), RDFFormat.TURTLE)
@@ -123,8 +123,8 @@ class ToRDFService {
                 val inferredModel = LinkedHashModel().apply {
                     conn.getStatements(null, null, null).forEach { add(it.subject, it.predicate, it.`object`, it.context) }
                     ontologyNamespaces?.forEach { setNamespace(it.prefix, it.name) }
-                    setNamespace("dcso-ont", "https://w3id.org/dcso/ns/core#")
-                    setNamespace("dcso", "https://w3id.org/dcso/ns/core/")
+                    setNamespace("dcso", "https://w3id.org/dcso/ns/core#")
+                    setNamespace("dcso-inst", "https://w3id.org/dcso/ns/core/")
                 }
                 BufferedWriter(OutputStreamWriter(outFile.outputStream(), Charsets.UTF_8)).use {
                     Rio.write(inferredModel, it, RDFFormat.TURTLE)
