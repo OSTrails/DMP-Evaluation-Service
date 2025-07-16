@@ -18,7 +18,8 @@
 
 # Mappings based on ex9-dmp-long.json
 # Structure of the taxonomy can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
-# Ontology can be found here: https://semantics.id/dcso/ns/core/ontology.ttl # This link needs to be update as I am using an slightly updated version
+# Ontology can be found here: https://github.com/larnhold/maDMP-Assessment/blob/main/data/ontologies/dcso-4.0.1.ttl
+# Note The above Ontology version is an unofficial version but it has important fixes.
 
 #################################################################
 # Logical Source for the JSON file
