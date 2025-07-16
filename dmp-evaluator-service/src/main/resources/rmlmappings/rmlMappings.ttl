@@ -1,4 +1,5 @@
-@prefix dcso: <https://w3id.org/dcso/ns/core#> .
+@prefix dcso-ont: <https://w3id.org/dcso/ns/core#> .
+@prefix dcso: <https://w3id.org/dcso/ns/core/> .
 @prefix rr: <http://www.w3.org/ns/r2rml#> .
 @prefix rml: <http://semweb.mmlab.be/ns/rml#> .
 @prefix ql: <http://semweb.mmlab.be/ns/ql#> .
@@ -17,7 +18,7 @@
 
 # Mappings based on ex9-dmp-long.json
 # Structure of the taxonomy can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
-# Ontology can be found here: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/blob/master/ontologies/core/dcso.4.0.0.ttl
+# Ontology can be found here: https://semantics.id/dcso/ns/core/ontology.ttl
 
 #################################################################
 # Logical Source for the JSON file
@@ -39,7 +40,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Dmp ;
+        rr:class dcso-ont:DMP ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -84,67 +85,67 @@
 
     # language
     rr:predicateObjectMap [
-        rr:predicate dcso:language ;
+        rr:predicate dcso-ont:language ;
         rr:objectMap [ rml:reference "language" ] ;
     ] ;
 
     # created
     rr:predicateObjectMap [
-        rr:predicate dcso:created ;
+        rr:predicate dcso-ont:created ;
         rr:objectMap [ rml:reference "created" ; rr:datatype xsd:dateTime ] ;
     ] ;
 
     # modified
     rr:predicateObjectMap [
-        rr:predicate dcso:modified ;
+        rr:predicate dcso-ont:modified ;
         rr:objectMap [ rml:reference "modified" ; rr:datatype xsd:dateTime ] ;
     ] ;
 
     # dmp_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasDMPId ;
+        rr:predicate dcso-ont:hasDMPId ;
         rr:objectMap [ rr:parentTriplesMap <#DMPIDMapping> ] ;
     ] ;
 
     # contact
     rr:predicateObjectMap [
-        rr:predicate dcso:hasContact ;
+        rr:predicate dcso-ont:hasContact ;
         rr:objectMap [ rr:parentTriplesMap <#ContactMapping> ] ;
     ] ;
 
     # contributor
     rr:predicateObjectMap [
-        rr:predicate dcso:hasContributor ;
+        rr:predicate dcso-ont:hasContributor ;
         rr:objectMap [ rr:parentTriplesMap <#ContributorMapping> ] ;
     ] ;
 
     # ethical_issues_exist
     rr:predicateObjectMap [
-        rr:predicate dcso:ethicalIssuesExist ;
+        rr:predicate dcso-ont:ethicalIssuesExist ;
         rr:objectMap [ rml:reference "ethical_issues_exist" ] ;
     ] ;
 
     # ethical_issues_report
     rr:predicateObjectMap [
-        rr:predicate dcso:ethicalIssueDescription ;
+        rr:predicate dcso-ont:ethicalIssueDescription ;
         rr:objectMap [ rml:reference "ethical_issues_description" ] ;
     ] ;
 
     # ethical_issues_description
     rr:predicateObjectMap [
-        rr:predicate dcso:ethicalIssuesReport ;
+        rr:predicate dcso-ont:ethicalIssuesReport ;
         rr:objectMap [ rml:reference "ethical_issues_report" ] ;
     ] ;
 
     # project
     rr:predicateObjectMap [
-        rr:predicate dcso:hasProject ;
+        rr:predicate dcso-ont:hasProject ;
         rr:objectMap [ rr:parentTriplesMap <#ProjectMapping> ] ;
     ] ;
 
     # dataset
     rr:predicateObjectMap [
-        rr:predicate dcso:hasDataset ;
+        rr:predicate dcso-ont:hasDataset ;
         rr:objectMap [ rr:parentTriplesMap <#DatasetMapping> ] ;
     ] .
 
@@ -165,7 +166,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:DmpId ;
+        rr:class dcso-ont:DMPId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -215,13 +216,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -243,7 +244,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Contact ;
+        rr:class dcso-ont:Contact ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -288,7 +289,7 @@
 
     # contact_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasContactId ;
+        rr:predicate dcso-ont:hasContactId ;
         rr:objectMap [ rr:parentTriplesMap <#ContactIDMapping> ] ;
     ] .
 
@@ -309,7 +310,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:ContactId ;
+        rr:class dcso-ont:ContactId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -359,13 +360,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -384,7 +385,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Contributor ;
+        rr:class dcso-ont:Contributor ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -429,7 +430,7 @@
 
     # contributor_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasContributorId ;
+        rr:predicate dcso-ont:hasContributorId ;
         rr:objectMap [ rr:parentTriplesMap <#ContributorIDMapping> ;
                        rr:joinCondition [
                            rr:child "contributor_id.identifier" ;
@@ -440,7 +441,7 @@
 
     # role
     rr:predicateObjectMap [
-        rr:predicate dcso:hasRole ;
+        rr:predicate dcso-ont:hasRole ;
         rr:objectMap [ rml:reference "role[*]" ] ;
     ] .
 
@@ -459,7 +460,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:contributorId ;
+        rr:class dcso-ont:contributorId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -509,13 +510,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -535,7 +536,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Project ;
+        rr:class dcso-ont:Project ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -574,25 +575,25 @@
 
     # project_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasProjectId ;
+        rr:predicate dcso-ont:hasProjectId ;
         rr:objectMap [ rml:reference "project_id" ] ;
     ] ;
 
     # project_id_type
     rr:predicateObjectMap [
-        rr:predicate dcso:hasProjectIdType ;
+        rr:predicate dcso-ont:hasProjectIdType ;
         rr:objectMap [ rml:reference "project_id_type" ] ;
     ] ;
 
     # start
     rr:predicateObjectMap [
-        rr:predicate dcso:start ;
+        rr:predicate dcso-ont:start ;
         rr:objectMap [ rml:reference "start" ; rr:datatype xsd:dateTime ] ;
     ] ;
 
     # end
     rr:predicateObjectMap [
-        rr:predicate dcso:end ;
+        rr:predicate dcso-ont:end ;
         rr:objectMap [ rml:reference "end" ; rr:datatype xsd:dateTime ] ;
     ] ;
 
@@ -605,7 +606,7 @@
     # funding
     # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for funding
     rr:predicateObjectMap [
-        rr:predicate dcso:hasFunding ;
+        rr:predicate dcso-ont:hasFunding ;
         rr:objectMap [
             rr:template "dcso:dmp/project/funding/{funding[*].generated_id}"
         ]
@@ -627,7 +628,7 @@
     # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for funding
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Funding ;
+        rr:class dcso-ont:Funding ;
         rr:template "dcso:dmp/project/funding/{generated_id}"
     ] ;
 
@@ -639,13 +640,13 @@
 
     # funder_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasFunderId ;
+        rr:predicate dcso-ont:hasFunderId ;
         rr:objectMap [ rr:parentTriplesMap <#funderIDMapping> ] ;
     ] ;
 
     # grant_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasGrantId ;
+        rr:predicate dcso-ont:hasGrantId ;
         rr:objectMap [ rr:parentTriplesMap <#GrantIDMapping> ] ;
     ] .
 
@@ -665,7 +666,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:FunderId ;
+        rr:class dcso-ont:FunderId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -715,13 +716,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -740,7 +741,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:GrantId ;
+        rr:class dcso-ont:GrantId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -790,13 +791,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -816,7 +817,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Dataset ;
+        rr:class dcso-ont:Dataset ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -849,7 +850,7 @@
 
     # dataset_id
     rr:predicateObjectMap [
-        rr:predicate dcso:hasDatasetId ;
+        rr:predicate dcso-ont:hasDatasetId ;
         rr:objectMap [ rr:parentTriplesMap <#DatasetIDMapping> ;
                        rr:joinCondition [
                            rr:child "dataset_id.identifier" ;
@@ -866,19 +867,19 @@
 
     # personal_data
     rr:predicateObjectMap [
-        rr:predicate dcso:personalData ;
+        rr:predicate dcso-ont:personalData ;
         rr:objectMap [ rml:reference "personal_data" ] ;
     ] ;
 
     # sensitive_data
     rr:predicateObjectMap [
-        rr:predicate dcso:sensitiveData ;
+        rr:predicate dcso-ont:sensitiveData ;
         rr:objectMap [ rml:reference "sensitive_data" ] ;
     ] ;
 
     #type
     rr:predicateObjectMap [
-        rr:predicate dcso:datasetType ;
+        rr:predicate dcso-ont:datasetType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] ;
 
@@ -891,7 +892,7 @@
     # distribution
     # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for distribution
     rr:predicateObjectMap [
-        rr:predicate dcso:hasDistribution ;
+        rr:predicate dcso-ont:hasDistribution ;
         rr:objectMap [ rr:template "dcso:dmp/dataset/distribution/{distribution[*].generated_id}" ]
     ] .
 
@@ -911,7 +912,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:DatasetId ;
+        rr:class dcso-ont:DatasetId ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -961,13 +962,13 @@
 
     # identifier
     rr:predicateObjectMap [
-        rr:predicate dcso:identifier ;
+        rr:predicate dcso-ont:identifier ;
         rr:objectMap [ rml:reference "identifier" ] ;
     ] ;
 
     # type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "type" ] ;
     ] .
 
@@ -987,7 +988,7 @@
     # Note: generated_id is created in ToRDFService.kt as the maDMP model does not have an ID for distribution
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Distribution ;
+        rr:class dcso-ont:Distribution ;
         rr:template "dcso:dmp/dataset/distribution/{generated_id}"
     ] ;
 
@@ -1011,19 +1012,19 @@
 
     # data_access
     rr:predicateObjectMap [
-        rr:predicate dcso:dataAccess ;
+        rr:predicate dcso-ont:dataAccess ;
         rr:objectMap [ rml:reference "data_access" ] ;
     ] ;
 
     # license
     rr:predicateObjectMap [
-        rr:predicate dcso:hasLicense ;
+        rr:predicate dcso-ont:hasLicense ;
         rr:objectMap [ rml:reference "license[*].license_ref" ; rr:termType rr:IRI ]
     ] ;
 
     # host
     rr:predicateObjectMap [
-        rr:predicate dcso:hasHost ;
+        rr:predicate dcso-ont:hasHost ;
         rr:objectMap [ rr:parentTriplesMap <#HostMapping> ;
                        rr:joinCondition [
                            rr:child "host.url" ;
@@ -1034,7 +1035,7 @@
 
     # available_until
     rr:predicateObjectMap [
-        rr:predicate dcso:availableUntil ;
+        rr:predicate dcso-ont:availableUntil ;
         rr:objectMap [ rml:reference "available_until" ; rr:datatype xsd:dateTime ] ;
     ] .
 
@@ -1054,25 +1055,25 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:License ;
+        rr:class dcso-ont:License ;
         rml:reference "license_ref"
     ] ;
 
     # license_name
     rr:predicateObjectMap [
-        rr:predicate dcso:licenseName ;
+        rr:predicate dcso-ont:licenseName ;
         rr:objectMap [ rml:reference "license_name" ] ;
     ] ;
 
     # license_ref
     rr:predicateObjectMap [
-        rr:predicate dcso:licenseRef ;
+        rr:predicate dcso-ont:licenseRef ;
         rr:objectMap [ rml:reference "license_ref" ] ;
     ] ;
 
     # start_date
     rr:predicateObjectMap [
-        rr:predicate dcso:startDate ;
+        rr:predicate dcso-ont:startDate ;
         rr:objectMap [ rml:reference "start_date" ; rr:datatype xsd:dateTime ] ;
     ] .
 
@@ -1091,7 +1092,7 @@
 
     rr:subjectMap [
         rr:termType rr:IRI ;
-        rr:class dcso:Host ;
+        rr:class dcso-ont:Host ;
         fnml:functionValue [
             rr:predicateObjectMap [
                 rr:predicate fno:executes ;
@@ -1129,12 +1130,12 @@
     ] ;
     # url
     rr:predicateObjectMap [
-        rr:predicate dcso:url ;
+        rr:predicate dcso-ont:url ;
         rr:objectMap [ rml:reference "url" ] ;
     ] ; 
     # host_id_type
     rr:predicateObjectMap [
-        rr:predicate dcso:identifierType ;
+        rr:predicate dcso-ont:identifierType ;
         rr:objectMap [ rml:reference "host_id_type" ] ;
     ] ;
     # description
@@ -1145,16 +1146,16 @@
 
     #supports_versioning
     rr:predicateObjectMap [
-        rr:predicate dcso:supportVersioning ;
+        rr:predicate dcso-ont:supportVersioning ;
         rr:objectMap [ rml:reference "supports_versioning" ] ;
     ] ;
     # storage_type
     rr:predicateObjectMap [
-        rr:predicate dcso:storageType ;
+        rr:predicate dcso-ont:storageType ;
         rr:objectMap [ rml:reference "storage_type" ] ;
     ] ;
     # pid_system
     rr:predicateObjectMap [
-        rr:predicate dcso:pidSystem ;
+        rr:predicate dcso-ont:pidSystem ;
         rr:objectMap [ rml:reference "pid_system[*]" ] ;
     ] .
