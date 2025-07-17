@@ -87,14 +87,14 @@ class EvaluationManagerService(
     }
 
 
-    suspend fun gatewayBenchmarkEvaluationService(file: FilePart, benchmarkTitle: String, reportId: String?): List<Evaluation> {
+    suspend fun gatewayBenchmarkEvaluationService(file: FilePart, benchmarkId: String, reportId: String?): List<Evaluation> {
         try {
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
                 //jsonFilevalidator(file)
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
-                val benchmark = benchmarService.benchmarkByTitle(benchmarkTitle)
+                val benchmark = benchmarService.getBenchmarkDetail(benchmarkId)
                     val evaluations = evaluationService.generateTestsResultsFromBenchmark(benchmark, maDMP, reportIdentifier.toString())
                     val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
                     val updateReport = report.copy(

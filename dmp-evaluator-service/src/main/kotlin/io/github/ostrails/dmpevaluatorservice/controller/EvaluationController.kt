@@ -48,22 +48,11 @@ class EvaluationController(
     @GetMapping("/report/{reportid}/full")
     suspend fun getReport(@PathVariable reportid: String): ResponseEntity<EvaluationReportResponse> {
         val evaluationreport = evaluationManagerService.getFullReport(reportid)
-        //        System.out.println(evaluations)
         return ResponseEntity.ok(evaluationreport)
     }
 
-    /*
-    Example in how to call the benchmark with a file
-    curl -X POST http://localhost:8080/api/evaluation/benchmark \
-  -F 'file=@/path/to/my-dmp.json' \
-  -F 'dimension=completeness' \
-  -F 'tests=metadataCoverage' \
-  -F 'tests=structure'
-    * */
-
-
     @Operation(
-        summary = "List all the evaluations of a specific report",
+        summary = "List the results for the benchmark",
         description = "List of evaluations results"
     )
     @PostMapping("/benchmark", consumes = ["multipart/form-data"])
