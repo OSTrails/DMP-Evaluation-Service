@@ -22,7 +22,7 @@ import java.util.*
 @Service
 class ToRDFService {
 
-    suspend fun jsonToRDF(json: String) {
+    suspend fun jsonToRDF(json: String): String {
         try {
             val outputDir = File("target/output").apply { mkdirs() }
             val madmpFile = File(outputDir, "madmp_file.json")
@@ -95,10 +95,9 @@ class ToRDFService {
             val result = executor.execute(null)[NamedNode("rmlmapper://default.store")]
             if (result == null) {
                 println("No RDF output generated.")
-                return
+                return "No RDF output generated."
             }
 
-            val outFile = File(outputDir, "madmp.ttl")
             println("Saving output to: \${outFile.absolutePath}")
 
             val modelField = RDF4JStore::class.java.getDeclaredField("model").apply { isAccessible = true }
@@ -126,13 +125,125 @@ class ToRDFService {
                     setNamespace("dcso", "https://w3id.org/dcso/ns/core#")
                     setNamespace("dcso-inst", "https://w3id.org/dcso/ns/core/")
                 }
-                BufferedWriter(OutputStreamWriter(outFile.outputStream(), Charsets.UTF_8)).use {
-                    Rio.write(inferredModel, it, RDFFormat.TURTLE)
+                val stringWriter = StringWriter()
+                Rio.write(inferredModel, stringWriter, RDFFormat.TURTLE)
+                return stringWriter.toString()
                 }
-            }
-        } catch (e: Exception) {
-            println("Error during RDF generation: \${e.message}")
+            } catch (e: Exception) {
+            println("Error during RDF generation: ${e.message}")
             e.printStackTrace()
+            return "Error during RDF generation: ${e.message}"
         }
     }
 }
+
+/*
+
+# How to build
+Go to the rmlmapper-java directory and execute:
+```
+mvn install -DskipTests=true
+```
+
+# How to test
+In the root project directory `dmp-evaluator-serivce` run:
+```
+mvn test -Dtest=io.github.ostrails.dmpevaluatorservice.ToRDFServiceTest
+```
+
+# Status:
+dmp:
+* class assignment: mapped
+* properties:
+    * description: mapped
+    * title: mapped
+    * language: mapped
+    * created: mapped
+    * modified: mapped
+    * dmp_id: mapped
+        * identifier: mapped
+        * doi: mapped
+    * contact: mapped
+        * name: mapped
+        * mbox: mapped
+        * contactId: mapped
+            * identifier: mapped
+            * type: mapped
+    * contributor: mapped
+        * name: mapped
+        * mbox: mapped
+        * contributor_id: mapped
+            * identifier: mapped
+            * type: mapped
+        * role:
+    * ethical_issues_exist: mapped
+    * ethical_issues_report: mapped
+    * ethical_issues_description: mapped
+    * project: mapped
+        * title: mapped
+        * description: mapped
+        * start: mapped
+        * end: mapped
+        * project_id: mapped (not in ontology)
+        * project_id_type (not in ontology)
+        * funding: mapped
+            * funder_name: mapped
+            * funder_id: mapped
+                * identifier: mapped
+                * type: mapped
+            * grant_id: mapped
+                * identifier: mapped
+                * type: mapped
+    * dataset: mapped
+        * dataset_id: mapped
+            * identifier: mapped    
+            * type: mapped
+        * title: mapped
+        * personal_data: mapped
+        * sensitive_data: mapped
+        * type: mapped
+        * description: mapped
+        * distribution: mapped
+            * title: mapped
+            * format: mapped
+            * byte_size: mapped
+            * data_access: mapped
+            * license: mapped
+                * license_name: mapped (not in ontology)
+                * license_ref: mapped
+                * start_date: mapped
+            * host:
+                * title: mapped
+                * url: mapped
+                * host_id_type: mapped
+                * description: mapped
+                * supports_versioning: mapped
+                * storage_type: mapped
+                * pid_system: mapped
+            * available_until: mapped
+
+# Improvements
+generate md5 hashsums for instance IRIs
+
+mapped host_id_type to dcso:identifierType
+
+ex9-dmp-long.json has the same dataset identifiers for every dataset. I changed 
+the handle IDs so that they can be distinguished. it is important for the ID 
+generation.
+
+# Unsolved issues in the dcso.4.0.0.ttl core ontology
+hasProjectId and hasProjectIdType do not exist
+
+no licenseName datatype property
+
+the range of the datatype property dcterms:format is a string but a list of strings is given.
+
+Some IDs like project_id are datatype properties and other IDs like contributor_id is an objectProperty
+
+There is a dcat:Distribution and dcso:Distribution in the dcso.4.0.0.ttl core ontology.
+
+(Distribution has no ID)
+
+Can really multiple licenses be assigned to a dataset?
+
+*/

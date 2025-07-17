@@ -160,13 +160,13 @@ class EvaluationManagerService(
         }
     }
 
-    suspend fun mapToRDF(maDMP: FilePart): Any {
+    suspend fun mapToRDF(maDMP: FilePart): String {
         val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
         val json = dataBuffer.toString(StandardCharsets.UTF_8)
         DataBufferUtils.release(dataBuffer) 
 
-        toRDFService.jsonToRDF(json)
-        return true
+        val maDMPTurtle = toRDFService.jsonToRDF(json)
+        return maDMPTurtle
     }
 
     fun jsonFilevalidator(file: FilePart){
