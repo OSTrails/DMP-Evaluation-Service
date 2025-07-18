@@ -84,6 +84,19 @@ class EvaluationController(
         return ResponseEntity.ok(jsonLDResult)
     }
 
+    /*
+        TODO: Create a mapping between the test IDs and SPARQL queries to run the tests
+            * Create a file with two columns, test ID and SPARQL query file name
+        TODO: Create a directory for the SPARQL queries
+        TODO: Create a function to run a specific SPARQL query against the RDF-encoded maDMP 
+        that corresponds to the test ID
+        TODO: Re-use code from Lukas: https://github.com/larnhold/maDMP-Assessment/tree/main
+            * SHACL constraints in: https://github.com/larnhold/maDMP-Assessment/tree/main/data/case-study/shapes
+
+        Note: Report ID is optional
+        Requirements: Test cases including the test IDs and descriptions.
+
+    */
     @Operation(
         summary = "Run a specific test",
         description = "Return the result of a specific test evaluation"
@@ -96,6 +109,20 @@ class EvaluationController(
     ): ResponseEntity<Evaluation>{
         val jsonResult = evaluationManagerService.gatewayTestsEvaluationService(maDMP, test, reportId)
         return ResponseEntity.ok(jsonResult)
+    }
+
+    @Operation(
+        summary = "Run a specific test",
+        description = "Return the result of a specific test evaluation"
+    )
+    @PostMapping("/validate", consumes = ["multipart/form-data"])
+    suspend fun runSHACLValidation(
+        @RequestPart("maDMP") maDMP: FilePart,
+    ): ResponseEntity<List<Evaluation>>{
+        
+        val maDMPTurtle = evaluationManagerService.mapToRDF(maDMP)
+        val testReportJSON = evaluationManagerService.shaclValidationService(maDMPTurtle)
+        return ResponseEntity.ok(testReportJSON)
     }
 
     @Operation(
@@ -126,7 +153,3 @@ class EvaluationController(
     }
 }
 
-/*
-
-test
-*/

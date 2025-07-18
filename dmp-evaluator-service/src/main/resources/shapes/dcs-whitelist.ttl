@@ -1,0 +1,13 @@
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix dcso: <https://w3id.org/dcso/ns/core#>.
+@prefix : <https://w3id.org/validation/ns/core#>.
+@prefix terms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+
+:DatasetWhitelist a sh:NodeShape ;
+	sh:targetClass dcso:Dataset ;
+	sh:property [
+					sh:path dcso:sensitiveData ;
+					sh:in ("yes" "no" "unkown")
+				] .

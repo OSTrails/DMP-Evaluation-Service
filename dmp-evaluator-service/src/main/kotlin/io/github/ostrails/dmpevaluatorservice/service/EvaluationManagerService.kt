@@ -24,6 +24,17 @@ import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.core.io.buffer.DataBufferUtils
 
+import org.eclipse.rdf4j.model.Model
+import org.eclipse.rdf4j.model.util.Models
+import org.eclipse.rdf4j.rio.RDFFormat
+import org.eclipse.rdf4j.rio.Rio
+import org.eclipse.rdf4j.repository.sail.SailRepository
+import org.eclipse.rdf4j.sail.memory.MemoryStore
+import org.eclipse.rdf4j.sail.shacl.ShaclSail
+import org.eclipse.rdf4j.model.util.Values
+import java.io.File
+import java.util.UUID
+
 @Service
 class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
@@ -130,13 +141,76 @@ class EvaluationManagerService(
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
                     return savedEvaluation
-                }else throw ApiException("There is a problem in the execution of the test $testId",)
+                } else throw ApiException("There is a problem in the execution of the test $testId",)
                 //TODO()
                 // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
-            }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
+            } else throw ResourceNotFoundException("Not found the report to associated the evaluations")
         }catch (e: Exception) {
             throw ResourceNotFoundException("Was not possible to generate the evaluation due $e")
         }
+    }
+
+
+    suspend fun shaclValidationService(maDMP: String): List<Evaluation> {
+        val baseURI = "https://w3id.org/dcso/ns/core#"
+
+        // Parse the maDMP Turtle content into a Model
+        val maDMPModel: Model = Rio.parse(maDMP.byteInputStream(), baseURI, RDFFormat.TURTLE)
+
+        val evaluationList = mutableListOf<Evaluation>()
+
+        val shapesDir = File("src/main/resources/shapes")
+        val shapeFiles = shapesDir.listFiles { file -> file.extension == "ttl" } ?: emptyArray()
+
+        for (shapeFile in shapeFiles) {
+            // Parse shape model
+            val shapeModel = Rio.parse(shapeFile.inputStream(), baseURI, RDFFormat.TURTLE)
+
+            // Create a SHACL-enabled repository
+            val shaclSail = ShaclSail(MemoryStore())
+            val repo = SailRepository(shaclSail)
+            repo.init()
+
+            // Load shapes into the SHACL Sail
+            repo.connection.use { conn ->
+                conn.begin()
+                conn.add(shapeModel)
+                conn.commit()
+
+                // Now validate the data (maDMPModel) against the loaded shapes
+                try {
+                    conn.begin()
+                    conn.add(maDMPModel)
+                    conn.commit()
+
+                    // If no exception is thrown, the data conforms to the shapes
+                    evaluationList.add(
+                        Evaluation(
+                            evaluationId = UUID.randomUUID().toString(),
+                            title = "SHACL Validation for ${shapeFile.name}",
+                            result = ResultTestEnum.PASS,
+                            details = "Validation based on the file ${shapeFile.name} and the shape ${shapeFile.nameWithoutExtension}",
+                            reportId = null,
+                        )
+                    )
+                } catch (e: Exception) {
+                    // If validation fails, a ValidationException is thrown
+                    evaluationList.add(
+                        Evaluation(
+                            evaluationId = UUID.randomUUID().toString(),
+                            title = "SHACL Validation for ${shapeFile.name}",
+                            result = ResultTestEnum.FAIL,
+                            details = "Validation failed: ${e.message}",
+                            reportId = null,
+                        )
+                    )
+                }
+            }
+
+            repo.shutDown()
+        }
+
+        return evaluationList
     }
 
     suspend fun fileToJsonObject(file: FilePart): JsonObject {
