@@ -32,6 +32,8 @@ import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import org.eclipse.rdf4j.sail.shacl.ShaclSail
 import org.eclipse.rdf4j.model.util.Values
+import org.eclipse.rdf4j.model.vocabulary.RDF
+import org.eclipse.rdf4j.model.vocabulary.SHACL
 import java.io.File
 import java.util.UUID
 
@@ -152,7 +154,7 @@ class EvaluationManagerService(
 
 
     suspend fun shaclValidationService(maDMP: String): List<Evaluation> {
-        val baseURI = "https://w3id.org/dcso/ns/core#"
+        val baseURI = "https://w3id.org/validation/ns/core#"
 
         // Parse the maDMP Turtle content into a Model
         val maDMPModel: Model = Rio.parse(maDMP.byteInputStream(), baseURI, RDFFormat.TURTLE)
@@ -166,6 +168,28 @@ class EvaluationManagerService(
             // Parse shape model
             val shapeModel = Rio.parse(shapeFile.inputStream(), baseURI, RDFFormat.TURTLE)
 
+            // Register the base prefix ":" for prettier output (if not already present)
+            shapeModel.setNamespace("", baseURI)
+            
+            // Extract all shapes (NodeShape or PropertyShape)
+            val shapeSubjects = shapeModel
+                .filter(null, RDF.TYPE, null)
+                .filter { it.`object` == SHACL.NODE_SHAPE || it.`object` == SHACL.PROPERTY_SHAPE }
+                .map { stmt ->
+                    val subj = stmt.subject
+                    when {
+                        subj.isIRI -> shapeModel.namespaces.firstOrNull { ns -> subj.stringValue().startsWith(ns.name) }?.let { ns ->
+                            val localName = subj.stringValue().removePrefix(ns.name)
+                            if (ns.prefix.isEmpty()) ":$localName" else "${ns.prefix}:$localName"
+                        } ?: "<${subj.stringValue()}>"
+                        else -> subj.stringValue()
+                    }
+                }
+                .distinct()
+
+            // Create a comma-separated list for the detailed report
+            val shapeListString = shapeSubjects.joinToString(", ")
+
             // Create a SHACL-enabled repository
             val shaclSail = ShaclSail(MemoryStore())
             val repo = SailRepository(shaclSail)
@@ -177,24 +201,22 @@ class EvaluationManagerService(
                 conn.add(shapeModel)
                 conn.commit()
 
-                // Now validate the data (maDMPModel) against the loaded shapes
+                // Validate the maDMPModel against the loaded shapes
                 try {
                     conn.begin()
                     conn.add(maDMPModel)
                     conn.commit()
 
-                    // If no exception is thrown, the data conforms to the shapes
                     evaluationList.add(
                         Evaluation(
                             evaluationId = UUID.randomUUID().toString(),
-                            title = "SHACL Validation for ${shapeFile.name}",
+                            title = "SHACL Validation with shapes from the file: ${shapeFile.name}",
                             result = ResultTestEnum.PASS,
-                            details = "Validation based on the file ${shapeFile.name} and the shape ${shapeFile.nameWithoutExtension}",
+                            details = "Validation based on the file ${shapeFile.name} which has following shapes: ${shapeListString}",
                             reportId = null,
                         )
                     )
                 } catch (e: Exception) {
-                    // If validation fails, a ValidationException is thrown
                     evaluationList.add(
                         Evaluation(
                             evaluationId = UUID.randomUUID().toString(),
