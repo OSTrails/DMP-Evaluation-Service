@@ -24,16 +24,6 @@ import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.core.io.buffer.DataBufferUtils
 
-import org.eclipse.rdf4j.model.Model
-import org.eclipse.rdf4j.model.util.Models
-import org.eclipse.rdf4j.rio.RDFFormat
-import org.eclipse.rdf4j.rio.Rio
-import org.eclipse.rdf4j.repository.sail.SailRepository
-import org.eclipse.rdf4j.sail.memory.MemoryStore
-import org.eclipse.rdf4j.sail.shacl.ShaclSail
-import org.eclipse.rdf4j.model.util.Values
-import org.eclipse.rdf4j.model.vocabulary.RDF
-import org.eclipse.rdf4j.model.vocabulary.SHACL
 import java.io.File
 import java.util.UUID
 
@@ -153,88 +143,6 @@ class EvaluationManagerService(
     }
 
 
-    suspend fun shaclValidationService(maDMP: String): List<Evaluation> {
-        val baseURI = "https://w3id.org/validation/ns/core#"
-
-        // Parse the maDMP Turtle content into a Model
-        val maDMPModel: Model = Rio.parse(maDMP.byteInputStream(), baseURI, RDFFormat.TURTLE)
-
-        val evaluationList = mutableListOf<Evaluation>()
-
-        val shapesDir = File("src/main/resources/shapes")
-        val shapeFiles = shapesDir.listFiles { file -> file.extension == "ttl" } ?: emptyArray()
-
-        for (shapeFile in shapeFiles) {
-            // Parse shape model
-            val shapeModel = Rio.parse(shapeFile.inputStream(), baseURI, RDFFormat.TURTLE)
-
-            // Register the base prefix ":" for prettier output (if not already present)
-            shapeModel.setNamespace("", baseURI)
-            
-            // Extract all shapes (NodeShape or PropertyShape)
-            val shapeSubjects = shapeModel
-                .filter(null, RDF.TYPE, null)
-                .filter { it.`object` == SHACL.NODE_SHAPE || it.`object` == SHACL.PROPERTY_SHAPE }
-                .map { stmt ->
-                    val subj = stmt.subject
-                    when {
-                        subj.isIRI -> shapeModel.namespaces.firstOrNull { ns -> subj.stringValue().startsWith(ns.name) }?.let { ns ->
-                            val localName = subj.stringValue().removePrefix(ns.name)
-                            if (ns.prefix.isEmpty()) ":$localName" else "${ns.prefix}:$localName"
-                        } ?: "<${subj.stringValue()}>"
-                        else -> subj.stringValue()
-                    }
-                }
-                .distinct()
-
-            // Create a comma-separated list for the detailed report
-            val shapeListString = shapeSubjects.joinToString(", ")
-
-            // Create a SHACL-enabled repository
-            val shaclSail = ShaclSail(MemoryStore())
-            val repo = SailRepository(shaclSail)
-            repo.init()
-
-            // Load shapes into the SHACL Sail
-            repo.connection.use { conn ->
-                conn.begin()
-                conn.add(shapeModel)
-                conn.commit()
-
-                // Validate the maDMPModel against the loaded shapes
-                try {
-                    conn.begin()
-                    conn.add(maDMPModel)
-                    conn.commit()
-
-                    evaluationList.add(
-                        Evaluation(
-                            evaluationId = UUID.randomUUID().toString(),
-                            title = "SHACL Validation with shapes from the file: ${shapeFile.name}",
-                            result = ResultTestEnum.PASS,
-                            details = "Validation based on the file ${shapeFile.name} which has following shapes: ${shapeListString}",
-                            reportId = null,
-                        )
-                    )
-                } catch (e: Exception) {
-                    evaluationList.add(
-                        Evaluation(
-                            evaluationId = UUID.randomUUID().toString(),
-                            title = "SHACL Validation for ${shapeFile.name}",
-                            result = ResultTestEnum.FAIL,
-                            details = "Validation failed: ${e.message}",
-                            reportId = null,
-                        )
-                    )
-                }
-            }
-
-            repo.shutDown()
-        }
-
-        return evaluationList
-    }
-
     suspend fun fileToJsonObject(file: FilePart): JsonObject {
         val content = file.content()
             .map { dataBuffer -> dataBuffer.toByteBuffer().array().decodeToString() }
@@ -254,15 +162,6 @@ class EvaluationManagerService(
             put("fileExtension", JsonPrimitive(extension))
             put("fileName", JsonPrimitive(fileName))
         }
-    }
-
-    suspend fun mapToRDF(maDMP: FilePart): String {
-        val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
-        val json = dataBuffer.toString(StandardCharsets.UTF_8)
-        DataBufferUtils.release(dataBuffer) 
-
-        val maDMPTurtle = toRDFService.jsonToRDF(json)
-        return maDMPTurtle
     }
 
     fun jsonFilevalidator(file: FilePart){

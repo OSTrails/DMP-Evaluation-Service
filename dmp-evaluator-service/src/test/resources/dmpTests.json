@@ -209,6 +209,27 @@
             "metricImplemented": "686d155fdd621c3ebe98d5bb",
             "evaluator": "QualityOfActionsEvaluator",
             "functionEvaluator": "evaluateOpenAccess"
+        },
+        {
+            "id": "689dd209389b4a421ef4c846", 
+            "title": "DCSCompletenessEvaluation",
+            "description": "Checks the completeness of the maDMP with SHACL.",
+            "license": "MIT",
+            "version": "0.0.1",
+            "endpointURL": "http://localhost:8080/tests/null",
+            "endpointDescription": "Checks the completeness of the maDMP with SHACL.",
+            "keyword": "DMP, complet, test, SHACL",
+            "abbreviation": null,
+            "repository": "https://github.com/OSTrails/DMP-Evaluation-Service",
+            "type": "test",
+            "theme": "DMP Coverage",
+            "versionNotes": "0.0.1",
+            "status": "Active",
+            "isApplicableFor": "maDMP",
+            "supportedBy": null,
+            "metricImplemented": "",
+            "evaluator": "DCSCompletenessEvaluator",
+            "functionEvaluator": "evaluateCompleteness"
         }
     ]
 }

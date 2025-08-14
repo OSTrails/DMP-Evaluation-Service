@@ -1,5 +1,7 @@
 package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 
+import io.github.ostrails.dmpevaluatorservice.utils.jsonToRDF
+import io.github.ostrails.dmpevaluatorservice.utils.validateCompletenessWithSHACL
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
@@ -29,10 +31,12 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
     override val functionMap = mapOf(
         "evaluateStructure" to ::evaluateStructure,
         "evaluateFormats" to :: evaluateFormats,
+        "evaluateCompleteness" to ::evaluateCompleteness,
         "costEntityPresent" to :: costEntityPresent,
         "costEntityValuesPresent" to :: costEntityValuesPresent,
         "contributorValuesPresent" to :: contributorValuesPresent,
         "datasetEntityValuesPresent" to :: datasetEntityValuesPresent,
+
     )
 
     override fun getPluginInformation(): PluginInfo {
@@ -93,6 +97,26 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             generated = "${this::class.qualifiedName}:: evaluateFormats",
             outputFromTest = testRecord.id,
             completion = 100
+        )
+    }
+
+    fun evaluateCompleteness(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val maDMPTurtle = jsonToRDF(maDMP.toString());
+        val evaluationReport = validateCompletenessWithSHACL(maDMPTurtle)
+        return evaluationReport ?: Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = ResultTestEnum.INDERTERMINATED,
+            details = testRecord.description,
+            title = testRecord.title,
+            reportId = reportId,
+            log = "SHACL validation did not return a result.",
+            generated = "${this::class.qualifiedName}:: evaluateCompleteness",
+            outputFromTest = testRecord.id,
+            completion = 0
         )
     }
 
@@ -282,7 +306,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             val inputStream: InputStream = javaClass.classLoader
                 .getResourceAsStream("maDMPSchemas/maDMP-schema-1.2.json")
                 ?: throw IllegalStateException("Schema file not found")
-            val rawSchema = JSONObject(JSONTokener(inputStream))
+            val rawSchema = JSONObject(JSONTokener(inputStream.toString()))
             SchemaLoader.load(rawSchema)
         }
 

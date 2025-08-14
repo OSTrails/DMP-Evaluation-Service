@@ -112,20 +112,6 @@ class EvaluationController(
     }
 
     @Operation(
-        summary = "Run a specific test",
-        description = "Return the result of a specific test evaluation"
-    )
-    @PostMapping("/validate", consumes = ["multipart/form-data"])
-    suspend fun runSHACLValidation(
-        @RequestPart("maDMP") maDMP: FilePart,
-    ): ResponseEntity<List<Evaluation>>{
-        
-        val maDMPTurtle = evaluationManagerService.mapToRDF(maDMP)
-        val testReportJSON = evaluationManagerService.shaclValidationService(maDMPTurtle)
-        return ResponseEntity.ok(testReportJSON)
-    }
-
-    @Operation(
         summary = "Run the evaluation for a specific test",
         description = "Return the evaluation for a specific test in json-ld format"
     )
@@ -141,15 +127,5 @@ class EvaluationController(
         return ResponseEntity.ok(jsonLDResult)
     }
 
-    @Operation(
-        summary = "Mapping a maDMP into a RDF format"
-    )
-    @PostMapping("/mappingRDF", consumes = ["multipart/form-data"])
-    suspend fun runMapping(
-        @RequestPart("maDMP") maDMP: FilePart,
-    ): ResponseEntity<Any>{
-        val result = evaluationManagerService.mapToRDF(maDMP)
-        return ResponseEntity.ok().body(result)
-    }
 }
 
