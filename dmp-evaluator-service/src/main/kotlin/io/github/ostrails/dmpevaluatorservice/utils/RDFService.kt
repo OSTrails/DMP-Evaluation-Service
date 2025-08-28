@@ -205,8 +205,12 @@ fun validateCompletenessWithSHACL(maDMP: String): Evaluation? {
                 val cause = exception.cause
                 var prettyPrintedStatements: String? = null
 
+
                 if (cause is ShaclSailValidationException) {
+                    println("SHACL Validation failed against constraints from the file: ${shapeFile.name}")
+
                     val validationReportModel: Model = cause.validationReportAsModel()
+                    val allFailedConstraints = StringBuilder()
 
                     validationReportModel.filter(null, SHACL.SOURCE_SHAPE, null).forEach { stmt ->
                         val obj = stmt.`object`
@@ -218,19 +222,15 @@ fun validateCompletenessWithSHACL(maDMP: String): Evaluation? {
                                 val shapeModel: Model = LinkedHashModel()
                                 statements.forEach { shapeModel.add(it) }
 
-                                val writerConfig = WriterConfig()
-                                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true)
-                                    .set(BasicWriterSettings.XSD_STRING_TO_PLAIN_LITERAL, true)
-                                    .set(BasicWriterSettings.PRETTY_PRINT, true)
-
                                 val sw = StringWriter()
-                                Rio.write(shapeModel, sw, RDFFormat.TURTLE, writerConfig)
-                                prettyPrintedStatements = sw.toString()
+                                Rio.write(shapeModel, sw, RDFFormat.TURTLE)
+
+                                allFailedConstraints.append(sw.toString()).append("\n\n")
                             }
                         }
                     }
+                    prettyPrintedStatements = allFailedConstraints.toString()
                 }
-
                 val evaluationReport = Evaluation(
                     evaluationId = UUID.randomUUID().toString(),
                     title = "SHACL Validation failed against constraints from the file: ${shapeFile.name}",
