@@ -13,7 +13,6 @@
 @prefix exf: <http://example.org/functions#> .
 @prefix idlab-fn: <https://w3id.org/imec/idlab/function#> .
 @prefix grel: <http://users.ugent.be/~bjdmeest/function/grel.ttl#> .
-
 @base <https://w3id.org/dcso/ns/core>.
 
 # Mappings based on ex9-dmp-long.json

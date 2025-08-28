@@ -1,6 +1,6 @@
+@prefix : <https://w3id.org/validation/ns/core#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix dcso: <https://w3id.org/dcso/ns/core#>.
-@prefix : <https://w3id.org/validation/ns/core#>.
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
 

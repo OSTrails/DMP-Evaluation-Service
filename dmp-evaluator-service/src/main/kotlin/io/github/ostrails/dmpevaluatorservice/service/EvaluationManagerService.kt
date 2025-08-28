@@ -11,7 +11,6 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
-import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDFService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -33,7 +32,6 @@ class EvaluationManagerService(
     private val evaluationReportRepository: EvaluationReportRepository,
     private val benchmarService: BenchmarService,
     private val evaluationService: EvaluationService,
-    private val toRDFService: ToRDFService,
     private val testService: TestService
 ) {
 

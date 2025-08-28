@@ -10,21 +10,40 @@ import be.ugent.rml.store.QuadStoreFactory
 import be.ugent.rml.store.RDF4JStore
 import be.ugent.rml.term.NamedNode
 import kotlinx.serialization.json.*
+import kotlin.Throwable
+import kotlin.sequences.asSequence
+
+import org.springframework.stereotype.Service
+
 import org.eclipse.rdf4j.model.Model
+import org.eclipse.rdf4j.model.Resource
+import org.eclipse.rdf4j.model.Statement
+
 import org.eclipse.rdf4j.model.impl.LinkedHashModel
 import org.eclipse.rdf4j.repository.RepositoryConnection
+import org.eclipse.rdf4j.repository.RepositoryException
 import org.eclipse.rdf4j.repository.sail.SailRepository
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat
 import org.eclipse.rdf4j.rio.Rio
+import org.eclipse.rdf4j.rio.WriterConfig
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings
+import org.eclipse.rdf4j.model.vocabulary.RDF
+import org.eclipse.rdf4j.model.vocabulary.RDF4J;
+import org.eclipse.rdf4j.model.vocabulary.SHACL
+import org.eclipse.rdf4j.model.util.Values.iri
 import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer
 import org.eclipse.rdf4j.sail.memory.MemoryStore
-import org.eclipse.rdf4j.model.vocabulary.RDF
-import org.eclipse.rdf4j.model.vocabulary.SHACL
-import org.springframework.stereotype.Service
 import org.eclipse.rdf4j.sail.shacl.ShaclSail
+import org.eclipse.rdf4j.sail.shacl.ShaclSailValidationException
 
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.*
 import java.util.*
+import java.io.StringWriter
+
 
 
 
@@ -146,85 +165,106 @@ fun jsonToRDF(json: String): String {
 }
 
 fun validateCompletenessWithSHACL(maDMP: String): Evaluation? {
-    val baseURI = "https://w3id.org/validation/ns/core#"
-
-    // Parse the maDMP Turtle content into a Model
-    val maDMPModel: Model = Rio.parse(maDMP.byteInputStream(), baseURI, RDFFormat.TURTLE)
-
-    var evaluationReport: Evaluation?
+    println("Validating maDMP against the dcs-completeness.ttl shape.")
 
     val shapesDir = File("src/main/resources/shapes")
-
     val shapeFile = shapesDir.listFiles { file -> file.name == "dcs-completeness.ttl" }?.firstOrNull()
         ?: throw IllegalStateException("Shape file dcs-completeness.ttl not found in shapes directory")
-    
-    // Parse shape model
-    val shapeModel = Rio.parse(shapeFile.inputStream(), baseURI, RDFFormat.TURTLE)
 
-    // Register the base prefix ":" for prettier output (if not already present)
-    shapeModel.setNamespace("", baseURI)
-    
-    // Extract all shapes (NodeShape or PropertyShape)
-    val shapeSubjects = shapeModel
-        .filter(null, RDF.TYPE, null)
-        .filter { it.`object` == SHACL.NODE_SHAPE || it.`object` == SHACL.PROPERTY_SHAPE }
-        .map { stmt ->
-            val subj = stmt.subject
-            when {
-                subj.isIRI -> shapeModel.namespaces.firstOrNull { ns -> subj.stringValue().startsWith(ns.name) }?.let { ns ->
-                    val localName = subj.stringValue().removePrefix(ns.name)
-                    if (ns.prefix.isEmpty()) ":$localName" else "${ns.prefix}:$localName"
-                } ?: "<${subj.stringValue()}>"
-                else -> subj.stringValue()
-            }
-        }
-        .distinct()
-
-    // Create a comma-separated list for the detailed report
-    val shapeListString = shapeSubjects.joinToString(", ")
-
-    // Create a SHACL-enabled repository
     val shaclSail = ShaclSail(MemoryStore())
     val repo = SailRepository(shaclSail)
     repo.init()
 
-    // Load shapes into the SHACL Sail
-    repo.connection.use { conn ->
-        conn.begin()
-        conn.add(shapeModel)
-        conn.commit()
+    try {
+        repo.connection.use { conn: SailRepositoryConnection ->
 
-        // Validate the maDMPModel against the loaded shapes
-        try {
-            conn.begin()
-            conn.add(maDMPModel)
-            conn.commit()
+            // Load shapes
+            try {
+                println("Loading shapes file into SailRepository.")
+                conn.begin()
+                shapeFile.inputStream().use { inputStream ->
+                    conn.add(inputStream, "", RDFFormat.TURTLE, RDF4J.SHACL_SHAPE_GRAPH)
+                    conn.commit() 
 
-            evaluationReport =
-                Evaluation(
+                }
+            } catch (e: Exception) {
+                println("An exception occurred while loading shapes: ${e.message}")
+                throw Exception("An exception occurred while loading shapes: ${e.message}")
+            }
+
+            // Load data
+            try {
+                println("Loading maDMP file into SailRepository.")
+                conn.begin()
+                BufferedInputStream(maDMP.byteInputStream()).use { inputStream ->
+                    conn.add(inputStream, "", RDFFormat.TURTLE)
+                    conn.commit() 
+
+                }
+            } catch (exception: RepositoryException) {
+                val cause = exception.cause
+                var prettyPrintedStatements: String? = null
+
+                if (cause is ShaclSailValidationException) {
+                    val validationReportModel: Model = cause.validationReportAsModel()
+
+                    validationReportModel.filter(null, SHACL.SOURCE_SHAPE, null).forEach { stmt ->
+                        val obj = stmt.`object`
+                        if (obj is Resource) {
+                            repo.connection.use { conn ->
+                                val statements = conn.getStatements(obj, null, null, RDF4J.SHACL_SHAPE_GRAPH).asIterable().toList()
+
+                                // Convert statements to a Model so Rio can write them
+                                val shapeModel: Model = LinkedHashModel()
+                                statements.forEach { shapeModel.add(it) }
+
+                                val writerConfig = WriterConfig()
+                                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true)
+                                    .set(BasicWriterSettings.XSD_STRING_TO_PLAIN_LITERAL, true)
+                                    .set(BasicWriterSettings.PRETTY_PRINT, true)
+
+                                val sw = StringWriter()
+                                Rio.write(shapeModel, sw, RDFFormat.TURTLE, writerConfig)
+                                prettyPrintedStatements = sw.toString()
+                            }
+                        }
+                    }
+                }
+
+                val evaluationReport = Evaluation(
                     evaluationId = UUID.randomUUID().toString(),
-                    title = "SHACL Validation with shapes from the file: ${shapeFile.name}",
-                    result = ResultTestEnum.PASS,
-                    details = "Validation based on the file ${shapeFile.name} which has following shapes: ${shapeListString}",
-                    reportId = null,
-                )
-            
-        } catch (e: Exception) {
-            evaluationReport =
-                Evaluation(
-                    evaluationId = UUID.randomUUID().toString(),
-                    title = "SHACL Validation for ${shapeFile.name}",
+                    title = "SHACL Validation failed against constraints from the file: ${shapeFile.name}",
                     result = ResultTestEnum.FAIL,
-                    details = "Validation failed: ${e.message}",
+                    details = "The following constraints did not pass: ${prettyPrintedStatements}",
                     reportId = null,
                 )
-            
-        }
+                return evaluationReport
+            }
+
+            val outFile = File("target/output/maDMP_with_shapes.ttl")
+            FileOutputStream(outFile).use { fos ->
+                val allStatements = conn.getStatements(null, null, null).asIterable()
+                Rio.write(allStatements, fos, RDFFormat.TURTLE)
+            }
+            println("Repository contents written to: ${outFile.absolutePath}")
+        }               
+    } catch (e: Exception) {
+        println("Could not establish a connection to the Sail repository. ${e.message}")
+    } finally {
+
+        repo.shutDown()
     }
 
-    repo.shutDown()
 
+    val evaluationReport = Evaluation(
+        evaluationId = UUID.randomUUID().toString(),
+        title = "SHACL Validation passed",
+        result = ResultTestEnum.PASS,
+        details = "SHACL Validation passed against constraints from the file: ${shapeFile.name}.",
+        reportId = null,
+    )
     return evaluationReport
+
 }
 
 

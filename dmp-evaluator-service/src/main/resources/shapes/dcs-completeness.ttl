@@ -1,10 +1,10 @@
+@prefix val: <https://w3id.org/validation/ns/core#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix dcso: <https://w3id.org/dcso/ns/core#>.
-@prefix : <https://w3id.org/validation/ns/core#>.
 @prefix terms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-:DMPCompletenessShape a sh:NodeShape ;
+val:DMPCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:DMP ;
     sh:property [
                     sh:path dcso:hasContact ;
@@ -39,9 +39,9 @@
                 sh:minCount 1 ;
                 ] .
 
-####################################
 
-:ContactCompletenessShape a sh:NodeShape ;
+
+val:ContactCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Contact ;
     sh:property [
                     sh:path dcso:hasContactId ;
@@ -56,9 +56,9 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:IdCompletenessShape a sh:NodeShape ;
+
+val:IdCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Id ;
     sh:property [
                     sh:path dcso:identifier ;
@@ -69,9 +69,9 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:ContributorCompletenessShape a sh:NodeShape ;
+
+val:ContributorCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Contributor ;
     sh:property [
                     sh:path dcso:hasContributorId ;
@@ -86,18 +86,18 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:CostCompletenessShape a sh:NodeShape ;
+
+val:CostCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Cost ;
     sh:property [
                     sh:path terms:title ;
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:DatasetCompletenessShape a sh:NodeShape ;
+
+val:DatasetCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Dataset ;
     sh:property [
                     sh:path dcso:hasDatasetId ;
@@ -116,9 +116,8 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:DistributionCompletenessShape a sh:NodeShape ;
+val:DistributionCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Distribution ;
     sh:property [
                     sh:path dcso:dataAccess ;
@@ -129,18 +128,18 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:FundingCompletenessShape a sh:NodeShape ;
+
+val:FundingCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Funding ;
     sh:property [
                     sh:path dcso:hasId ;
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:HostCompletenessShape a sh:NodeShape ;
+
+val:HostCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Host ;
     sh:property [
                     sh:path terms:title ;
@@ -151,9 +150,9 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:LicenseCompletenessShape a sh:NodeShape ;
+
+val:LicenseCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:License ;
     sh:property [
                     sh:path dcso:licenseRef ;
@@ -164,9 +163,9 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:MetadataCompletenessShape a sh:NodeShape ;
+
+val:MetadataCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Metadata ;
     sh:property [
                     sh:path dcso:language ;
@@ -177,27 +176,27 @@
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:ProjectCompletenessShape a sh:NodeShape ;
+
+val:ProjectCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:Metadata ;
     sh:property [
                     sh:path terms:title ;
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:SecurityAndPrivacyCompletenessShape a sh:NodeShape ;
+
+val:SecurityAndPrivacyCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:SecurityPrivacy ;
     sh:property [
                     sh:path terms:title ;
                     sh:minCount 1 ;
                 ] .
 
-####################################
 
-:TechnicalResourceCompletenessShape a sh:NodeShape ;
+
+val:TechnicalResourceCompletenessShape a sh:NodeShape ;
     sh:targetClass dcso:TechnicalResource ;
     sh:property [
                     sh:path foaf:name ;
