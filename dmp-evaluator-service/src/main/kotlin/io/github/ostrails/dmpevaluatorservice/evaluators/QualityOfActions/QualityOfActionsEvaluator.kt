@@ -128,8 +128,6 @@ class QualityOfActionsEvaluator(
         }
     }
 
-
-
     fun dmpIdValid(
         maDMP: JsonObject,
         reportId: String,
