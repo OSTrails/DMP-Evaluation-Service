@@ -206,7 +206,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         val logMessages = mutableListOf<String>()
         if (datasets.isEmpty()) {
             resultValue = ResultTestEnum.FAIL
-            logMessages.add("Cost field is not present in the maDMP")
+            logMessages.add("dataset field is not present in the maDMP")
         } else{resultValue = ResultTestEnum.INDERTERMINATED}
 
         datasets.forEachIndexed { index, element ->
