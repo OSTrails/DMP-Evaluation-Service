@@ -212,22 +212,22 @@ fun validateCompletenessWithSHACL(maDMP: String): Evaluation? {
                     val validationReportModel: Model = cause.validationReportAsModel()
                     val allFailedConstraints = StringBuilder()
 
-                    validationReportModel.filter(null, SHACL.SOURCE_SHAPE, null).forEach { stmt ->
-                        val obj = stmt.`object`
-                        if (obj is Resource) {
-                            repo.connection.use { conn ->
-                                val statements = conn.getStatements(obj, null, null, RDF4J.SHACL_SHAPE_GRAPH).asIterable().toList()
+                    val results = validationReportModel.filter(null, RDF.TYPE, SHACL.VALIDATION_RESULT)
 
-                                // Convert statements to a Model so Rio can write them
-                                val shapeModel: Model = LinkedHashModel()
-                                statements.forEach { shapeModel.add(it) }
+                    for (result in results) {
+                        val resultNode = result.subject
 
-                                val sw = StringWriter()
-                                Rio.write(shapeModel, sw, RDFFormat.TURTLE)
+                        val focusNode = validationReportModel.filter(resultNode, SHACL.FOCUS_NODE, null)
+                            .firstOrNull()?.`object`
 
-                                allFailedConstraints.append(sw.toString()).append("\n\n")
-                            }
-                        }
+                        val path = validationReportModel.filter(resultNode, SHACL.RESULT_PATH, null)
+                            .firstOrNull()?.`object`
+
+                        val message = validationReportModel.filter(resultNode, SHACL.RESULT_MESSAGE, null)
+                            .firstOrNull()?.`object`
+
+                        allFailedConstraints.append("FocusNode: $focusNode;")
+                        allFailedConstraints.append("Path: $path;")
                     }
                     prettyPrintedStatements = allFailedConstraints.toString()
                 }

@@ -18,6 +18,8 @@ import org.json.JSONTokener
 import org.springframework.stereotype.Component
 import java.io.InputStream
 import java.util.*
+import java.nio.file.Files
+import java.nio.file.Paths
 
 @Component
 class DCSCompletenessEvaluator: EvaluatorPlugin {
@@ -106,6 +108,11 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         testRecord: TestRecord
     ): Evaluation {
         val maDMPTurtle = jsonToRDF(maDMP.toString());
+
+        // save maDMPTurtle to file for debugging to target/output/maDMPTurtle.ttl 
+        println("Saving maDMPTurtle to target/output/maDMPTurtle.ttl for debugging")
+        Files.writeString(Paths.get("target/output/maDMPTurtle.ttl"), maDMPTurtle)
+
         val evaluationReport = validateCompletenessWithSHACL(maDMPTurtle)
         return evaluationReport ?: Evaluation(
             evaluationId = UUID.randomUUID().toString(),
