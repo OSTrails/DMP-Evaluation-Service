@@ -1,0 +1,119 @@
+{
+    "dmp": {
+        "dmp_id": {
+            "type": "doi",
+            "identifier": "testingidentifier"
+        },
+        "language": "en",
+        "title": "DMP test to evaluate the service",
+        "contact": {
+            "contact_id": {
+                "type": "orcid"
+            },
+            "mbox": "email",
+            "name": "My Name"
+        },
+        "contributor": [
+            {
+                "contributor_id": {
+                    "identifier": "0000-0002-4929-7875",
+                    "type": "orc"
+                },
+                "name": "Tomasz Miksa",
+                "role": [
+                    "Supervisor"
+                ]
+            },
+            {
+                "contributor_id": {
+                    "type": "orcid"
+                },
+                "mbox": "email",
+                "name": "My Name",
+                "role": [
+                    "Data Manager"
+                ]
+            }
+        ],
+        "cost": [
+            {
+                "currency_code": "EUR",
+                "title": "DAMAP Tutorial"
+            }
+        ],
+        "created": 1736756261554,
+        "dataset": [
+            {
+                "dataset_id": {
+                    "identifier": "https://www.gbif.org/dataset/510acddb-63e7-4dec-bcf8-e22e4fa60d76",
+                    "type": "doi"
+                },
+                "description": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\" RBW simulation datasets in HDF5 format: 300pT.h5 The particle dataset to generate the figures. Python scripts to generate figures in the manuscript. - Environment: Python 3.6.7 :: Anaconda 4.4.0 (64-bit) - Required modules: matplotlib, numpy, h5py Figure1.py Generate figure 1. Figure2.py Generate figure 2. Figure3.py Generate figure 3. Figure4.py Generate figure 4. QLDe.py Calculate bounce averaged diffusion coefficients according to Shprits et al. (2006) (doi: https://doi.org/10.1029/ 2006JA011725).",
+                "distribution": [
+                    {
+                        "access_url": "https://cloud.google.com/",
+                        "data_access": "open",
+                        "description": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\" RBW simulation datasets in HDF5 format: 300pT.h5 The particle dataset to generate the figures. Python scripts to generate figures in the manuscript. - Environment: Python 3.6.7 :: Anaconda 4.4.0 (64-bit) - Required modules: matplotlib, numpy, h5py Figure1.py Generate figure 1. Figure2.py Generate figure 2. Figure3.py Generate figure 3. Figure4.py Generate figure 4. QLDe.py Calculate bounce averaged diffusion coefficients according to Shprits et al. (2006) (doi: https://doi.org/10.1029/ 2006JA011725).",
+                        "format": [
+                            "Other"
+                        ],
+                        "host": {
+                            "description": "Institutional Cloud is your institutions cloud service. It runs on your IT department's servers and has every standard cloud functionality.",
+                            "title": "Institutional Cloud",
+                            "url": "https://cloud.google.com/"
+                        },
+                        "license": [],
+                        "title": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\""
+                    }
+                ],
+                "personal_data": "no",
+                "security_and_privacy": [],
+                "sensitive_data": "no",
+                "technical_resource": [],
+                "title": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\"",
+                "type": "Other"
+            },
+            {
+                "dataset_id": {
+                    "identifier": "10.1103/PhysRevB.87.115105212",
+                    "type": "doi"
+                },
+                "description": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\" RBW simulation datasets in HDF5 format: 300pT.h5 The particle dataset to generate the figures. Python scripts to generate figures in the manuscript. - Environment: Python 3.6.7 :: Anaconda 4.4.0 (64-bit) - Required modules: matplotlib, numpy, h5py Figure1.py Generate figure 1. Figure2.py Generate figure 2. Figure3.py Generate figure 3. Figure4.py Generate figure 4. QLDe.py Calculate bounce averaged diffusion coefficients according to Shprits et al. (2006) (doi: https://doi.org/10.1029/ 2006JA011725).",
+                "distribution": [
+                    {
+                        "access_url": "https://cloud.google.com/",
+                        "data_access": "open",
+                        "description": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\" RBW simulation datasets in HDF5 format: 300pT.h5 The particle dataset to generate the figures. Python scripts to generate figures in the manuscript. - Environment: Python 3.6.7 :: Anaconda 4.4.0 (64-bit) - Required modules: matplotlib, numpy, h5py Figure1.py Generate figure 1. Figure2.py Generate figure 2. Figure3.py Generate figure 3. Figure4.py Generate figure 4. QLDe.py Calculate bounce averaged diffusion coefficients according to Shprits et al. (2006) (doi: https://doi.org/10.1029/ 2006JA011725).",
+                        "format": [
+                            "Other"
+                        ],
+                        "host": {
+                            "description": "Institutional Cloud is your institutions cloud service. It runs on your IT department's servers and has every standard cloud functionality.",
+                            "title": "Institutional Cloud",
+                            "url": "https://cloud.google.com/"
+                        },
+                        "license": [],
+                        "title": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\""
+                    }
+                ],
+                "personal_data": "no",
+                "security_and_privacy": [],
+                "sensitive_data": "no",
+                "technical_resource": [],
+                "title": "HDF5 datasets and python scripts to generate figures in \"Butterfly distribution of relativistic electrons driven by parallel propagating lower band whistler chorus waves\"",
+                "type": "Other"
+            }
+        ],
+        "ethical_issues_exist": "no",
+        "modified": 1739746475449,
+        "project": [
+            {
+                "description": "Creative",
+                "end": "2025-06-01 00:00:00.0",
+                "funding": [],
+                "start": "2024-06-01 00:00:00.0",
+                "title": "CRIS2024 Demo Project"
+            }
+        ]
+    }
+}
