@@ -52,7 +52,7 @@ class BenchmarkController(
         summary = "Get all the benchmarks",
         description = "Return all the benchmarks supported by the system"
     )
-    @GetMapping("/list")
+    @GetMapping("/list",  produces = ["application/json"])
     suspend fun getBenchmarks(): ResponseEntity<List<BenchmarkRecord>> {
         val benchmarks = benchMarkService.getBenchmarks()
         return ResponseEntity.ok(benchmarks)

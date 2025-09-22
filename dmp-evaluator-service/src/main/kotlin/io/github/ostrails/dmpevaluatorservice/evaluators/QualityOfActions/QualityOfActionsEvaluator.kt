@@ -1,4 +1,4 @@
-package io.github.ostrails.dmpevaluatorservice.evaluators
+package io.github.ostrails.dmpevaluatorservice.evaluators.QualityOfActions
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
@@ -26,13 +26,14 @@ class QualityOfActionsEvaluator(
 
     override val functionMap = mapOf(
         "evaluateOpenAccess" to ::evaluateOpenAccess,
+        "dmpIdValid" to ::dmpIdValid,
     )
 
     override fun getPluginInformation(): PluginInfo {
         return PluginInfo(
             pluginId = getPluginIdentifier(),
-            description = "Evaluator to perform completeness tests",
-            tests = listOf()
+            description = "Evaluator to perform FAIR tests",
+            functions = listOf()
         )
     }
 
@@ -126,6 +127,64 @@ class QualityOfActionsEvaluator(
             }
         }
     }
+
+
+
+    fun dmpIdValid(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val logMessages = mutableListOf<String>()
+        val allowedTypes = setOf("handle", "doi", "ark", "url", "other")
+        var resultValue = ResultTestEnum.INDERTERMINATED
+
+        val dmpObject = maDMP["dmp"]?.jsonObjectOrNull()
+        if (dmpObject == null) {
+            logMessages.add("dmp field is missing in maDMP.")
+            resultValue = ResultTestEnum.FAIL
+        } else {
+            val dmpId = dmpObject["dmp_id"]?.jsonObjectOrNull()
+            if (dmpId == null) {
+                logMessages.add("dmp_id field is missing in 'dmp'.")
+                resultValue = ResultTestEnum.FAIL
+            } else {
+                val type = dmpId["type"]?.jsonPrimitive?.contentOrNull
+                val identifier = dmpId["identifier"]?.jsonPrimitive?.contentOrNull
+
+                logMessages.add("🔍 dmp_id found: type=$type, identifier=$identifier")
+
+                when {
+                    type == null || type !in allowedTypes -> {
+                        logMessages.add("Invalid or missing 'type' in dmp_id. Expected one of $allowedTypes.")
+                        resultValue = ResultTestEnum.FAIL
+                    }
+                    identifier.isNullOrBlank() -> {
+                        logMessages.add("identifier is missing or blank in dmp_id.")
+                        resultValue = ResultTestEnum.FAIL
+                    }
+                    else -> {
+                        logMessages.add("✅ dmp_id is valid.")
+                        resultValue = ResultTestEnum.PASS
+                    }
+                }
+            }
+        }
+
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = resultValue,
+            details = testRecord.description,
+            affectedElements = "dmp.dmp_id",
+            title = testRecord.title,
+            reportId = reportId,
+            log = logMessages.joinToString("\n"),
+            generated = "${this::class.qualifiedName}::dmpIdValid",
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+    }
+
 
     fun JsonElement.jsonArrayOrNull(): JsonArray? =
         this as? JsonArray

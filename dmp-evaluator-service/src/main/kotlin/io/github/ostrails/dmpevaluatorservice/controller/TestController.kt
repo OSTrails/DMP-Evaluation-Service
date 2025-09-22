@@ -54,7 +54,7 @@ class TestController(
         summary = "get the list of tests",
         description = "Return the list of tests that are in the system"
     )
-    @GetMapping("/info")
+    @GetMapping("/info", produces = ["application/json"])
     suspend fun getTests(): ResponseEntity<List<TestRecord>>{
         val result = testService.listAllTests()
         return ResponseEntity.ok(result)

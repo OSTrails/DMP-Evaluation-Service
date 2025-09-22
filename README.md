@@ -16,3 +16,24 @@ Evaluation is organised across five core dimensions, each addressing a critical 
 # Exemplar metadata
 Compatible with: https://github.com/OSTrails/FAIR_assessment_output_specification 
 
+# Requirements to run the service.
+Java 17 or higher Required for Spring Boot 3.x. <br>
+MongoDB Any (locally or Docker) Can use Docker to simplify. <br>
+
+# How to run the service.
+1. clone the repository
+   * git clone https://github.com/your-org/dmp-evaluator-service.git
+   * cd dmp-evaluator-service
+2. Start MongoDB Using Docker Compose
+   * Make sure Docker is running, then start the MongoDB service:
+   * docker-compose up -d
+3. Build the project
+   * mvn clean install
+4. Run the Application
+   * mvn spring-boot:run
+5. Checking th status
+   * Access Swagger UI (Optional)
+   * http://localhost:8080/swagger-ui.html
+
+
+

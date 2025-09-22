@@ -30,7 +30,6 @@ class MetricService(
     suspend fun listMetrics(): List<MetricRecord> {
         val metrics = metricRepository.findAll().collectList().awaitSingle()
         val enrichedMetrics = metrics.map {it.copy(
-            id = configurationMetricVariables.endpointURL + "/" + it.id,
             hasBenchmark = it.hasBenchmark?.map { configurationBenchmarkVariables.endpointURL + "/" + it },
             testAssociated = it.testAssociated?.map { configurationTestVariables.endpointURL + "/" + it }
         )}

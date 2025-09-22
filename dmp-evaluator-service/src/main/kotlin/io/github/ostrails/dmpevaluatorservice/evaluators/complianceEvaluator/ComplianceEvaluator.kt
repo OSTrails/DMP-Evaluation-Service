@@ -24,8 +24,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
     override fun getPluginInformation(): PluginInfo {
         return PluginInfo(
             pluginId = getPluginIdentifier(),
-            description = "Evaluator to perform Feasibility tests",
-            tests = listOf()
+            description = "Evaluator to perform Compliance tests",
+            functions = listOf()
         )
     }
 

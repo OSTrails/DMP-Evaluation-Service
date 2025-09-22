@@ -16,8 +16,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
 
     override val functionMap = mapOf(
-        "evaluateStructure" to ::evaluateStructure,
-        "evaluateMetadata" to ::evaluateMetadata
+        "testFuntion" to ::testFuntion
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
@@ -42,27 +41,11 @@ class CompletenessEvaluator: EvaluatorPlugin {
         return PluginInfo(
             pluginId = getPluginIdentifier(),
             description = "Evaluator to perform completeness tests",
-            tests = listOf()
+            functions = listOf()
         )
     }
 
-    fun evaluateStructure(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateStructure",
-            outputFromTest = testRecord.id
-        )
-    }
-
-    fun evaluateMetadata(
+    fun testFuntion(
         maDMP: Any,
         reportId: String,
         testRecord: TestRecord

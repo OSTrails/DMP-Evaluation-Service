@@ -35,16 +35,16 @@ class WebClientConfig {
 
 @Configuration
 class CorsGlobalConfig {
-
     @Bean
     fun corsWebFilter(): CorsWebFilter {
         val corsConfig = CorsConfiguration().apply {
             addAllowedOrigin("*") // or addAllowedOriginPattern("*") for Spring 6+
             addAllowedHeader("*")
             addAllowedMethod("*")
-            allowCredentials = true
+            //allowCredentials = true
         }
 
+        corsConfig.addAllowedOriginPattern("*")
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", corsConfig)
         return CorsWebFilter(source)

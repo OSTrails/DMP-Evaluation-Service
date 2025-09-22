@@ -26,9 +26,9 @@ dmp:
     unpayWallEmail: "dmpEvalutionService@test.com"
     fairChampionEndPoint: "https://tests.ostrails.eu/assess/test/"
   test:
-    endpointURL: "http://localhost:8080/tests"
+    endpointURL: ${TEST_URL}
   metric:
-    endpointURL: "http://localhost:8080/metrics"
+    endpointURL: ${METRIC_URL}
   benchmark:
-    endpointURL: "http://localhost:8080/benchmarks"
+    endpointURL: ${BENCHMARK_URL}
 

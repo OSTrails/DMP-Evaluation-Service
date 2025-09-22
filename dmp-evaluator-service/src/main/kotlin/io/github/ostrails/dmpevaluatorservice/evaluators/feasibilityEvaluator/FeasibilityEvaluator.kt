@@ -22,7 +22,7 @@ class FeasibilityEvaluator: EvaluatorPlugin {
         return PluginInfo(
             pluginId = getPluginIdentifier(),
             description = "Evaluator to perform Feasibility tests",
-            tests = listOf()
+            functions = listOf()
         )
     }
 

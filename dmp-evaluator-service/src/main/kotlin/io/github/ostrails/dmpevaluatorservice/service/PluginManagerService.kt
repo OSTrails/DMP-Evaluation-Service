@@ -14,7 +14,11 @@ class PluginManagerService(
     fun getEvaluators(): List<PluginInfo> {
         return pluginRegistry.plugins.map { plugin ->
             println("identifier , ${plugin.getPluginIdentifier()}")
-            plugin.getPluginInformation()
+            PluginInfo(
+                pluginId = plugin.getPluginIdentifier(),
+                description= plugin.getPluginInformation().description,
+                functions = plugin.functionMap.keys.toList(),
+            )
         }
     }
 
@@ -22,8 +26,8 @@ class PluginManagerService(
         val plugin =  pluginRegistry.getPluginFor(pluginId).orElseThrow {
             IllegalArgumentException("Plugin '$pluginId' not found")
         }
-
-        return plugin.getPluginInformation()
+        return PluginInfo(pluginId = plugin.getPluginIdentifier(),
+            description = plugin.getPluginInformation().description,
+            functions = plugin.functionMap.keys.toList(),)
     }
-
 }
