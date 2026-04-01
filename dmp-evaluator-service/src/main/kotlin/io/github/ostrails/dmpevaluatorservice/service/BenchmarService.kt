@@ -115,8 +115,10 @@ class BenchmarService(
 
 
     suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
+        val benchmarkUrl = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId
         val graphEntry = BenchmarkGraphEntry(
-            id = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId,
+            id = benchmarkUrl,
+            identifier = IdWrapper(benchmarkUrl),
             title = LangLiteral("en",  benchmark.title),
             description = LangLiteral("en", benchmark.description),
             version = benchmark.version,

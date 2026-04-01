@@ -145,10 +145,12 @@ class MetricService(
         val benchMarksIds = metric.hasBenchmark
         val benchmarks = benchMarksIds?.let { benchmarkRepository.findAllByBenchmarkIdIn(it).collectList().awaitSingle() }
             ?: listOf()
+        val metricUrl = configurationMetricVariables.endpointURL + "/" + metric.id
         val graphEntry = metric.let {
             MetricGraphEntry(
-                id = configurationMetricVariables.endpointURL + "/" + it.id ,
-                type = "dqv:Metric",
+                id = metricUrl,
+                identifier = IdWrapper(metricUrl),
+                type = "ftr:Metric",
                 title = LangLiteral("en", metric.title),
                 description = LangLiteral("en", metric.description),
                 version = metric.version,

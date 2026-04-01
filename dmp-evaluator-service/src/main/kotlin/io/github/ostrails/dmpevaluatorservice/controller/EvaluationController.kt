@@ -5,6 +5,7 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultSetJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -69,19 +70,17 @@ class EvaluationController(
 
 
     @Operation(
-        summary = "Run a benchmark evaluaion and return the list of results in json-ld",
-        description = "Run all the tests that are associated wiht a benchmark"
+        summary = "Run a benchmark evaluation and return the results as a ftr:TestResultSet in JSON-LD",
+        description = "Run all the tests associated with a benchmark and return the aggregated results as an FTR-compliant TestResultSet"
     )
     @PostMapping("/benchmark/json-ld", consumes = ["multipart/form-data"])
     suspend fun runBenchmarkJsonLD(
         @RequestPart("maDMP") maDMP: FilePart,
         @RequestPart("benchmark") benchmark: String,
         @RequestPart(required = false) reportId: String?
-    ): ResponseEntity<List<TestResultJsonLD>>{
-        val filename = maDMP.filename().lowercase()
-        val jsonResult = evaluationManagerService.gatewayBenchmarkEvaluationService(maDMP, benchmark, reportId)
-        val jsonLDResult: List<TestResultJsonLD> = jsonResult.map { evaluationService.buildEvalutionResultJsonLD(it) }
-        return ResponseEntity.ok(jsonLDResult)
+    ): ResponseEntity<TestResultSetJsonLD> {
+        val result = evaluationManagerService.gatewayBenchmarkEvaluationJsonLD(maDMP, benchmark, reportId)
+        return ResponseEntity.ok(result)
     }
 
     @Operation(

@@ -22,7 +22,8 @@ data class MetricJsonLD(
             "vcard" to "http://www.w3.org/2006/vcard/ns#",
             "vivo" to "http://vivoweb.org/ontology/core#",
             "dcat" to "http://www.w3.org/ns/dcat#",
-            "foaf" to "http://xmlns.com/foaf/0.1/"
+            "foaf" to "http://xmlns.com/foaf/0.1/",
+            "dpv" to "https://w3id.org/dpv#"
         )
     }
 }
@@ -32,7 +33,10 @@ data class MetricGraphEntry(
     val id: String,
 
     @JsonProperty("@type")
-    val type: Any = "dqv:Metric", // String or List<String>
+    val type: Any = "ftr:Metric", // String or List<String>
+
+    @JsonProperty("dcterms:identifier")
+    val identifier: IdWrapper? = null,
 
     @JsonProperty("dcterms:title")
     val title: LangLiteral,
@@ -59,9 +63,9 @@ data class MetricGraphEntry(
     val hasTest: List<IdWrapper>,
 
     @JsonProperty("ftr:hasBenchmark")
-    val hasBenchmark: List<IdWrapper> ,
+    val hasBenchmark: List<IdWrapper>,
 
-    @JsonProperty("ftr:isApplicableFor")
+    @JsonProperty("dpv:isApplicableFor")
     val isApplicableFor: IdWrapper? = null,
 
     @JsonProperty("ftr:supportedBy")
@@ -117,4 +121,3 @@ data class FAIRPrinciple(
     val abbreviation: String,
     val description: String
 )
-
