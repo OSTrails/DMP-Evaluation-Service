@@ -11,6 +11,7 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
+import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultSetJsonLD
 import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDFService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -134,6 +135,15 @@ class EvaluationManagerService(
         }catch (e: Exception) {
             throw ResourceNotFoundException("Was not possible to generate the evaluation due $e")
         }
+    }
+
+    suspend fun gatewayBenchmarkEvaluationJsonLD(file: FilePart, benchmarkId: String, reportId: String?): TestResultSetJsonLD {
+        val evaluations = gatewayBenchmarkEvaluationService(file, benchmarkId, reportId)
+        val benchmark = benchmarkService.getBenchmarkDetail(benchmarkId)
+        val effectiveReportId = evaluations.firstOrNull()?.reportId
+            ?: reportId
+            ?: "urn:dmpEvaluationService:unknown"
+        return evaluationService.buildTestResultSetJsonLD(evaluations, benchmark.title, effectiveReportId)
     }
 
     suspend fun fileToJsonObject(file: FilePart): JsonObject {

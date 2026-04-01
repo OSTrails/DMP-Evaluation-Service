@@ -13,7 +13,7 @@ data class BenchmarkJsonLD(
 ){
     companion object {
         val defaultContext = mapOf(
-            "ftr" to "https://www.w3id.org/ftr#",
+            "ftr" to "https://w3id.org/ftr#",
             "doap" to "http://usefulinc.com/ns/doap#",
             "xsd" to "http://www.w3.org/2001/XMLSchema#",
             "dqv" to "http://www.w3.org/ns/dqv#",
@@ -34,6 +34,9 @@ data class BenchmarkGraphEntry(
 
     @JsonProperty("@type")
     val type: String = "ftr:Benchmark",
+
+    @JsonProperty("dcterms:identifier")
+    val identifier: IdWrapper? = null,
 
     @JsonProperty("dcterms:title")
     val title: LangLiteral,
@@ -59,10 +62,10 @@ data class BenchmarkGraphEntry(
     @JsonProperty("dcat:keyword")
     val keyword: List<LangLiteral>? = null,
 
-    @JsonProperty("ftr:associatedMetric")
+    @JsonProperty("ftr:hasAssociatedMetric")
     val associatedMetric: List<IdWrapper>? = null,
 
-    @JsonProperty("ftr:hasAlgorithm")
+    @JsonProperty("ftr:scoringFunction")
     val hasAlgorithm: List<IdWrapper>? = null,
 
     @JsonProperty("dcterms:creator")
@@ -97,13 +100,8 @@ data class Creator(
 
 data class MetricLDEntry(
     @JsonProperty("@id") val id: String,
-    @JsonProperty("@type") val type: String = "dqv:Metric",
+    @JsonProperty("@type") val type: String = "ftr:Metric",
     @JsonProperty("dcterms:identifier") val identifier: IdWrapper,
     @JsonProperty("rdfs:label") val label: String,
     @JsonProperty("vivo:abbreviation") val abbreviation: String
 )
-
-
-
-
-

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 import org.springframework.plugin.core.PluginRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -61,7 +62,7 @@ class EvaluationService(
     fun buildEvalutionResultJsonLD(evaluation: Evaluation): TestResultJsonLD {
         val resultId = "urn:dmpEvaluationService:${evaluation.evaluationId}"
         val testId = evaluation.outputFromTest ?: "https://example.org/test/default"
-        val resourceId = evaluation.generated ?: "https://example.org/resource/default"
+        val resourceId = evaluation.generated?.takeIf { it.isNotBlank() } ?: "https://example.org/resource/default"
         val activityId = "urn:ostrails:testexecutionactivity:${UUID.randomUUID()}"
 
         val testResult = TestResultGraph(
@@ -71,29 +72,50 @@ class EvaluationService(
             description = LangLiteral(value = evaluation.details),
             license = IdWrapper("https://creativecommons.org/publicdomain/zero/1.0/"),
             resultValue = LangLiteral(value = evaluation.result.name.lowercase()),
-            summary = LangLiteral(value = ""),
-            generatedAt = TypedLiteral("xsd:date", evaluation.timestamp.toString()),
+            generatedAt = TypedLiteral("xsd:dateTime", evaluation.timestamp.toString()),
             log = LangLiteral(value = evaluation.log),
             completion = TypedLiteral("xsd:int", (evaluation.completion ?: 100).toString()),
-            outputFromTest = IdWrapper("urn:dmpEvaluationService:${testId}"),
-            wasDerivedFrom = IdWrapper("urn:dmpEvaluationService:${resourceId}")
+            outputFromTest = IdWrapper(testId),
+            assessmentTarget = IdWrapper(resourceId),
+            wasGeneratedBy = IdWrapper(activityId)
         )
 
         val testExecution = TestExecutionActivity(
             id = activityId,
-            associatedWith = IdWrapper("urn:dmpEvaluationService:${testId}"),
-            generated = IdWrapper("urn:dmpEvaluationService:${resultId}"),
-            used = IdWrapper("urn:dmpEvaluationService:${resourceId}")
+            associatedWith = IdWrapper(testId),
+            generated = IdWrapper(resultId),
+            used = IdWrapper(resourceId)
         )
 
-        val resource = Entity(id = "urn:dmpEvaluationService:${resourceId}")
+        val resource = Entity(id = resourceId)
 
         return TestResultJsonLD(
-            graph = listOf(testExecution, testResult, resource /* optionally also: test definition */)
+            graph = listOf(testExecution, testResult, resource)
         )
-
     }
 
+    fun buildTestResultSetJsonLD(
+        evaluations: List<Evaluation>,
+        benchmarkTitle: String,
+        reportId: String
+    ): TestResultSetJsonLD {
+        val setId = "urn:dmpEvaluationService:$reportId"
+        val assessmentTargetId = evaluations.firstOrNull()?.generated?.takeIf { it.isNotBlank() }
+            ?: "https://example.org/resource/default"
 
+        val individualResults = evaluations.map { buildEvalutionResultJsonLD(it) }
+        val memberIds = evaluations.map { IdWrapper("urn:dmpEvaluationService:${it.evaluationId}") }
 
+        val setGraph = TestResultSetGraph(
+            id = setId,
+            identifier = IdWrapper(setId),
+            title = LangLiteral(value = "Assessment results for: $benchmarkTitle"),
+            assessmentTarget = IdWrapper(assessmentTargetId),
+            hadMember = memberIds,
+            generatedAtTime = TypedLiteral("xsd:dateTime", Instant.now().toString()),
+            license = IdWrapper("https://creativecommons.org/publicdomain/zero/1.0/")
+        )
+
+        return TestResultSetJsonLD(graph = listOf(setGraph) + individualResults.flatMap { it.graph })
+    }
 }
