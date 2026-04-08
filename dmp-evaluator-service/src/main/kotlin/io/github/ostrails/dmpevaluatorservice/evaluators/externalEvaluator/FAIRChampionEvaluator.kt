@@ -59,7 +59,8 @@ class FAIRChampionEvaluato(
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateStructure",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateStructure",
             outputFromTest = testRecord.id
 
         )
@@ -76,7 +77,8 @@ class FAIRChampionEvaluato(
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateMetadata",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateMetadata",
             outputFromTest = testRecord.id
         )
     }
@@ -101,7 +103,8 @@ class FAIRChampionEvaluato(
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateLicense",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateLicense",
             outputFromTest = testRecord.id
         )
     }

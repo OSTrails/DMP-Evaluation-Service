@@ -68,7 +68,7 @@ class EvaluationManagerService(
         }
         val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
         val updateReport = report.copy(
-            evaluations = report.evaluations + savedEvaluations.map { it.evaluationId }
+            evaluations = report.evaluations + savedEvaluations.mapNotNull { it.evaluationId }
         )
         evaluationReportRepository.save(updateReport).awaitSingle()
         return (savedEvaluations)
@@ -102,7 +102,7 @@ class EvaluationManagerService(
                     val evaluations = evaluationService.generateTestsResultsFromBenchmark(benchmark, maDMP, reportIdentifier.toString())
                     val savedEvaluations = evaluations.map { resultEvaluationResultRepository.save(it).awaitSingle() }
                     val updateReport = report.copy(
-                        evaluations = report.evaluations + savedEvaluations.map { it.evaluationId }
+                        evaluations = report.evaluations + savedEvaluations.mapNotNull { it.evaluationId }
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
                     //TODO()
@@ -127,7 +127,7 @@ class EvaluationManagerService(
                 if (evaluation != null) {
                     val savedEvaluation = evaluation.let { resultEvaluationResultRepository.save(it).awaitSingle() }
                     val updateReport = report.copy(
-                        evaluations = report.evaluations + (savedEvaluation?.evaluationId)
+                        evaluations = report.evaluations + listOfNotNull(savedEvaluation?.evaluationId)
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
                     return savedEvaluation

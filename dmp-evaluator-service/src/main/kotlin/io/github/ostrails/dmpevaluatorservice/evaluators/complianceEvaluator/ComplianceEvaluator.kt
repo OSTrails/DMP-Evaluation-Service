@@ -60,7 +60,6 @@ class ComplianceEvaluator: EvaluatorPlugin {
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateLicenseCompliance",
             outputFromTest = testRecord.id
         )
     }
@@ -77,7 +76,6 @@ class ComplianceEvaluator: EvaluatorPlugin {
                 title = testRecord.title,
                 details = "Input is not a valid JsonObject",
                 reportId = reportId,
-                generated = "${this::class.qualifiedName}::checkFormatFile",
                 outputFromTest = testRecord.id,
                 log = "The provided maDMP could not be parsed as a JsonObject."
             )
@@ -95,7 +93,6 @@ class ComplianceEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             details = testRecord.description,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}::checkFormatFile",
             outputFromTest = testRecord.id,
             log = logMessage
         )

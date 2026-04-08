@@ -1,23 +1,39 @@
 package io.github.ostrails.dmpevaluatorservice.database.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
-import javax.annotation.processing.Completion
-import javax.annotation.processing.Generated
 
 @Document(collection = "evaluations")
 data class Evaluation(
-    @Id val evaluationId:  String? = null,
+    @Id
+    @JsonProperty("identifier")
+    val evaluationId: String? = null,
+
     val title: String = "",
-    val result: ResultTestEnum,
+
+    @JsonProperty("description")
     val details: String,
+
+    @JsonProperty("value")
+    val result: ResultTestEnum,
+
+    @JsonProperty("generatedAtTime")
     val timestamp: Instant = Instant.now(),
-    val reportId: String?,  // Links back to EvaluationReport
+
+    val reportId: String?,
+
     val log: String = "",
-    val affectedElements: String? = null,
+
+    val affectedElements: List<String>? = null,
+
     val completion: Int? = null,
-    val generated: String? = "",
-    val outputFromTest: String? = "",
+
+    val assessmentTarget: String? = null,
+
+    val wasGeneratedBy: String? = null,
+
+    val outputFromTest: String? = null,
 )
