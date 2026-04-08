@@ -7,11 +7,6 @@ data class TestResultSetJsonLD(
     @JsonProperty("@context")
     val context: Map<String, String> = defaultContext,
 
-    @JsonProperty("@graph")
-    val graph: List<Any>
-)
-
-data class TestResultSetGraph(
     @JsonProperty("@id") val id: String,
     @JsonProperty("@type") val type: String = "ftr:TestResultSet",
     @JsonProperty("dcterms:identifier") val identifier: IdWrapper,

@@ -62,10 +62,10 @@ class EvaluationService(
     fun buildEvalutionResultJsonLD(evaluation: Evaluation): TestResultJsonLD {
         val resultId = "urn:dmpEvaluationService:${evaluation.evaluationId}"
         val testId = evaluation.outputFromTest ?: "https://example.org/test/default"
-        val resourceId = evaluation.generated?.takeIf { it.isNotBlank() } ?: "https://example.org/resource/default"
-        val activityId = "urn:ostrails:testexecutionactivity:${UUID.randomUUID()}"
+        val resourceId = evaluation.assessmentTarget?.takeIf { it.isNotBlank() } ?: "https://example.org/resource/default"
+        val activityId = evaluation.wasGeneratedBy?.takeIf { it.isNotBlank() } ?: "urn:ostrails:testexecutionactivity:${UUID.randomUUID()}"
 
-        val testResult = TestResultGraph(
+        return TestResultJsonLD(
             id = resultId,
             identifier = IdWrapper(resultId),
             title = LangLiteral(value = "${evaluation.title} OUTPUT"),
@@ -79,19 +79,6 @@ class EvaluationService(
             assessmentTarget = IdWrapper(resourceId),
             wasGeneratedBy = IdWrapper(activityId)
         )
-
-        val testExecution = TestExecutionActivity(
-            id = activityId,
-            associatedWith = IdWrapper(testId),
-            generated = IdWrapper(resultId),
-            used = IdWrapper(resourceId)
-        )
-
-        val resource = Entity(id = resourceId)
-
-        return TestResultJsonLD(
-            graph = listOf(testExecution, testResult, resource)
-        )
     }
 
     fun buildTestResultSetJsonLD(
@@ -100,13 +87,11 @@ class EvaluationService(
         reportId: String
     ): TestResultSetJsonLD {
         val setId = "urn:dmpEvaluationService:$reportId"
-        val assessmentTargetId = evaluations.firstOrNull()?.generated?.takeIf { it.isNotBlank() }
+        val assessmentTargetId = evaluations.firstOrNull()?.assessmentTarget?.takeIf { it.isNotBlank() }
             ?: "https://example.org/resource/default"
-
-        val individualResults = evaluations.map { buildEvalutionResultJsonLD(it) }
         val memberIds = evaluations.map { IdWrapper("urn:dmpEvaluationService:${it.evaluationId}") }
 
-        val setGraph = TestResultSetGraph(
+        return TestResultSetJsonLD(
             id = setId,
             identifier = IdWrapper(setId),
             title = LangLiteral(value = "Assessment results for: $benchmarkTitle"),
@@ -115,7 +100,5 @@ class EvaluationService(
             generatedAtTime = TypedLiteral("xsd:dateTime", Instant.now().toString()),
             license = IdWrapper("https://creativecommons.org/publicdomain/zero/1.0/")
         )
-
-        return TestResultSetJsonLD(graph = listOf(setGraph) + individualResults.flatMap { it.graph })
     }
 }

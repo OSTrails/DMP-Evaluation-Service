@@ -6,29 +6,8 @@ import io.github.ostrails.dmpevaluatorservice.model.metric.LangLiteral
 
 data class BenchmarkJsonLD(
     @JsonProperty("@context")
-    val context: Map<String, String> = Companion.defaultContext,
+    val context: Map<String, String> = defaultContext,
 
-    @JsonProperty("@graph")
-    val graph: List<Any>
-){
-    companion object {
-        val defaultContext = mapOf(
-            "ftr" to "https://w3id.org/ftr#",
-            "doap" to "http://usefulinc.com/ns/doap#",
-            "xsd" to "http://www.w3.org/2001/XMLSchema#",
-            "dqv" to "http://www.w3.org/ns/dqv#",
-            "dcterms" to "http://purl.org/dc/terms/",
-            "rdfs" to "http://www.w3.org/2000/01/rdf-schema#",
-            "vcard" to "http://www.w3.org/2006/vcard/ns#",
-            "vivo" to "http://vivoweb.org/ontology/core#",
-            "dcat" to "http://www.w3.org/ns/dcat#",
-            "foaf" to "http://xmlns.com/foaf/0.1/"
-        )
-    }
-}
-
-
-data class BenchmarkGraphEntry(
     @JsonProperty("@id")
     val id: String,
 
@@ -70,7 +49,22 @@ data class BenchmarkGraphEntry(
 
     @JsonProperty("dcterms:creator")
     val creators: List<IdWrapper>? = null
-)
+){
+    companion object {
+        val defaultContext = mapOf(
+            "ftr" to "https://w3id.org/ftr#",
+            "doap" to "http://usefulinc.com/ns/doap#",
+            "xsd" to "http://www.w3.org/2001/XMLSchema#",
+            "dqv" to "http://www.w3.org/ns/dqv#",
+            "dcterms" to "http://purl.org/dc/terms/",
+            "rdfs" to "http://www.w3.org/2000/01/rdf-schema#",
+            "vcard" to "http://www.w3.org/2006/vcard/ns#",
+            "vivo" to "http://vivoweb.org/ontology/core#",
+            "dcat" to "http://www.w3.org/ns/dcat#",
+            "foaf" to "http://xmlns.com/foaf/0.1/"
+        )
+    }
+}
 
 data class IdWrapper(
     @JsonProperty("@id")

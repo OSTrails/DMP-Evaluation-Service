@@ -50,8 +50,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                 result = ResultTestEnum.PASS,
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
-                reportId = report.reportId,
-                generated = "${this::class.qualifiedName}:: evaluate"
+                reportId = report.reportId
             )
         }
         return evaluationsResults
@@ -70,7 +69,6 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             reportId = reportId,
             log = formattedLog(validationDMP, "All required fields are present.", "Missing required fields detected"),
-            generated = "${this::class.qualifiedName}:: evaluateStructure",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -87,10 +85,9 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
             details = testRecord.description,
             title = testRecord.title,
-            affectedElements = "dpm",
+            affectedElements = listOf("dpm"),
             reportId = reportId,
             log = formattedLog(validationDMP, "All required fields are in format.", "Fields formats required detected"),
-            generated = "${this::class.qualifiedName}:: evaluateFormats",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -107,10 +104,9 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             result =if (costs.isEmpty()) ResultTestEnum.FAIL else ResultTestEnum.PASS,
             details = testRecord.description,
             title = testRecord.title,
-            affectedElements = "dpm.contributor",
+            affectedElements = listOf("dpm.contributor"),
             reportId = reportId,
             log = if (costs.isEmpty()) "Cost field are not present in the maDMP"  else "Cost fields are present in the maDMP",
-            generated = "${this::class.qualifiedName}:: costEntityPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -156,12 +152,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
-            affectedElements = "dpm.cost",
+            affectedElements = listOf("dpm.cost"),
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: costEntityPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::costEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -187,11 +184,12 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             evaluationId = UUID.randomUUID().toString(),
             result =resultValue,
             details = testRecord.description,
-            affectedElements = "dpm.contributor",
+            affectedElements = listOf("dpm.contributor"),
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: contributorValuesPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::contributorValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
             )
@@ -263,12 +261,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
-            affectedElements = "dpm.dataset",
+            affectedElements = listOf("dpm.dataset"),
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: datasetEntityValuesPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::datasetEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )

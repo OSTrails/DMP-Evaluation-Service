@@ -6,7 +6,6 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
-import io.github.ostrails.dmpevaluatorservice.model.test.FullTestLDEntry
 import io.github.ostrails.dmpevaluatorservice.model.test.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.test.LangLiteral
 import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
@@ -116,19 +115,19 @@ class TestService(
         val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
         val keywords = test.keyword?.split(",")?.map { LangLiteral(value = it.trim()) }
 
-        val mainTest = FullTestLDEntry(
+        return TestJsonLD(
             id = "urn:dmpEvaluationService:${test.id}",
             identifier = IdWrapper(test.id ?: "urn:uuid:test-id"),
             title = LangLiteral(value = test.title),
             description = LangLiteral(value = test.description),
             license = IdWrapper(test.license),
-            endpointURL = IdWrapper("${configurationTestVariables.endpointURL}/${test.id}" ?: ""),
+            endpointURL = IdWrapper("${configurationTestVariables.endpointURL}/${test.id}"),
             endpointDescription = test.endpointDescription?.let { IdWrapper(it) },
             version = LangLiteral(value = test.version),
             keyword = keywords,
             typeUri = test.type?.let { IdWrapper(it) },
             theme = test.theme?.let { IdWrapper(it) },
-            inDimension = null, // optionally filled
+            inDimension = null,
             supportedBy = test.supportedBy?.let { IdWrapper(it) },
             isApplicableFor = test.isApplicableFor?.let { IdWrapper(it) },
             creator = test.evaluator?.let { IdWrapper(it) },
@@ -138,7 +137,6 @@ class TestService(
             ).takeIf { it.isNotEmpty() },
             linkedMetric = test.metricImplemented?.let { IdWrapper(it) }
         )
-        return TestJsonLD(graph = listOf(mainTest))
 
     }
 

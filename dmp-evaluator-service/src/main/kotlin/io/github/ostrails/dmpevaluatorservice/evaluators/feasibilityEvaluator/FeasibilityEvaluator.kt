@@ -39,7 +39,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
                 reportId = report.reportId,
-                generated = "${this::class.qualifiedName}:: evaluate",
+                assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+                wasGeneratedBy = "${this::class.qualifiedName}::evaluate",
 
             )
         }
@@ -57,7 +58,8 @@ class FeasibilityEvaluator: EvaluatorPlugin {
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateCoherentLicense",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateCoherentLicense",
             outputFromTest = testRecord.id
         )
     }
