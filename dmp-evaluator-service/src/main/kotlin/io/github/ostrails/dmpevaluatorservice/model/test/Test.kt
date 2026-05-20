@@ -13,11 +13,6 @@ data class TestJsonLD(
         "dcat" to "http://www.w3.org/ns/dcat#",
         "prov" to "http://www.w3.org/ns/prov#"
     ),
-    @JsonProperty("@graph") val graph: List<Any>
-)
-
-// Main Test entity JSON-LD entry
-data class FullTestLDEntry(
     @JsonProperty("@id") val id: String,
     @JsonProperty("@type") val type: List<String> = listOf("https://w3id.org/ftr#Test", "http://www.w3.org/ns/dcat#DataService"),
     @JsonProperty("dcterms:identifier") val identifier: IdWrapper,

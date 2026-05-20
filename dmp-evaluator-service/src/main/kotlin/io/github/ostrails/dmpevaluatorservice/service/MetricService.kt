@@ -142,32 +142,22 @@ class MetricService(
     }
 
     suspend fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
-        val benchMarksIds = metric.hasBenchmark
-        val benchmarks = benchMarksIds?.let { benchmarkRepository.findAllByBenchmarkIdIn(it).collectList().awaitSingle() }
-            ?: listOf()
-        val graphEntry = metric.let {
-            MetricGraphEntry(
-                id = configurationMetricVariables.endpointURL + "/" + it.id ,
-                type = "dqv:Metric",
-                title = LangLiteral("en", metric.title),
-                description = LangLiteral("en", metric.description),
-                version = metric.version,
-                label = metric.abbreviation,
-                abbreviation = metric.abbreviation,
-                landingPage = (it.landingPage ?: it.landingPage)?.let { it1 -> IdWrapper(it1) },
-                keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
-                hasTest = metric.testAssociated?.map { IdWrapper(configurationTestVariables.endpointURL + "/" + it) } ?: listOf(),
-                hasBenchmark = metric.hasBenchmark?.map { IdWrapper("urn:dmpEvaluationService:${it}")  } ?: listOf()  ,
-                license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
-            )
-        }
-        val benchmarkgrapgh = benchmarks.map { BenchmarkMini(
-            id =  configurationBenchmarkVariables.endpointURL + "/" + it.benchmarkId,
-            title = "benchmark ${it.title}",
-            description = it.description,
-        )  }
-
-        return MetricJsonLD (graph = benchmarkgrapgh + graphEntry)
+        val metricUrl = configurationMetricVariables.endpointURL + "/" + metric.id
+        return MetricJsonLD(
+            id = metricUrl,
+            identifier = IdWrapper(metricUrl),
+            type = "ftr:Metric",
+            title = LangLiteral("en", metric.title),
+            description = LangLiteral("en", metric.description),
+            version = metric.version,
+            label = metric.abbreviation,
+            abbreviation = metric.abbreviation,
+            landingPage = metric.landingPage?.let { IdWrapper(it) },
+            keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
+            hasTest = metric.testAssociated?.map { IdWrapper(configurationTestVariables.endpointURL + "/" + it) } ?: listOf(),
+            hasBenchmark = metric.hasBenchmark?.map { IdWrapper(configurationBenchmarkVariables.endpointURL + "/" + it) } ?: listOf(),
+            license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
+        )
     }
 }
 

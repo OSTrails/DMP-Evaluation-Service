@@ -26,8 +26,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
                     result = ResultTestEnum.PASS,
                     title = "Testing ",
                     details = "Auto-generated evaluation of the test" + test ,
-                    reportId = report.reportId,
-                    generated = "${this::class.qualifiedName}:: evaluate"
+                    reportId = report.reportId
             )
         }
         return evaluationsResults
@@ -56,7 +55,6 @@ class CompletenessEvaluator: EvaluatorPlugin {
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateMetadata",
             outputFromTest = testRecord.id
         )
     }

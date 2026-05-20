@@ -115,9 +115,11 @@ class BenchmarService(
 
 
     suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
-        val graphEntry = BenchmarkGraphEntry(
-            id = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId,
-            title = LangLiteral("en",  benchmark.title),
+        val benchmarkUrl = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId
+        return BenchmarkJsonLD(
+            id = benchmarkUrl,
+            identifier = IdWrapper(benchmarkUrl),
+            title = LangLiteral("en", benchmark.title),
             description = LangLiteral("en", benchmark.description),
             version = benchmark.version,
             label = benchmark.abbreviation,
@@ -128,15 +130,6 @@ class BenchmarService(
             associatedMetric = benchmark.hasAssociatedMetric?.map { IdWrapper(configurationMetricVariables.endpointURL + "/" + it) },
             hasAlgorithm = benchmark.algorithms?.map { IdWrapper(it) }
         )
-
-        val metrics = benchmark.hasAssociatedMetric?.let { metricService.findMultipleMetrics(benchmark.hasAssociatedMetric) }
-        val metricsLD = metrics?.map(::toMetricLDEntry)
-
-        if (metricsLD != null) {
-            return BenchmarkJsonLD (graph = metricsLD + graphEntry)
-        }else {
-            return BenchmarkJsonLD (graph = listOf(graphEntry))
-        }
     }
 
     fun toMetricLDEntry(metric: MetricRecord): MetricLDEntry {

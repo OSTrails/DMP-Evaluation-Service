@@ -1,11 +1,14 @@
 package io.github.ostrails.dmpevaluatorservice.database.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "metrics")
 data class MetricRecord(
-    @Id val id: String? = null,
+    @Id
+    @JsonProperty("identifier")
+    val id: String? = null,
     val title: String,
     val description: String,
     val version: String,
@@ -15,7 +18,9 @@ data class MetricRecord(
     val landingPage: String? = null,
     val theme: String? = null,
     val status: String? = null,
-    val isApplicableFor: String? = null, //Indicates the concept or information is applicable for specified context
+    val isApplicableFor: String? = null,
     val supportedBy: String? = null,
-    val hasBenchmark: List<String>?
+    val hasBenchmark: List<String>?,
+    val license: String? = null,
+    val inDimension: String? = null,
     )

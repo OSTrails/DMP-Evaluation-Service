@@ -45,7 +45,8 @@ class QualityOfActionsEvaluator(
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
                 reportId = report.reportId,
-                generated = "${this::class.qualifiedName}:: evaluate"
+                assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+                wasGeneratedBy = "${this::class.qualifiedName}::evaluate"
             )
         }
         return evaluationsResults
@@ -82,10 +83,11 @@ class QualityOfActionsEvaluator(
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
-            generated = "${this::class.qualifiedName}:: evaluateOpenAccess",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateOpenAccess",
             outputFromTest = testRecord.id,
             log = logForTest,
-            affectedElements = "datasets ${datasets}",
+            affectedElements = listOf("datasets ${datasets}"),
         )
     }
 
@@ -127,8 +129,6 @@ class QualityOfActionsEvaluator(
             }
         }
     }
-
-
 
     fun dmpIdValid(
         maDMP: JsonObject,
@@ -175,11 +175,12 @@ class QualityOfActionsEvaluator(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
             details = testRecord.description,
-            affectedElements = "dmp.dmp_id",
+            affectedElements = listOf("dmp.dmp_id"),
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}::dmpIdValid",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::dmpIdValid",
             outputFromTest = testRecord.id,
             completion = 100
         )

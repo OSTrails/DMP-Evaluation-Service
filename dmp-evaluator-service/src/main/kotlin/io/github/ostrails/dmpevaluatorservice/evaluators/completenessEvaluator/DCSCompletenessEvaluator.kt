@@ -28,11 +28,12 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
 
     override val functionMap = mapOf(
         "evaluateStructure" to ::evaluateStructure,
-        "evaluateFormats" to :: evaluateFormats,
-        "costEntityPresent" to :: costEntityPresent,
-        "costEntityValuesPresent" to :: costEntityValuesPresent,
-        "contributorValuesPresent" to :: contributorValuesPresent,
-        "datasetEntityValuesPresent" to :: datasetEntityValuesPresent,
+        "evaluateFormats" to ::evaluateFormats,
+        "costEntityPresent" to ::costEntityPresent,
+        "costEntityValuesPresent" to ::costEntityValuesPresent,
+        "contributorValuesPresent" to ::contributorValuesPresent,
+        "datasetEntityValuesPresent" to ::datasetEntityValuesPresent,
+        "datasetPersistentIdentifierPresent" to ::datasetPersistentIdentifierPresent,
     )
 
     override fun getPluginInformation(): PluginInfo {
@@ -50,8 +51,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                 result = ResultTestEnum.PASS,
                 title = "Testing ",
                 details = "Auto-generated evaluation of the test" + test ,
-                reportId = report.reportId,
-                generated = "${this::class.qualifiedName}:: evaluate"
+                reportId = report.reportId
             )
         }
         return evaluationsResults
@@ -70,7 +70,6 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             reportId = reportId,
             log = formattedLog(validationDMP, "All required fields are present.", "Missing required fields detected"),
-            generated = "${this::class.qualifiedName}:: evaluateStructure",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -87,10 +86,9 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             result = if (validationDMP.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL,
             details = testRecord.description,
             title = testRecord.title,
-            affectedElements = "dpm",
+            affectedElements = listOf("dpm"),
             reportId = reportId,
             log = formattedLog(validationDMP, "All required fields are in format.", "Fields formats required detected"),
-            generated = "${this::class.qualifiedName}:: evaluateFormats",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -107,10 +105,9 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             result =if (costs.isEmpty()) ResultTestEnum.FAIL else ResultTestEnum.PASS,
             details = testRecord.description,
             title = testRecord.title,
-            affectedElements = "dpm.contributor",
+            affectedElements = listOf("dpm.contributor"),
             reportId = reportId,
             log = if (costs.isEmpty()) "Cost field are not present in the maDMP"  else "Cost fields are present in the maDMP",
-            generated = "${this::class.qualifiedName}:: costEntityPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -156,12 +153,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
-            affectedElements = "dpm.cost",
+            affectedElements = listOf("dpm.cost"),
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: costEntityPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::costEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -187,11 +185,12 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             evaluationId = UUID.randomUUID().toString(),
             result =resultValue,
             details = testRecord.description,
-            affectedElements = "dpm.contributor",
+            affectedElements = listOf("dpm.contributor"),
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: contributorValuesPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::contributorValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
             )
@@ -206,7 +205,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         val logMessages = mutableListOf<String>()
         if (datasets.isEmpty()) {
             resultValue = ResultTestEnum.FAIL
-            logMessages.add("Cost field is not present in the maDMP")
+            logMessages.add("dataset field is not present in the maDMP")
         } else{resultValue = ResultTestEnum.INDERTERMINATED}
 
         datasets.forEachIndexed { index, element ->
@@ -263,12 +262,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
-            affectedElements = "dpm.dataset",
+            affectedElements = listOf("dpm.dataset"),
             details = testRecord.description,
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            generated = "${this::class.qualifiedName}:: datasetEntityValuesPresent",
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::datasetEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
         )
@@ -276,6 +276,106 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
 
 
 
+
+    fun datasetPersistentIdentifierPresent(
+        maDMP: JsonObject,
+        reportId: String,
+        testRecord: TestRecord
+    ): Evaluation {
+        val logMessages = mutableListOf<String>()
+        val affectedDatasets = mutableListOf<String>()
+        var resultValue = ResultTestEnum.INDERTERMINATED
+        val validTypes = setOf("doi", "handle", "ark", "url", "other")
+
+        val datasets = extractValuesByPath<Any>(maDMP, "dmp.dataset[*]")
+
+        if (datasets.isEmpty()) {
+            logMessages.add("No datasets found in the maDMP.")
+            resultValue = ResultTestEnum.FAIL
+        } else {
+            resultValue = ResultTestEnum.PASS
+            datasets.forEachIndexed { index, element ->
+                if (element is JsonObject) {
+                    val datasetId = element["dataset_id"]?.jsonObjectOrNull
+                    val type = datasetId?.get("type")?.jsonPrimitiveOrNull?.contentOrNull
+                    val identifier = datasetId?.get("identifier")?.jsonPrimitiveOrNull?.contentOrNull
+
+                    when {
+                        type == null || type !in validTypes -> {
+                            logMessages.add("Dataset[$index]: missing or invalid type '$type'. Expected one of $validTypes.")
+                            affectedDatasets.add("dataset[$index]")
+                            resultValue = ResultTestEnum.FAIL
+                        }
+                        identifier.isNullOrBlank() -> {
+                            logMessages.add("Dataset[$index]: identifier is missing or blank.")
+                            affectedDatasets.add("dataset[$index]")
+                            resultValue = ResultTestEnum.FAIL
+                        }
+                        else -> {
+                            val resolvedUrl = resolveIdentifierUrl(type, identifier)
+                            val responseCode = getResponseCode(resolvedUrl)
+                            when {
+                                responseCode == null -> {
+                                    logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — could not connect to $resolvedUrl.")
+                                    affectedDatasets.add("dataset[$index]:$identifier")
+                                    resultValue = ResultTestEnum.FAIL
+                                }
+                                responseCode in 404..404 || responseCode == 410 -> {
+                                    logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — resource not found at $resolvedUrl (HTTP $responseCode).")
+                                    affectedDatasets.add("dataset[$index]:$identifier")
+                                    resultValue = ResultTestEnum.FAIL
+                                }
+                                responseCode >= 500 -> {
+                                    logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — server error at $resolvedUrl (HTTP $responseCode). Could not confirm resolvability.")
+                                    affectedDatasets.add("dataset[$index]:$identifier")
+                                    resultValue = ResultTestEnum.FAIL
+                                }
+                                else -> logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) resolves at $resolvedUrl (HTTP $responseCode).")
+                            }
+                        }
+                    }
+                } else {
+                    logMessages.add("Dataset[$index]: not a valid JSON object.")
+                    resultValue = ResultTestEnum.FAIL
+                }
+            }
+        }
+
+        return Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = resultValue,
+            details = testRecord.description,
+            title = testRecord.title,
+            reportId = reportId,
+            log = logMessages.joinToString("\n"),
+            affectedElements = affectedDatasets.ifEmpty { null },
+            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            wasGeneratedBy = "${this::class.qualifiedName}::datasetPersistentIdentifierPresent",
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+    }
+
+    private fun resolveIdentifierUrl(type: String, identifier: String): String = when (type) {
+        "doi"    -> if (identifier.startsWith("http")) identifier else "https://doi.org/$identifier"
+        "handle" -> if (identifier.startsWith("http")) identifier else "https://hdl.handle.net/$identifier"
+        else     -> identifier // ark, url, other — identifier is expected to be a full URL
+    }
+
+    private fun getResponseCode(url: String): Int? = try {
+        val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connectTimeout = 5000
+        connection.readTimeout = 5000
+        connection.instanceFollowRedirects = true
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (compatible; DMPEvaluationService/1.0; +https://github.com/OSTrails/DMP-Evaluation-Service)")
+        connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        val code = connection.responseCode
+        connection.disconnect()
+        code
+    } catch (e: Exception) {
+        null
+    }
 
     object Validator {
         private val schema: Schema by lazy {

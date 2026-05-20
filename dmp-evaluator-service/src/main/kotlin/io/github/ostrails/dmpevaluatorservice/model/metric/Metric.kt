@@ -7,32 +7,14 @@ data class MetricJsonLD(
     @JsonProperty("@context")
     val context: Map<String, String> = defaultContext,
 
-    @JsonProperty("@graph")
-    val graph: List<Any>
-
-){
-    companion object {
-        val defaultContext = mapOf(
-            "ftr" to "https://w3id.org/ftr#",
-            "doap" to "http://usefulinc.com/ns/doap#",
-            "xsd" to "http://www.w3.org/2001/XMLSchema#",
-            "dqv" to "http://www.w3.org/ns/dqv#",
-            "dcterms" to "http://purl.org/dc/terms/",
-            "rdfs" to "http://www.w3.org/2000/01/rdf-schema#",
-            "vcard" to "http://www.w3.org/2006/vcard/ns#",
-            "vivo" to "http://vivoweb.org/ontology/core#",
-            "dcat" to "http://www.w3.org/ns/dcat#",
-            "foaf" to "http://xmlns.com/foaf/0.1/"
-        )
-    }
-}
-
-data class MetricGraphEntry(
     @JsonProperty("@id")
     val id: String,
 
     @JsonProperty("@type")
-    val type: Any = "dqv:Metric", // String or List<String>
+    val type: Any = "ftr:Metric",
+
+    @JsonProperty("dcterms:identifier")
+    val identifier: IdWrapper? = null,
 
     @JsonProperty("dcterms:title")
     val title: LangLiteral,
@@ -59,9 +41,9 @@ data class MetricGraphEntry(
     val hasTest: List<IdWrapper>,
 
     @JsonProperty("ftr:hasBenchmark")
-    val hasBenchmark: List<IdWrapper> ,
+    val hasBenchmark: List<IdWrapper>,
 
-    @JsonProperty("ftr:isApplicableFor")
+    @JsonProperty("dpv:isApplicableFor")
     val isApplicableFor: IdWrapper? = null,
 
     @JsonProperty("ftr:supportedBy")
@@ -84,7 +66,24 @@ data class MetricGraphEntry(
 
     @JsonProperty("http://semanticscience.org/resource/SIO_000233")
     val sio233: IdWrapper? = null
-)
+
+){
+    companion object {
+        val defaultContext = mapOf(
+            "ftr" to "https://w3id.org/ftr#",
+            "doap" to "http://usefulinc.com/ns/doap#",
+            "xsd" to "http://www.w3.org/2001/XMLSchema#",
+            "dqv" to "http://www.w3.org/ns/dqv#",
+            "dcterms" to "http://purl.org/dc/terms/",
+            "rdfs" to "http://www.w3.org/2000/01/rdf-schema#",
+            "vcard" to "http://www.w3.org/2006/vcard/ns#",
+            "vivo" to "http://vivoweb.org/ontology/core#",
+            "dcat" to "http://www.w3.org/ns/dcat#",
+            "foaf" to "http://xmlns.com/foaf/0.1/",
+            "dpv" to "https://w3id.org/dpv#"
+        )
+    }
+}
 
 data class IdWrapper(
     @JsonProperty("@id")
@@ -117,4 +116,3 @@ data class FAIRPrinciple(
     val abbreviation: String,
     val description: String
 )
-
