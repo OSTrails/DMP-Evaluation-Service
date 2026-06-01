@@ -1,7 +1,9 @@
 package io.github.ostrails.dmpevaluatorservice
 
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,11 +24,22 @@ class OpenApiConfig(
 ) {
 
     @Bean
-    fun customOpenApi(): OpenAPI{
+    fun customOpenApi(): OpenAPI {
         return OpenAPI()
-            .info(Info()
-            .title(title).version(version).description(description)
-            .license(License().name(licenseName).url(licenseUrl))
+            .info(
+                Info()
+                    .title(title).version(version).description(description)
+                    .license(License().name(licenseName).url(licenseUrl))
+            )
+            .components(
+                Components().addSecuritySchemes(
+                    "bearerAuth",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")
+                        .description("Paste your JWT token obtained from POST /auth/token")
+                )
             )
     }
 }

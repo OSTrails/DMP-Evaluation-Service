@@ -42,6 +42,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `mvnw clean verify` against a MongoDB service container on every push to
   `main` and every pull request targeting `main`, plus a report-only ktlint
   style check.
+- JWT-based authentication using HMAC-SHA256 signed tokens (1-hour expiry)
+- Role-based access control with two roles: `ADMIN` and `WRITER`
+- `POST /auth/token` — public endpoint to obtain a Bearer token using clientId + clientSecret
+- `PUT /auth/change-secret` — authenticated clients can update their own secret (requires current secret as proof)
+- `POST /admin/clients` — ADMIN-only endpoint to register new API clients
+- `GET /admin/clients` — ADMIN-only endpoint to list all registered clients
+- `DELETE /admin/clients/{clientId}` — ADMIN-only endpoint to revoke a client
+- `PUT /admin/clients/{clientId}/reset-secret` — ADMIN-only endpoint to reset any client's secret
+- Bootstrap mechanism: on first startup, an ADMIN client is automatically created from `ADMIN_CLIENT_ID` and `ADMIN_CLIENT_SECRET` environment variables
+- `createdBy` field on `BenchmarkRecord`, `MetricRecord`, and `TestRecord` to track record ownership
+- Ownership-based update restriction: only the creator or an ADMIN can modify a record
+- Audit logging: every `POST`, `PUT`, and `DELETE` request logs the caller identity, method, path, and timestamp
+- Bearer token authorization button in Swagger UI for interactive testing
+- `application-local.yml` profile for local development (excluded from git)
+- `AUTH_CHANGES.md` implementation log explaining every change made
 
 ### Changed
 - `Evaluation`, `EvaluationReport`, `BenchmarkRecord`, `MetricRecord`, and
@@ -59,11 +74,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   to the FAIR Champion benchmark endpoint and returns a structured `JsonObject`.
 - Removed unused imports/autowiring in `MetricService`, and the redundant `generated`
   field assignment in `ComplianceEvaluator.checkFormatFile`.
+- `POST /benchmarks`, `POST /metrics`, `POST /tests` and all related write endpoints now require authentication (`ADMIN` or `WRITER` role)
+- `DELETE` endpoints now require `ADMIN` role
+- `POST /assess/**` remains fully public — anyone can submit a DMP for evaluation without a token
+- `GET` endpoints remain fully public
+- `BenchmarkRecord`, `MetricRecord`, `TestRecord` services updated to enforce ownership checks on update operations
+- `GlobalExceptionHandler` extended with handlers for `ForbiddenException` (HTTP 403) and `IllegalArgumentException` (HTTP 400)
+- `README.md` updated with full configuration reference, local development guide, and authentication documentation
 
 ### Fixed
 - `GET /plugins` was missing the function names for `ExternalBenchmarkPlugin`
   implementations; `PluginManagerService` now resolves functions from
   `benchmarkFunctionMap` for those plugins.
 - Corrected the FAIR Champion evaluator's plugin description text.
+
+### Security
+- Passwords stored as BCrypt hashes — never in plain text
+- JWT secret loaded from environment variable `JWT_SECRET` — never hardcoded
+- Records without an owner (`createdBy = null`, i.e. legacy data) can only be updated by `ADMIN`
 
 ## [1.0.0] 2025-MM-DD

@@ -60,5 +60,24 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(ForbiddenException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleForbidden(ex: ForbiddenException, exchange: ServerWebExchange): ErrorResponse {
+        return ErrorResponse(
+            code = "FORBIDDEN",
+            message = ex.message.orEmpty(),
+            path = exchange.request.path.toString()
+        )
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleIllegalArgument(ex: IllegalArgumentException, exchange: ServerWebExchange): ErrorResponse {
+        return ErrorResponse(
+            code = "BAD_REQUEST",
+            message = ex.message.orEmpty(),
+            path = exchange.request.path.toString()
+        )
+    }
 
 }
