@@ -7,10 +7,12 @@ import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Test APIs", description = "Manage tests")
@@ -20,125 +22,88 @@ class TestController(
     val testService: TestService,
 ) {
 
-    @Operation(
-        summary = "Create a test record",
-        description = "Receives the json with the data that describe a test and create a new one and return the test record "
-    )
+    @Operation(summary = "Create a test record", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping
-    suspend fun createTest(@RequestBody test: TestRecord): ResponseEntity<TestRecord>{
-        val result = testService.createTest(test)
+    suspend fun createTest(
+        @RequestBody test: TestRecord,
+        authentication: Authentication
+    ): ResponseEntity<TestRecord> {
+        val result = testService.createTest(test, authentication.name)
         return ResponseEntity.ok(result)
     }
 
-    @Operation(
-        summary = "Update a test record",
-        description = "Receives the json with the data that describe a test and updated return the test record "
-    )
+    @Operation(summary = "Update a test record", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping("/{testId}")
-    suspend fun updateTest(@PathVariable testId: String,@RequestBody test: TestUpdateRequest): ResponseEntity<TestRecord>{
-        val result = testService.updateTest(testId, test)
+    suspend fun updateTest(
+        @PathVariable testId: String,
+        @RequestBody test: TestUpdateRequest,
+        authentication: Authentication
+    ): ResponseEntity<TestRecord> {
+        val result = testService.updateTest(testId, test, authentication.name, authentication.isAdmin())
         return ResponseEntity.ok(result)
     }
 
-    @Operation(
-        summary = "get the list of tests ids",
-        description = "Return the list of tests ids that are in the system"
-    )
+    @Operation(summary = "Get the list of tests ids")
     @GetMapping
-    suspend fun getTestsIds(): ResponseEntity<List<String?>>{
-        val result = testService.listAllTestUIDs()
-        return ResponseEntity.ok(result)
-    }
+    suspend fun getTestsIds(): ResponseEntity<List<String?>> =
+        ResponseEntity.ok(testService.listAllTestUIDs())
 
-    @Operation(
-        summary = "get the list of tests",
-        description = "Return the list of tests that are in the system"
-    )
+    @Operation(summary = "Get the list of tests")
     @GetMapping("/info", produces = ["application/json"])
-    suspend fun getTests(): ResponseEntity<List<TestRecord>>{
-        val result = testService.listAllTests()
-        return ResponseEntity.ok(result)
-    }
+    suspend fun getTests(): ResponseEntity<List<TestRecord>> =
+        ResponseEntity.ok(testService.listAllTests())
 
-    @Operation(
-        summary = "Get a specific test",
-        description = "Receives the id of a test and return the test record"
-    )
-    @GetMapping("/info/{testId}", produces =   ["application/json"])
-    suspend fun getTestById(@PathVariable testId: String): ResponseEntity<TestRecord> {
-        val test = testService.getTest(testId)
-        return ResponseEntity.ok(test)
-    }
+    @Operation(summary = "Get a specific test")
+    @GetMapping("/info/{testId}", produces = ["application/json"])
+    suspend fun getTestById(@PathVariable testId: String): ResponseEntity<TestRecord> =
+        ResponseEntity.ok(testService.getTest(testId))
 
-    @Operation(
-        summary = "Get a test in json - ld using the pathvariable ",
-        description = "Return a test in json ld format "
-    )
-    @GetMapping("/{testId}", produces =   ["application/ld+json"])
+    @Operation(summary = "Get a test in json-ld using the path variable")
+    @GetMapping("/{testId}", produces = ["application/ld+json"])
     suspend fun getTestJsonLD(@PathVariable testId: String): ResponseEntity<TestJsonLD> {
         val result = testService.testJsonLD(testId)
         val headers = HttpHeaders()
         headers.contentType = MediaType.valueOf("application/ld+json")
-        return ResponseEntity(result, headers, HttpStatus.OK )
+        return ResponseEntity(result, headers, HttpStatus.OK)
     }
 
-    @Operation(
-        summary = "Get a test in json - ld using the Requestparam testId",
-        description = "Return a test in json ld format "
-    )
-    @GetMapping("/", produces =   ["application/ld+json"])
+    @Operation(summary = "Get a test in json-ld using the request param testId")
+    @GetMapping("/", produces = ["application/ld+json"])
     suspend fun getTestJsonLDFrom(@RequestParam("testId") testId: String): ResponseEntity<TestJsonLD> {
         val result = testService.testJsonLD(testId)
         val headers = HttpHeaders()
         headers.contentType = MediaType.valueOf("application/ld+json")
-        return ResponseEntity(result, headers, HttpStatus.OK )
+        return ResponseEntity(result, headers, HttpStatus.OK)
     }
 
-    @Operation(
-        summary = "List the test in json ld ",
-        description = "return a list of tests in json-ld "
-    )
-    @GetMapping("/list", produces =   ["application/ld+json"])
+    @Operation(summary = "List the tests in json-ld")
+    @GetMapping("/list", produces = ["application/ld+json"])
     suspend fun getTestsJsonLD(): ResponseEntity<List<TestJsonLD?>> {
         val result = testService.listAllTests()
-        val resultJsonLD = result.map { it.id?.let { it1 -> testService.testJsonLD(it1) } }
-        return ResponseEntity.ok(resultJsonLD)
+        return ResponseEntity.ok(result.map { it.id?.let { id -> testService.testJsonLD(id) } })
     }
 
-    @Operation(
-        summary = "Delete a test record",
-        description = "Receive the testId and delete that test record"
-    )
+    @Operation(summary = "Delete a test record", security = [SecurityRequirement(name = "bearerAuth")])
     @DeleteMapping("/{testId}")
-    suspend fun deleteTest(@PathVariable testId: String): ResponseEntity<String>{
-        val result = testService.deleteTest(testId)
-        return ResponseEntity.ok(result)
-    }
+    suspend fun deleteTest(@PathVariable testId: String): ResponseEntity<String> =
+        ResponseEntity.ok(testService.deleteTest(testId))
 
-    @Operation(
-        summary = "Filter the test by metric",
-        description = "Receive a metric id and return a list of tests that are implementations of that metric"
-    )
+    @Operation(summary = "Filter tests by metric")
     @GetMapping("/metrics/{metricId}")
-    suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestRecord>>{
-        val result = testService.getTestsByMetrics(metricId)
-        return ResponseEntity.ok(result)
-    }
+    suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestRecord>> =
+        ResponseEntity.ok(testService.getTestsByMetrics(metricId))
 
-
-    @Operation(
-        summary = "Update the evaluator and the function of a test",
-        description = "receive a testId and the metric, evaluator and function that implement that test"
-    )
+    @Operation(summary = "Update the evaluator and function of a test", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping("/{testId}/addEvaluator")
-    suspend fun updateTestEvaluator(@PathVariable testId: String,@RequestBody test: TestAddMetricRequest): ResponseEntity<TestRecord>{
-        val result = testService.addMetric(testId, test)
-        if (result != null){
-            return ResponseEntity.ok(result)
-        }else{
-            return ResponseEntity.notFound().build()
-        }
+    suspend fun updateTestEvaluator(
+        @PathVariable testId: String,
+        @RequestBody test: TestAddMetricRequest,
+        authentication: Authentication
+    ): ResponseEntity<TestRecord> {
+        val result = testService.addMetric(testId, test, authentication.name, authentication.isAdmin())
+        return if (result != null) ResponseEntity.ok(result) else ResponseEntity.notFound().build()
     }
-
-
 }
+
+private fun Authentication.isAdmin(): Boolean =
+    authorities.any { it.authority == "ROLE_ADMIN" }

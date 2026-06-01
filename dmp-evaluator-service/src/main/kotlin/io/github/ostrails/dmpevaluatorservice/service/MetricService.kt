@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ForbiddenException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.metric.*
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
@@ -23,25 +24,25 @@ class MetricService(
 
     private val log: Logger = LoggerFactory.getLogger(MetricService::class.java)
 
-    suspend fun createMetric(metric: MetricRecord): MetricRecord {
-        val saved = metricRepository.save(metric).awaitSingle()
+    suspend fun createMetric(metric: MetricRecord, callerClientId: String): MetricRecord {
+        val saved = metricRepository.save(metric.copy(createdBy = callerClientId)).awaitSingle()
         log.info("Created metric '${saved.id}'")
         return saved
     }
 
     suspend fun listMetrics(): List<MetricRecord> {
         val metrics = metricRepository.findAll().collectList().awaitSingle()
-        val enrichedMetrics = metrics.map {it.copy(
-            hasBenchmark = it.hasBenchmark?.map { configurationBenchmarkVariables.endpointURL + "/" + it },
-            testAssociated = it.testAssociated?.map { configurationTestVariables.endpointURL + "/" + it }
-        )}
-        return enrichedMetrics
+        return metrics.map {
+            it.copy(
+                hasBenchmark = it.hasBenchmark?.map { configurationBenchmarkVariables.endpointURL + "/" + it },
+                testAssociated = it.testAssociated?.map { configurationTestVariables.endpointURL + "/" + it }
+            )
+        }
     }
 
     suspend fun listMetricsIds(): List<String?> {
         val metrics = metricRepository.findAll().collectList().awaitSingle()
-        val metricsIds = metrics.map { configurationMetricVariables.endpointURL + "/" + it.id }
-        return metricsIds
+        return metrics.map { configurationMetricVariables.endpointURL + "/" + it.id }
     }
 
     suspend fun metricDetail(metricId: String): MetricRecord {
@@ -51,11 +52,12 @@ class MetricService(
         }
     }
 
-    suspend fun updateMetric(metricId: String, metricRequest: MetricUpdateRequest): MetricRecord {
+    suspend fun updateMetric(metricId: String, metricRequest: MetricUpdateRequest, callerClientId: String, isAdmin: Boolean): MetricRecord {
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
             log.warn("Metric '$metricId' not found")
             throw ResourceNotFoundException("Metric with id $metricId not found")
         }
+        checkOwnership(metric.createdBy, callerClientId, isAdmin)
         log.debug("Updating metric '$metricId'")
         val updateMetric = metric.copy(
             title = metricRequest.title ?: metric.title,
@@ -78,37 +80,39 @@ class MetricService(
             metricRepository.deleteById(metricId).awaitFirstOrNull()
             log.info("Deleted metric '$metricId'")
             return record.id
-        }else{
+        } else {
             log.warn("Metric '$metricId' not found, nothing deleted")
             return null
         }
     }
 
-    suspend fun addTests(metricId: String, tests:List<String>): MetricRecord {
+    suspend fun addTests(metricId: String, tests: List<String>, callerClientId: String = "", isAdmin: Boolean = true): MetricRecord {
         val testsToAdd: List<String>
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
             log.warn("Metric '$metricId' not found")
             throw ResourceNotFoundException("Metric with id $metricId not found")
         }
+        if (callerClientId.isNotEmpty()) checkOwnership(metric.createdBy, callerClientId, isAdmin)
         if (metric.testAssociated != null) {
             testsToAdd = tests.filterNot { it in metric.testAssociated }
-        }else testsToAdd = tests
+        } else testsToAdd = tests
         val updateMetric = metric.copy(testAssociated = metric.testAssociated?.plus(testsToAdd) ?: tests)
         log.debug("Adding ${testsToAdd.size} test(s) to metric '$metricId'")
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
-    suspend fun deleteTest(metricId: String, tests: List<String>): MetricRecord{
+    suspend fun deleteTest(metricId: String, tests: List<String>, callerClientId: String, isAdmin: Boolean): MetricRecord {
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
             log.warn("Metric '$metricId' not found")
             throw ResourceNotFoundException("Metric with id $metricId not found")
         }
+        checkOwnership(metric.createdBy, callerClientId, isAdmin)
         if (metric.testAssociated != null && metric.testAssociated.isNotEmpty()) {
             val testFiltered = metric.testAssociated.filterNot { it in tests }
             val updateMetric = metric.copy(testAssociated = testFiltered)
             log.debug("Removing ${tests.size} test(s) from metric '$metricId'")
             return metricRepository.save(updateMetric).awaitSingle()
-        }else {
+        } else {
             log.warn("Metric '$metricId' has no tests to delete")
             throw ResourceNotFoundException("There is not tests to delete in this metric")
         }
@@ -122,15 +126,16 @@ class MetricService(
         return metrics
     }
 
-    suspend fun addBenchMark(metricId: String, benchMarkIds: List<String>): MetricRecord{
+    suspend fun addBenchMark(metricId: String, benchMarkIds: List<String>, callerClientId: String, isAdmin: Boolean): MetricRecord {
         val benchmarkToAdd: List<String>
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
             log.warn("Metric '$metricId' not found")
             throw ResourceNotFoundException("Metric with id $metricId not found")
         }
+        checkOwnership(metric.createdBy, callerClientId, isAdmin)
         if (metric.hasBenchmark != null) {
             benchmarkToAdd = benchMarkIds.filterNot { it in metric.hasBenchmark }
-        }else benchmarkToAdd = benchMarkIds
+        } else benchmarkToAdd = benchMarkIds
         val updateMetric = metric.copy(hasBenchmark = metric.hasBenchmark?.plus(benchmarkToAdd) ?: benchMarkIds)
         log.debug("Adding ${benchmarkToAdd.size} benchmark(s) to metric '$metricId'")
         return metricRepository.save(updateMetric).awaitSingle()
@@ -138,18 +143,15 @@ class MetricService(
 
     suspend fun getMetricsJsonLD(): List<MetricJsonLD?> {
         val metrics = metricRepository.findAll().collectList().awaitSingle()
-        val result = metrics.map { it -> it.id?.let { it1 -> getMetricDetailJsonLD(it1) } }
-        return result
+        return metrics.map { it.id?.let { id -> getMetricDetailJsonLD(id) } }
     }
-
 
     suspend fun getMetricDetailJsonLD(metricId: String): MetricJsonLD {
         val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
             log.warn("Metric '$metricId' not found")
             throw ResourceNotFoundException("There is no record with id $metricId")
         }
-        val result = metricJsonLD(metric)
-        return result
+        return metricJsonLD(metric)
     }
 
     suspend fun metricJsonLD(metric: MetricRecord): MetricJsonLD {
@@ -170,5 +172,12 @@ class MetricService(
             license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
         )
     }
-}
 
+    private fun checkOwnership(createdBy: String?, callerClientId: String, isAdmin: Boolean) {
+        if (isAdmin) return
+        if (createdBy == null)
+            throw ForbiddenException("Only ADMIN can modify records without an owner")
+        if (createdBy != callerClientId)
+            throw ForbiddenException("You can only modify records you created")
+    }
+}

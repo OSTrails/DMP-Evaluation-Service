@@ -4,6 +4,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ForbiddenException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.*
 import io.github.ostrails.dmpevaluatorservice.model.metric.LangLiteral
@@ -26,56 +27,58 @@ class BenchmarService(
 
     private val log: Logger = LoggerFactory.getLogger(BenchmarService::class.java)
 
-    suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
-        val saved = benchmarkRepository.save(benchmark).awaitSingle()
+    suspend fun createBenchmark(benchmark: BenchmarkRecord, callerClientId: String): BenchmarkRecord {
+        val saved = benchmarkRepository.save(benchmark.copy(createdBy = callerClientId)).awaitSingle()
         log.info("Created benchmark '${saved.benchmarkId}'")
         return saved
     }
 
-    suspend fun getBenchmarks():List<BenchmarkRecord> {
+    suspend fun getBenchmarks(): List<BenchmarkRecord> {
         try {
             return benchmarkRepository.findAll().asFlow().toList()
-        }catch (e:Exception){
+        } catch (e: Exception) {
             log.error("Failed to fetch benchmarks", e)
             throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
         }
     }
 
-    suspend fun getBenchmarksIds():List<String> {
+    suspend fun getBenchmarksIds(): List<String> {
         try {
-            val benchmarks =  benchmarkRepository.findAll().asFlow().toList()
+            val benchmarks = benchmarkRepository.findAll().asFlow().toList()
             return benchmarks.map { configurationBenchmarkVariables.endpointURL + "/" + it.benchmarkId.toString() }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             log.error("Failed to fetch benchmark ids", e)
             throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
         }
     }
 
-    suspend fun addMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
-        val metricToAdd:List<String>
+    suspend fun addMetric(benchmarkId: String, metricsId: List<String>, callerClientId: String, isAdmin: Boolean): BenchmarkRecord {
+        val metricToAdd: List<String>
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
             log.warn("Benchmark '$benchmarkId' not found")
             throw ResourceNotFoundException("There is no record with id $benchmarkId")
         }
-        if (benchmark.hasAssociatedMetric !=  null){
+        checkOwnership(benchmark.createdBy, callerClientId, isAdmin)
+        if (benchmark.hasAssociatedMetric != null) {
             metricToAdd = metricsId.filterNot { it in benchmark.hasAssociatedMetric }
-        }else metricToAdd = metricsId
+        } else metricToAdd = metricsId
         val updateBenchmark = benchmark.copy(hasAssociatedMetric = benchmark.hasAssociatedMetric?.plus(metricToAdd) ?: metricsId)
         log.debug("Adding ${metricToAdd.size} metric(s) to benchmark '$benchmarkId'")
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
     }
 
-    suspend fun deleteMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
+    suspend fun deleteMetric(benchmarkId: String, metricsId: List<String>, callerClientId: String, isAdmin: Boolean): BenchmarkRecord {
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
             log.warn("Benchmark '$benchmarkId' not found")
             throw ResourceNotFoundException("Metric with id $benchmarkId not found")
         }
+        checkOwnership(benchmark.createdBy, callerClientId, isAdmin)
         if (benchmark.hasAssociatedMetric != null && benchmark.hasAssociatedMetric.isNotEmpty()) {
             val metricFiltered = benchmark.hasAssociatedMetric.filterNot { it in metricsId }
-            val updateBenchmark = benchmark.copy(hasAssociatedMetric = metricFiltered ?: null)
+            val updateBenchmark = benchmark.copy(hasAssociatedMetric = metricFiltered)
             log.debug("Removing ${metricsId.size} metric(s) from benchmark '$benchmarkId'")
             return benchmarkRepository.save(updateBenchmark).awaitSingle()
-        }else {
+        } else {
             log.warn("Benchmark '$benchmarkId' has no metrics to delete")
             throw ResourceNotFoundException("There is not metric to delete in this benchmark")
         }
@@ -89,22 +92,21 @@ class BenchmarService(
         try {
             benchmarkRepository.delete(benchmark).awaitFirstOrNull()
             log.info("Deleted benchmark '$benchmarkId'")
-        }catch (e:Exception){
+        } catch (e: Exception) {
             log.error("Failed to delete benchmark '$benchmarkId'", e)
             throw DatabaseException("There is a error with the database trying to delete the record ${benchmarkId}   ${e.message}")
         }
         return benchmarkId
-
     }
 
-    suspend fun getBenchmarkDetail(benchmarkId: String): BenchmarkRecord{
+    suspend fun getBenchmarkDetail(benchmarkId: String): BenchmarkRecord {
         return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
             log.warn("Benchmark '$benchmarkId' not found")
             throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
         }
     }
 
-    suspend fun getBenchmarskDetail(benchmarkIds: List<String>): List<BenchmarkRecord>{
+    suspend fun getBenchmarskDetail(benchmarkIds: List<String>): List<BenchmarkRecord> {
         return benchmarkRepository.findAllByBenchmarkIdIn(benchmarkIds).collectList().awaitSingle() ?: run {
             log.warn("No benchmarks found for ids $benchmarkIds")
             throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkIds")
@@ -118,22 +120,20 @@ class BenchmarService(
         }
     }
 
-    suspend fun getBenchmarkDetailJsonLD(benchmarkId: String): BenchmarkJsonLD{
+    suspend fun getBenchmarkDetailJsonLD(benchmarkId: String): BenchmarkJsonLD {
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
             log.warn("Benchmark '$benchmarkId' not found")
             throw ResourceNotFoundException("There is no record with id $benchmarkId")
         }
-        val result = toJsonLD(benchmark)
-        return result
+        return toJsonLD(benchmark)
     }
 
-
-
-    suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest): BenchmarkRecord {
+    suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest, callerClientId: String, isAdmin: Boolean): BenchmarkRecord {
         val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
             log.warn("Benchmark '$benchmarkId' not found")
             throw ResourceNotFoundException("There is no record with id $benchmarkId")
         }
+        checkOwnership(benchmark.createdBy, callerClientId, isAdmin)
         log.debug("Updating benchmark '$benchmarkId'")
         val updateBenchmark = benchmark.copy(
             title = benchmarkRequest.title ?: benchmark.title,
@@ -145,10 +145,9 @@ class BenchmarService(
             theme = benchmarkRequest.theme ?: benchmark.theme,
             status = benchmarkRequest.status ?: benchmark.status,
             creator = benchmarkRequest.creator ?: benchmark.creator
-            )
+        )
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
     }
-
 
     suspend fun toJsonLD(benchmark: BenchmarkRecord): BenchmarkJsonLD {
         val benchmarkUrl = configurationBenchmarkVariables.endpointURL + "/" + benchmark.benchmarkId
@@ -178,4 +177,11 @@ class BenchmarService(
         )
     }
 
+    private fun checkOwnership(createdBy: String?, callerClientId: String, isAdmin: Boolean) {
+        if (isAdmin) return
+        if (createdBy == null)
+            throw ForbiddenException("Only ADMIN can modify records without an owner")
+        if (createdBy != callerClientId)
+            throw ForbiddenException("You can only modify records you created")
+    }
 }

@@ -23,4 +23,5 @@ data class BenchmarkRecord(
     val status: String? = null,
     val creator: List<String> = emptyList(),
     val license: String? = null,
+    val createdBy: String? = null,
 )

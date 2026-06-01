@@ -24,5 +24,6 @@ data class TestRecord(
     val metricImplemented: String?,
     val evaluator: String?,
     val functionEvaluator: String?,
+    val createdBy: String? = null,
     )
 

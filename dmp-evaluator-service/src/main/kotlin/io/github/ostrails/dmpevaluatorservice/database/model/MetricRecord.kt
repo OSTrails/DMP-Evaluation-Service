@@ -23,4 +23,5 @@ data class MetricRecord(
     val hasBenchmark: List<String>?,
     val license: String? = null,
     val inDimension: String? = null,
+    val createdBy: String? = null,
     )
