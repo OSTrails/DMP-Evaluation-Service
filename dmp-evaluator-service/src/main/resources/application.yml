@@ -27,6 +27,15 @@ openapi:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-seconds: 3600
+
+admin:
+  client-id: ${ADMIN_CLIENT_ID:admin}
+  client-secret: ${ADMIN_CLIENT_SECRET}
+  display-name: ${ADMIN_DISPLAY_NAME:System Administrator}
+
 dmp:
   global:
     repository: "https://github.com/OSTrails/DMP-Evaluation-Service"
