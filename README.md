@@ -154,6 +154,60 @@ Test results use the `ResultTestEnum` enum: `PASS`, `FAIL`, `ERROR`, `INDERTERMI
 
 Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the service is running.
 
+### Authentication
+
+Most read (`GET`) endpoints and assessment (`POST /assess/**`) endpoints are **public** — no token required.
+
+All management endpoints (creating, editing, or deleting benchmarks, metrics, and tests) require a **JWT Bearer token**.
+
+#### Roles
+
+| Role | Can create / update | Can delete | Can manage clients |
+|------|--------------------|-----------|--------------------|
+| `ADMIN` | Yes | Yes | Yes |
+| `WRITER` | Yes (own records only) | No | No |
+
+#### Obtaining a token
+
+```http
+POST /auth/token
+Content-Type: application/json
+
+{ "clientId": "admin", "clientSecret": "your-password" }
+```
+
+Response:
+```json
+{ "accessToken": "eyJ...", "tokenType": "Bearer", "expiresIn": 3600 }
+```
+
+Use the token in subsequent requests:
+```http
+Authorization: Bearer eyJ...
+```
+
+Tokens expire after **1 hour**. Request a new one using the same endpoint.
+
+#### Client management (`/admin/clients`) — ADMIN only
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/admin/clients` | Register a new client with a role (`ADMIN` or `WRITER`) |
+| `GET` | `/admin/clients` | List all registered clients |
+| `DELETE` | `/admin/clients/{clientId}` | Revoke a client |
+| `PUT` | `/admin/clients/{clientId}/reset-secret` | Reset a client's secret |
+
+#### Self-service (`/auth`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/token` | Obtain a JWT token |
+| `PUT` | `/auth/change-secret` | Change your own secret (requires current secret + valid token) |
+
+#### Ownership rule
+
+A `WRITER` can only update records they created. An `ADMIN` can update any record. Records that existed before authentication was enabled have no owner and can only be updated by an `ADMIN`.
+
 ### Assessment (`/assess`)
 
 | Method | Path | Description |
@@ -226,7 +280,23 @@ Provides CRUD operations for `MetricRecord` documents. Metrics group related tes
 
 ## Configuration
 
-Configuration is managed via `src/main/resources/application.yml`. The key properties are:
+Configuration is managed via `src/main/resources/application.yml`.
+
+### Environment variables
+
+All variables marked **Required** will cause the service to fail to start if missing.
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `JWT_SECRET` | **Yes** | — | Base64-encoded 256-bit HMAC key used to sign and verify JWT tokens. Generate with `openssl rand -base64 32`. |
+| `ADMIN_CLIENT_SECRET` | **Yes** | — | Password for the bootstrap admin client created on first startup. |
+| `ADMIN_CLIENT_ID` | No | `admin` | Username for the bootstrap admin client. |
+| `ADMIN_DISPLAY_NAME` | No | `System Administrator` | Display name for the bootstrap admin. |
+| `TEST_URL` | **Yes** | — | Base URL used when building test endpoint links (e.g. `http://localhost:8080/tests`). |
+| `METRIC_URL` | **Yes** | — | Base URL used when building metric endpoint links. |
+| `BENCHMARK_URL` | **Yes** | — | Base URL used when building benchmark endpoint links. |
+
+### Fixed configuration
 
 ```yaml
 server:
@@ -242,21 +312,38 @@ dmp:
     fairChampionEndPoint: https://tests.ostrails.eu/assess/test/
     unpayWallEndPoint:    https://api.unpaywall.org/v2/
     unpayWallEmail:       dmpEvalutionService@test.com
-  test:
-    endpointURL: ${TEST_URL}
-  metric:
-    endpointURL: ${METRIC_URL}
-  benchmark:
-    endpointURL: ${BENCHMARK_URL}
+
+jwt:
+  expiration-seconds: 3600   # tokens expire after 1 hour
 ```
 
-The following environment variables must be set at runtime:
+### Local development profile
 
-| Variable | Description |
-|----------|-------------|
-| `TEST_URL` | Base URL for test endpoint resolution |
-| `METRIC_URL` | Base URL for metric endpoint resolution |
-| `BENCHMARK_URL` | Base URL for benchmark endpoint resolution |
+Instead of setting environment variables manually every time, create a local override file that Spring Boot loads automatically when the `local` profile is active. This file is excluded from git via `.gitignore`.
+
+1. Edit `src/main/resources/application-local.yml` and fill in your values:
+   ```yaml
+   jwt:
+     secret: <output of: openssl rand -base64 32>
+
+   admin:
+     client-secret: my-local-admin-password
+
+   dmp:
+     test:
+       endpointURL: http://localhost:8080/tests
+     metric:
+       endpointURL: http://localhost:8080/metrics
+     benchmark:
+       endpointURL: http://localhost:8080/benchmarks
+   ```
+
+2. Run with the profile active:
+   ```bash
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+   ```
+
+> **Never commit `application-local.yml`** — it is listed in `.gitignore` to prevent accidental exposure of secrets.
 
 ---
 
@@ -273,6 +360,8 @@ The following environment variables must be set at runtime:
 
 ## Running the Service
 
+### Local development (recommended)
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/OSTrails/DMP-Evaluation-Service.git
@@ -281,17 +370,34 @@ cd DMP-Evaluation-Service/dmp-evaluator-service
 # 2. Start MongoDB
 docker-compose up -d
 
-# 3. Build the project
-./mvnw clean install
+# 3. Edit src/main/resources/application-local.yml with your local values
+#    (see the Configuration section above)
 
-# 4. Run the application
-./mvnw spring-boot:run
+# 4. Build the project
+./mvnw clean install -DskipTests
+
+# 5. Run with the local profile
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-> On Windows CMD use `mvnw.cmd` instead of `./mvnw`.
+> On Windows CMD/PowerShell use `mvnw.cmd` instead of `./mvnw`.
+
+On first startup the service will automatically create an ADMIN client using the credentials from `application-local.yml`. You will see this log line:
+```
+Bootstrap: admin client 'admin' created successfully
+```
 
 The service will be available at `http://localhost:8080`.
 Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+### Production / CI
+
+Set all required environment variables in your runtime environment (Docker, Kubernetes, CI pipeline) and run without a profile override:
+
+```bash
+./mvnw spring-boot:run
+# or deploy the fat JAR produced by: ./mvnw clean package
+```
 
 ---
 
