@@ -65,6 +65,7 @@ Thumbs.db
 .env
 *.local
 *.keystore
+src/main/resources/application-local.yml
 
 # Test coverage / reports
 coverage/
