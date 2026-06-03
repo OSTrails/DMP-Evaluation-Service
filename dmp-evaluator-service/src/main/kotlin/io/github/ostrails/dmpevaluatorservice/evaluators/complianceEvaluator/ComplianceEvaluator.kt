@@ -2,10 +2,14 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.complianceEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.Guidance
+import io.github.ostrails.dmpevaluatorservice.database.model.GuidanceEntry
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import io.github.ostrails.dmpevaluatorservice.utils.buildDatasetLabel
+import io.github.ostrails.dmpevaluatorservice.utils.extractAssessmentTarget
 import io.github.ostrails.dmpevaluatorservice.utils.extractValuesByPath
 import io.github.ostrails.dmpevaluatorservice.utils.jsonArrayOrNull
 import io.github.ostrails.dmpevaluatorservice.utils.jsonPrimitiveOrNull
@@ -134,6 +138,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
     ): Evaluation {
         val logMessages = mutableListOf<String>()
         val affectedElements = mutableListOf<String>()
+        val guidanceIssues = mutableListOf<GuidanceEntry>()
         var resultValue = ResultTestEnum.INDERTERMINATED
 
         val openLicenses = fetchAndUpdateOpenLicenses(logMessages)
@@ -147,18 +152,34 @@ class ComplianceEvaluator: EvaluatorPlugin {
             resultValue = ResultTestEnum.PASS
             datasets.forEachIndexed { datasetIndex, datasetElement ->
                 if (datasetElement is JsonObject) {
+                    val datasetIdObj = datasetElement["dataset_id"] as? JsonObject
+                    val idType = datasetIdObj?.get("type")?.jsonPrimitiveOrNull?.contentOrNull
+                    val identifier = datasetIdObj?.get("identifier")?.jsonPrimitiveOrNull?.contentOrNull
+                    val title = datasetElement["title"]?.jsonPrimitiveOrNull?.contentOrNull
+                    val datasetLabel = buildDatasetLabel(title, idType, identifier, datasetIndex)
+
                     val distributions = datasetElement["distribution"]?.jsonArrayOrNull()
                     if (distributions == null || distributions.isEmpty()) {
                         logMessages.add("Dataset[$datasetIndex]: no distributions found.")
                         affectedElements.add("dataset[$datasetIndex]")
+                        guidanceIssues.add(GuidanceEntry(
+                            dataset = datasetLabel,
+                            reason = "No distributions declared. Add at least one distribution with an open license."
+                        ))
                         resultValue = ResultTestEnum.FAIL
                     } else {
                         distributions.forEachIndexed { distIndex, distElement ->
                             val distObj = distElement as? JsonObject
+                            val distTitle = distObj?.get("title")?.jsonPrimitiveOrNull?.contentOrNull
+                                ?: "distribution ${distIndex + 1}"
                             val licenses = distObj?.get("license")?.jsonArrayOrNull()
                             if (licenses == null || licenses.isEmpty()) {
                                 logMessages.add("Dataset[$datasetIndex] distribution[$distIndex]: no license found.")
                                 affectedElements.add("dataset[$datasetIndex].distribution[$distIndex]")
+                                guidanceIssues.add(GuidanceEntry(
+                                    dataset = datasetLabel,
+                                    reason = "Distribution '$distTitle': no license declared. Add an open license (e.g., CC BY 4.0: https://creativecommons.org/licenses/by/4.0/)."
+                                ))
                                 resultValue = ResultTestEnum.FAIL
                             } else {
                                 licenses.forEachIndexed { licIndex, licElement ->
@@ -168,11 +189,19 @@ class ComplianceEvaluator: EvaluatorPlugin {
                                         licRef.isNullOrBlank() -> {
                                             logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: license_ref is missing.")
                                             affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].license[$licIndex]")
+                                            guidanceIssues.add(GuidanceEntry(
+                                                dataset = datasetLabel,
+                                                reason = "Distribution '$distTitle', license entry ${licIndex + 1}: missing 'license_ref' field. Provide the URL of an open license."
+                                            ))
                                             resultValue = ResultTestEnum.FAIL
                                         }
                                         !isOpenLicense(licRef, openLicenses) -> {
                                             logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: '$licRef' is not a recognized open license.")
                                             affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].license[$licIndex]:$licRef")
+                                            guidanceIssues.add(GuidanceEntry(
+                                                dataset = datasetLabel,
+                                                reason = "Distribution '$distTitle': '$licRef' is not a recognized open license. Replace it with an open license (e.g., CC BY 4.0: https://creativecommons.org/licenses/by/4.0/)."
+                                            ))
                                             resultValue = ResultTestEnum.FAIL
                                         }
                                         else -> logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: '$licRef' is an open license.")
@@ -185,6 +214,19 @@ class ComplianceEvaluator: EvaluatorPlugin {
             }
         }
 
+        val guidance = when {
+            resultValue != ResultTestEnum.FAIL -> Guidance(
+                summary = "All datasets use open licenses in their distributions."
+            )
+            datasets.isEmpty() -> Guidance(
+                summary = "No datasets found in the maDMP. Add at least one dataset with distributions and open licenses."
+            )
+            else -> Guidance(
+                summary = "${guidanceIssues.size} license issue(s) found across the datasets.",
+                issues = guidanceIssues
+            )
+        }
+
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
@@ -193,10 +235,11 @@ class ComplianceEvaluator: EvaluatorPlugin {
             reportId = reportId,
             log = logMessages.joinToString("\n"),
             affectedElements = affectedElements.ifEmpty { null },
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::datasetLicenseIsOpen",
             outputFromTest = testRecord.id,
-            completion = 100
+            completion = 100,
+            guidance = guidance
         )
     }
 
@@ -244,6 +287,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
     ): Evaluation {
         val logMessages = mutableListOf<String>()
         val affectedElements = mutableListOf<String>()
+        val guidanceIssues = mutableListOf<GuidanceEntry>()
         var resultValue = ResultTestEnum.INDERTERMINATED
 
         val datasets = extractValuesByPath<Any>(maDMP, "dmp.dataset[*]")
@@ -255,30 +299,54 @@ class ComplianceEvaluator: EvaluatorPlugin {
             resultValue = ResultTestEnum.PASS
             datasets.forEachIndexed { datasetIndex, datasetElement ->
                 if (datasetElement is JsonObject) {
+                    val datasetIdObj = datasetElement["dataset_id"] as? JsonObject
+                    val idType = datasetIdObj?.get("type")?.jsonPrimitiveOrNull?.contentOrNull
+                    val identifier = datasetIdObj?.get("identifier")?.jsonPrimitiveOrNull?.contentOrNull
+                    val title = datasetElement["title"]?.jsonPrimitiveOrNull?.contentOrNull
+                    val datasetLabel = buildDatasetLabel(title, idType, identifier, datasetIndex)
+
                     val distributions = datasetElement["distribution"]?.jsonArrayOrNull()
                     if (distributions == null || distributions.isEmpty()) {
                         logMessages.add("Dataset[$datasetIndex]: no distributions found.")
                         affectedElements.add("dataset[$datasetIndex]")
+                        guidanceIssues.add(GuidanceEntry(
+                            dataset = datasetLabel,
+                            reason = "No data storage location specified. Add at least one distribution indicating where the data will be stored, using a repository registered in RE3data."
+                        ))
                         resultValue = ResultTestEnum.FAIL
                     } else {
                         distributions.forEachIndexed { distIndex, distElement ->
                             val distObj = distElement as? JsonObject
+                            val distTitle = distObj?.get("title")?.jsonPrimitiveOrNull?.contentOrNull
+                                ?: "distribution ${distIndex + 1}"
                             val host = distObj?.get("host") as? JsonObject
                             val hostUrl = host?.get("url")?.jsonPrimitiveOrNull?.contentOrNull
                             when {
                                 host == null -> {
                                     logMessages.add("Dataset[$datasetIndex] distribution[$distIndex]: no host declared.")
                                     affectedElements.add("dataset[$datasetIndex].distribution[$distIndex]")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = datasetLabel,
+                                        reason = "Distribution '$distTitle': no repository specified. Add the URL of a trusted repository registered in RE3data (e.g., https://zenodo.org/)."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 hostUrl.isNullOrBlank() -> {
                                     logMessages.add("Dataset[$datasetIndex] distribution[$distIndex]: host.url is missing.")
                                     affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].host")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = datasetLabel,
+                                        reason = "Distribution '$distTitle': the repository URL is missing. Provide the URL of a repository registered in RE3data (e.g., https://zenodo.org/)."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 !isRepositoryInRe3data(hostUrl, logMessages) -> {
                                     logMessages.add("Dataset[$datasetIndex] distribution[$distIndex]: '$hostUrl' was not found in RE3data.")
                                     affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].host:$hostUrl")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = datasetLabel,
+                                        reason = "Distribution '$distTitle': the repository at '$hostUrl' is not registered in RE3data. Replace it with a repository from the RE3data registry (https://www.re3data.org/)."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 else -> logMessages.add("Dataset[$datasetIndex] distribution[$distIndex]: '$hostUrl' is registered in RE3data.")
@@ -289,6 +357,19 @@ class ComplianceEvaluator: EvaluatorPlugin {
             }
         }
 
+        val guidance = when {
+            resultValue != ResultTestEnum.FAIL -> Guidance(
+                summary = "All datasets are stored in RE3data-registered repositories."
+            )
+            datasets.isEmpty() -> Guidance(
+                summary = "No datasets found in the maDMP. Add at least one dataset with a distribution specifying a RE3data-registered repository."
+            )
+            else -> Guidance(
+                summary = "${guidanceIssues.size} distribution(s) are missing a valid RE3data-registered repository.",
+                issues = guidanceIssues
+            )
+        }
+
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
@@ -297,10 +378,11 @@ class ComplianceEvaluator: EvaluatorPlugin {
             reportId = reportId,
             log = logMessages.joinToString("\n"),
             affectedElements = affectedElements.ifEmpty { null },
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::datasetRepositoryIsInRe3data",
             outputFromTest = testRecord.id,
-            completion = 100
+            completion = 100,
+            guidance = guidance
         )
     }
 
