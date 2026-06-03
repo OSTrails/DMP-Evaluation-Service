@@ -2,10 +2,14 @@ package io.github.ostrails.dmpevaluatorservice.evaluators.completenessEvaluator
 
 import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
+import io.github.ostrails.dmpevaluatorservice.database.model.Guidance
+import io.github.ostrails.dmpevaluatorservice.database.model.GuidanceEntry
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import io.github.ostrails.dmpevaluatorservice.utils.buildDatasetLabel
+import io.github.ostrails.dmpevaluatorservice.utils.extractAssessmentTarget
 import io.github.ostrails.dmpevaluatorservice.utils.extractValuesByPath
 import kotlinx.serialization.json.*
 import org.everit.json.schema.Schema
@@ -158,7 +162,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::costEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
@@ -189,7 +193,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::contributorValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
@@ -267,7 +271,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::datasetEntityValuesPresent",
             outputFromTest = testRecord.id,
             completion = 100
@@ -284,6 +288,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
     ): Evaluation {
         val logMessages = mutableListOf<String>()
         val affectedDatasets = mutableListOf<String>()
+        val guidanceIssues = mutableListOf<GuidanceEntry>()
         var resultValue = ResultTestEnum.INDERTERMINATED
         val validTypes = setOf("doi", "handle", "ark", "url", "other")
 
@@ -299,16 +304,26 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                     val datasetId = element["dataset_id"]?.jsonObjectOrNull
                     val type = datasetId?.get("type")?.jsonPrimitiveOrNull?.contentOrNull
                     val identifier = datasetId?.get("identifier")?.jsonPrimitiveOrNull?.contentOrNull
+                    val title = element["title"]?.jsonPrimitiveOrNull?.contentOrNull
+                    val label = buildDatasetLabel(title, type, identifier, index)
 
                     when {
                         type == null || type !in validTypes -> {
                             logMessages.add("Dataset[$index]: missing or invalid type '$type'. Expected one of $validTypes.")
                             affectedDatasets.add("dataset[$index]")
+                            guidanceIssues.add(GuidanceEntry(
+                                dataset = label,
+                                reason = "Missing or invalid identifier type '${type ?: "none"}'. Expected one of: doi, handle, ark, url, other."
+                            ))
                             resultValue = ResultTestEnum.FAIL
                         }
                         identifier.isNullOrBlank() -> {
                             logMessages.add("Dataset[$index]: identifier is missing or blank.")
                             affectedDatasets.add("dataset[$index]")
+                            guidanceIssues.add(GuidanceEntry(
+                                dataset = label,
+                                reason = "The identifier value is missing or blank."
+                            ))
                             resultValue = ResultTestEnum.FAIL
                         }
                         else -> {
@@ -318,16 +333,28 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                                 responseCode == null -> {
                                     logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — could not connect to $resolvedUrl.")
                                     affectedDatasets.add("dataset[$index]:$identifier")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = label,
+                                        reason = "Could not connect to '$resolvedUrl'. Verify the URL is reachable."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 responseCode in 404..404 || responseCode == 410 -> {
                                     logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — resource not found at $resolvedUrl (HTTP $responseCode).")
                                     affectedDatasets.add("dataset[$index]:$identifier")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = label,
+                                        reason = "Identifier URL '$resolvedUrl' returned HTTP $responseCode (not found). The resource may have been removed or the identifier is incorrect."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 responseCode >= 500 -> {
                                     logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) — server error at $resolvedUrl (HTTP $responseCode). Could not confirm resolvability.")
                                     affectedDatasets.add("dataset[$index]:$identifier")
+                                    guidanceIssues.add(GuidanceEntry(
+                                        dataset = label,
+                                        reason = "Identifier URL '$resolvedUrl' returned a server error (HTTP $responseCode). The hosting service may be temporarily unavailable."
+                                    ))
                                     resultValue = ResultTestEnum.FAIL
                                 }
                                 else -> logMessages.add("Dataset[$index]: identifier '$identifier' (type=$type) resolves at $resolvedUrl (HTTP $responseCode).")
@@ -341,6 +368,19 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             }
         }
 
+        val guidance = when {
+            resultValue != ResultTestEnum.FAIL -> Guidance(
+                summary = "All datasets have valid, resolvable persistent identifiers."
+            )
+            datasets.isEmpty() -> Guidance(
+                summary = "No datasets found in the maDMP. Add at least one dataset with a persistent identifier."
+            )
+            else -> Guidance(
+                summary = "${guidanceIssues.size} out of ${datasets.size} dataset(s) have persistent identifier issues.",
+                issues = guidanceIssues
+            )
+        }
+
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result = resultValue,
@@ -349,10 +389,11 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
             reportId = reportId,
             log = logMessages.joinToString("\n"),
             affectedElements = affectedDatasets.ifEmpty { null },
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
+            assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::datasetPersistentIdentifierPresent",
             outputFromTest = testRecord.id,
-            completion = 100
+            completion = 100,
+            guidance = guidance
         )
     }
 

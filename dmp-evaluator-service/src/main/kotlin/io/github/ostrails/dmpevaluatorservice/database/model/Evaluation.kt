@@ -6,6 +6,16 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+data class GuidanceEntry  (
+    val dataset: String,
+    val reason: String
+)
+
+data class Guidance(
+    val summary: String,
+    val issues: List<GuidanceEntry> = emptyList()
+)
+
 @Document(collection = "evaluations")
 data class Evaluation(
     @Id
@@ -36,4 +46,6 @@ data class Evaluation(
     val wasGeneratedBy: String? = null,
 
     val outputFromTest: String? = null,
+
+    val guidance: Guidance? = null,
 )
