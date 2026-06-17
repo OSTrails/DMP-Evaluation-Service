@@ -108,7 +108,7 @@ class EvaluationController(
         @RequestPart(required = false) reportId: String?
     ): ResponseEntity<TestResultJsonLD>{
         val jsonResult = evaluationManagerService.gatewayTestsEvaluationService(maDMP, test, reportId)
-        val jsonLDResult = jsonResult?.let { evaluationService.buildEvalutionResultJsonLD(it) }
+        val jsonLDResult = jsonResult?.let { evaluationService.buildEvaluationResultJsonLD(it) }
 
         return ResponseEntity.ok(jsonLDResult)
     }

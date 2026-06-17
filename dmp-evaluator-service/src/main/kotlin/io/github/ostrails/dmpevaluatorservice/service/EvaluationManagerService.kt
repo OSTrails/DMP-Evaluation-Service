@@ -29,7 +29,7 @@ import org.springframework.core.io.buffer.DataBufferUtils
 class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
     private val evaluationReportRepository: EvaluationReportRepository,
-    private val benchmarkService: BenchmarService,
+    private val benchmarkService: BenchmarkService,
     private val evaluationService: EvaluationService,
     private val toRDFService: ToRDFService,
     private val testService: TestService
@@ -173,7 +173,7 @@ class EvaluationManagerService(
     suspend fun mapToRDF(maDMP: FilePart): String {
         val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
         val json = dataBuffer.toString(StandardCharsets.UTF_8)
-        DataBufferUtils.release(dataBuffer) 
+        DataBufferUtils.release(dataBuffer)
 
         val maDMPTurtle = toRDFService.jsonToRDF(json)
         return maDMPTurtle

@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 @Service
 class UnpaywallService(private val webClient: WebClient,
     val globalVariables: ConfigurationGlobalVariables) {
-    suspend fun checkOpenAccess(doi: String, email: String="dmpEvalutionService@test.com" ): JsonObject {
+    suspend fun checkOpenAccess(doi: String, email: String="dmpEvaluationService@test.com" ): JsonObject {
         val response = webClient.get()
             .uri(globalVariables.unpayWallEndPoint + "$doi?email=" + globalVariables.unpayWallEmail)
             .exchangeToMono { response: ClientResponse ->

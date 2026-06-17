@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BenchmarService(
+class BenchmarkService(
     private val benchmarkRepository: BenchmarkRepository,
     private val metricService: MetricService,
     val configurationBenchmarkVariables: ConfigurationBenchmarkVariables,

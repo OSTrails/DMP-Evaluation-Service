@@ -16,7 +16,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
 
     override val functionMap = mapOf(
-        "testFuntion" to ::testFuntion
+        "testFunction" to ::testFunction
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
@@ -44,7 +44,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
         )
     }
 
-    fun testFuntion(
+    fun testFunction(
         maDMP: Any,
         reportId: String,
         testRecord: TestRecord
