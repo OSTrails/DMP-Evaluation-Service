@@ -17,7 +17,6 @@ import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import org.springframework.stereotype.Service
 import java.io.*
-import java.util.*
 
 @Service
 class ToRDFService {
@@ -196,7 +195,7 @@ dmp:
                 * type: mapped
     * dataset: mapped
         * dataset_id: mapped
-            * identifier: mapped    
+            * identifier: mapped
             * type: mapped
         * title: mapped
         * personal_data: mapped
@@ -227,8 +226,8 @@ generate md5 hashsums for instance IRIs
 
 mapped host_id_type to dcso:identifierType
 
-ex9-dmp-long.json has the same dataset identifiers for every dataset. I changed 
-the handle IDs so that they can be distinguished. it is important for the ID 
+ex9-dmp-long.json has the same dataset identifiers for every dataset. I changed
+the handle IDs so that they can be distinguished. it is important for the ID
 generation.
 
 # Unsolved issues in the dcso.4.0.0.ttl core ontology
