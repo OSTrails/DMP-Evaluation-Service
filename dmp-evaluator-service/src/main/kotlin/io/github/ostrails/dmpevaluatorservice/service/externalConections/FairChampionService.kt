@@ -15,6 +15,37 @@ class FairChampionService(
     val globalVariables: ConfigurationGlobalVariables
 ) {
 
+    suspend fun assessBenchmark(guid: String): JsonObject {
+        val requestBody = buildJsonObject { put("guid", guid) }
+        val rawResponse = webClient.post()
+            .uri(globalVariables.fairChampionBenchmarkEndpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody.toString())
+            .exchangeToMono { response: ClientResponse ->
+                val status = response.rawStatusCode()
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(String::class.java).map { body ->
+                        buildJsonObject {
+                            put("success", true)
+                            put("status", status)
+                            put("data", Json.parseToJsonElement(body))
+                        }.toString()
+                    }
+                } else {
+                    response.bodyToMono(String::class.java).map { errorBody ->
+                        buildJsonObject {
+                            put("success", false)
+                            put("status", status)
+                            put("error", errorBody)
+                        }.toString()
+                    }
+                }
+            }
+            .awaitSingle()
+        return Json.parseToJsonElement(rawResponse).jsonObject
+    }
+
     suspend fun assessTest(testName: String, resourceUrl: String): JsonObject {
         val endpoint = globalVariables.fairChampionEndPoint + testName
 
