@@ -25,6 +25,7 @@ dmp:
     unpayWallEndPoint: "https://api.unpaywall.org/v2/"
     unpayWallEmail: "dmpEvalutionService@test.com"
     fairChampionEndPoint: "https://tests.ostrails.eu/assess/test/"
+    fairChampionBenchmarkEndpoint: "https://tools.ostrails.eu/champion/assess/algorithm/d/1UvHnRkKy3KZMlWdIdB7rz0LrBZJXpPibAgmTXJwRO_0"
   test:
     endpointURL: ${TEST_URL}
   metric:

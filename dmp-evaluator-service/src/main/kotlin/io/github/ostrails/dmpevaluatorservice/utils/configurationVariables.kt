@@ -11,6 +11,7 @@ class ConfigurationGlobalVariables(
     var unpayWallEndPoint: String = "",
     var unpayWallEmail: String = "",
     var fairChampionEndPoint: String = "",
+    var fairChampionBenchmarkEndpoint: String = "",
 ) {}
 
 @Component
