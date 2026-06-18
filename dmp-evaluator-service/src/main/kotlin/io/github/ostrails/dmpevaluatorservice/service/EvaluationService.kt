@@ -7,6 +7,7 @@ import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundE
 import io.github.ostrails.dmpevaluatorservice.model.metric.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.testResult.*
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import io.github.ostrails.dmpevaluatorservice.plugin.ExternalBenchmarkPlugin
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -39,11 +40,27 @@ class EvaluationService(
     suspend fun generateTestsResultsFromBenchmark(benchmark: BenchmarkRecord, maDMP: JsonObject, reportId:String): List<Evaluation> = coroutineScope{
         val tests = testsToExecute(benchmark)
         val testsEvaluations = tests.map { test ->
-            async<Evaluation?> {
-                generateTestResultFromTest(test, maDMP, reportId)
+            async<List<Evaluation>> {
+                val evaluatorId = test.evaluator ?: return@async emptyList()
+                val functionName = test.functionEvaluator ?: return@async emptyList()
+                val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@async emptyList()
+
+                if (plugin is ExternalBenchmarkPlugin) {
+                    val batchFn = plugin.benchmarkFunctionMap[functionName]
+                    if (batchFn != null) {
+                        return@async try {
+                            batchFn(maDMP, reportId, test)
+                        } catch (e: Exception) {
+                            log.error("Error running external benchmark test: ${test.title}", e)
+                            emptyList()
+                        }
+                    }
+                }
+
+                listOfNotNull(generateTestResultFromTest(test, maDMP, reportId))
             }
         }
-        testsEvaluations.awaitAll().filterNotNull()
+        testsEvaluations.awaitAll().flatten()
     }
 
     suspend fun generateTestResultFromTest(test: TestRecord, maDMP: JsonObject, reportId:String): Evaluation? {
