@@ -28,7 +28,7 @@ import org.springframework.core.io.buffer.DataBufferUtils
 class EvaluationManagerService(
     private val resultEvaluationResultRepository: EvaluationResultRepository,
     private val evaluationReportRepository: EvaluationReportRepository,
-    private val benchmarkService: BenchmarService,
+    private val benchmarkService: BenchmarkService,
     private val evaluationService: EvaluationService,
     private val toRDFService: ToRDFService,
     private val testService: TestService

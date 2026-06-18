@@ -16,7 +16,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
-class BenchmarService(
+class BenchmarkService(
     private val benchmarkRepository: BenchmarkRepository,
     val configurationBenchmarkVariables: ConfigurationBenchmarkVariables,
     val configurationMetricVariables: ConfigurationMetricVariables,

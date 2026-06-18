@@ -238,7 +238,7 @@ dmp:
   global:
     fairChampionEndPoint: https://tests.ostrails.eu/assess/test/
     unpayWallEndPoint:    https://api.unpaywall.org/v2/
-    unpayWallEmail:       dmpEvalutionService@test.com
+    unpayWallEmail:       dmpEvaluationService@test.com
   test:
     endpointURL: ${TEST_URL}
   metric:

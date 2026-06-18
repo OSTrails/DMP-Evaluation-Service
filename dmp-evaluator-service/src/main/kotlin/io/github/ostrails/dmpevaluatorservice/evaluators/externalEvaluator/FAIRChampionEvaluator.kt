@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class FAIRChampionEvaluato(
+class FAIRChampionEvaluator(
     private val fairChampionService: FairChampionService,
 ): EvaluatorPlugin {
 

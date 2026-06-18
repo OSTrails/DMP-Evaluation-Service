@@ -59,7 +59,7 @@ class EvaluationService(
         }
     }
 
-    fun buildEvalutionResultJsonLD(evaluation: Evaluation): TestResultJsonLD {
+    fun buildEvaluationResultJsonLD(evaluation: Evaluation): TestResultJsonLD {
         val resultId = "urn:dmpEvaluationService:${evaluation.evaluationId}"
         val testId = evaluation.outputFromTest ?: "https://example.org/test/default"
         val resourceId = evaluation.assessmentTarget?.takeIf { it.isNotBlank() } ?: "https://example.org/resource/default"
