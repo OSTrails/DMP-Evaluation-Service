@@ -5,150 +5,98 @@ import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
-import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import io.github.ostrails.dmpevaluatorservice.plugin.ExternalBenchmarkPlugin
 import io.github.ostrails.dmpevaluatorservice.service.externalConections.FairChampionService
+import io.github.ostrails.dmpevaluatorservice.utils.parseFairChampionResponse
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class FAIRChampionEvaluato(
+class FAIRChampionEvaluator(
     private val fairChampionService: FairChampionService,
-): EvaluatorPlugin {
+) : ExternalBenchmarkPlugin {
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
+    override fun getPluginIdentifier(): String = "FAIR_Champion"
 
-    override val functionMap = mapOf(
-        "evaluateStructure" to ::evaluateStructure,
-        "evaluateMetadata" to ::evaluateMetadata,
-        "evaluateLicense" to ::evaluateLicense,
+    override fun getPluginInformation(): PluginInfo = PluginInfo(
+        pluginId = getPluginIdentifier(),
+        description = "Delegates FAIR benchmark evaluation to the external FAIR Champion service",
+        functions = listOf()
+    )
+
+    override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = emptyMap()
+
+    override val benchmarkFunctionMap = mapOf(
+        "evaluateFAIRnessDatasetByChampion" to ::evaluateFAIRnessDatasetByChampion,
     )
 
     override fun evaluate(
         maDMP: Map<String, Any>,
         config: Map<String, Any>,
         tests: List<String>,
-        report: EvaluationReport
-    ): List<Evaluation> {
-        TODO("Not yet implemented")
-    }
+        report: EvaluationReport,
+    ): List<Evaluation> = TODO("Not yet implemented")
 
-    override fun getPluginIdentifier(): String {
-        return "FAIR_Champion"
-    }
-
-    override fun getPluginInformation(): PluginInfo {
-        return PluginInfo(
-            pluginId = getPluginIdentifier(),
-            description = "Evaluator to perform External calls for tests",
-            functions = listOf()
-        )
-    }
-
-
-
-    fun evaluateStructure(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
-            wasGeneratedBy = "${this::class.qualifiedName}::evaluateStructure",
-            outputFromTest = testRecord.id
-
-        )
-    }
-
-    fun evaluateMetadata(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
-            wasGeneratedBy = "${this::class.qualifiedName}::evaluateMetadata",
-            outputFromTest = testRecord.id
-        )
-    }
-
-    fun evaluateLicense(
+    fun evaluateFAIRnessDatasetByChampion(
         maDMP: JsonObject,
         reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        var resulTest: ResultTestEnum
-        var logForTest: String = ""
+        testRecord: TestRecord,
+    ): List<Evaluation> {
         val datasets = extractDatasetIds(maDMP)
-        if (datasets == null) {
-            resulTest = ResultTestEnum.FAIL
-        }else {
-            val fairresult = checkFair(datasets)
 
+        if (datasets.isNullOrEmpty()) {
+            return listOf(Evaluation(
+                evaluationId = UUID.randomUUID().toString(),
+                result = ResultTestEnum.FAIL,
+                title = testRecord.title,
+                details = testRecord.description,
+                reportId = reportId,
+                log = "No dataset identifiers found in the maDMP.",
+                wasGeneratedBy = "${this::class.qualifiedName}::evaluateFAIRnessDatasetByChampion",
+                outputFromTest = testRecord.id,
+                completion = 100
+            ))
         }
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
-            wasGeneratedBy = "${this::class.qualifiedName}::evaluateLicense",
-            outputFromTest = testRecord.id
-        )
-    }
 
-    fun checkFair(datasets: List<String>): Map<String, Map<String, Any?>> {
-        return datasets.associateWith { dataset ->
-            val jsonresult = runBlocking { fairChampionService.assessTest("fc_metadata_includes_license",dataset) }
-            val isSuccess = jsonresult["success"]?.jsonPrimitive?.boolean
-            if(isSuccess == true){
-                val data = jsonresult["data"]?.jsonObjectOrNull()
-                mapOf(
-                    "data" to data,
-                    "log" to "Successfully fetched unpaywall data doi $dataset - "
-                )
+        return datasets.flatMap { guid ->
+            val response = runBlocking { fairChampionService.assessBenchmark(guid) }
+            val success = response["success"]?.jsonPrimitive?.boolean
+
+            if (success == true) {
+                val data = response["data"]?.jsonObjectOrNull()
+                    ?: return@flatMap listOf(errorEvaluation(guid, "Empty response body", reportId, testRecord))
+                parseFairChampionResponse(data, reportId, testRecord)
             } else {
-                val errorMessage = jsonresult["error"]?.jsonPrimitive?.contentOrNull ?: "Unknown error"
-                val status = jsonresult["status"]?.jsonPrimitive?.intOrNull
-                mapOf(
-                    "log" to "Failed to fetch data with doi $dataset (status=$status): $errorMessage"
-                )
+                val errorMsg = response["error"]?.jsonPrimitive?.contentOrNull
+                    ?: "HTTP ${response["status"]?.jsonPrimitive?.intOrNull ?: "unknown"}"
+                listOf(errorEvaluation(guid, errorMsg, reportId, testRecord))
             }
         }
     }
 
-    fun extractDatasetIds(maDMP: JsonObject): List<String>? {
-        val datasetArray = maDMP["dmp"]
-            ?.jsonObject?.get("dataset")
-            ?.jsonArrayOrNull()
-        println(datasetArray)
-        if (datasetArray != null) {
-            return  datasetArray.mapNotNull { datasetElement ->
-                val dataset = datasetElement.jsonObject
-                val datasetIdObj = dataset["dataset_id"]?.jsonObjectOrNull()
-                val identifier = datasetIdObj?.get("identifier")
-                println("dataset: $dataset")
-                return@mapNotNull identifier?.jsonPrimitive?.contentOrNull
+    private fun errorEvaluation(guid: String, reason: String, reportId: String, testRecord: TestRecord) =
+        Evaluation(
+            evaluationId = UUID.randomUUID().toString(),
+            result = ResultTestEnum.ERROR,
+            title = testRecord.title,
+            details = testRecord.description,
+            reportId = reportId,
+            log = "FAIR Champion assessment failed for '$guid': $reason",
+            wasGeneratedBy = "${this::class.qualifiedName}::evaluateFAIRnessDatasetByChampion",
+            outputFromTest = testRecord.id,
+            completion = 100
+        )
+
+    private fun extractDatasetIds(maDMP: JsonObject): List<String>? =
+        maDMP["dmp"]?.jsonObject?.get("dataset")?.jsonArrayOrNull()
+            ?.mapNotNull { element ->
+                element.jsonObject["dataset_id"]?.jsonObjectOrNull()
+                    ?.get("identifier")?.jsonPrimitive?.contentOrNull
             }
-        }else return null
-    }
 
-    fun JsonElement.jsonArrayOrNull(): JsonArray? =
-        this as? JsonArray
-
-    fun JsonElement.jsonObjectOrNull(): JsonObject? =
-        this as? JsonObject
-
+    private fun JsonElement.jsonArrayOrNull(): JsonArray? = this as? JsonArray
+    private fun JsonElement.jsonObjectOrNull(): JsonObject? = this as? JsonObject
 }
