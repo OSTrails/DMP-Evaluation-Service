@@ -4,6 +4,6 @@ enum class ResultTestEnum {
     PASS,
     FAIL,
     ERROR,
-    INDERTERMINATED,
+    INTERMINATED,
     NOT_APPLICABLE
 }
