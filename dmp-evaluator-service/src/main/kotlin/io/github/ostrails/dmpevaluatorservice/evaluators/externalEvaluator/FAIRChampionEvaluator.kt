@@ -23,7 +23,7 @@ class FAIRChampionEvaluator(
 
     override fun getPluginInformation(): PluginInfo = PluginInfo(
         pluginId = getPluginIdentifier(),
-        description = "Delegates FAIR benchmark evaluation to the external FAIR Champion service",
+        description = "Delegates FAIR benchmark evaluation to the external FAIR Champion service to evaluate FAIRness of datasets",
         functions = listOf()
     )
 
