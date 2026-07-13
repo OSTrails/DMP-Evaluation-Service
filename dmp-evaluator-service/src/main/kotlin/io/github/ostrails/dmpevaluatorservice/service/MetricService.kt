@@ -16,10 +16,8 @@ import org.springframework.stereotype.Service
 @Service
 class MetricService(
     val metricRepository: MetricRepository,
-    val benchmarkRepository: BenchmarkRepository,
     val configurationMetricVariables: ConfigurationMetricVariables,
     val configurationTestVariables: ConfigurationTestVariables,
-    val configurationGlobalVariables: ConfigurationGlobalVariables,
     val configurationBenchmarkVariables: ConfigurationBenchmarkVariables
 ) {
 

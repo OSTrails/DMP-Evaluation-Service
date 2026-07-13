@@ -14,12 +14,10 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class BenchmarService(
     private val benchmarkRepository: BenchmarkRepository,
-    private val metricService: MetricService,
     val configurationBenchmarkVariables: ConfigurationBenchmarkVariables,
     val configurationMetricVariables: ConfigurationMetricVariables,
 ){

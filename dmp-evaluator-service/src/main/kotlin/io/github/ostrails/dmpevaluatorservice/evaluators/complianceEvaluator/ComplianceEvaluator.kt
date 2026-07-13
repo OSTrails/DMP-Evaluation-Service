@@ -126,6 +126,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
             title = testRecord.title,
             details = testRecord.description,
             reportId = reportId,
+            generated = "${this::class.qualifiedName}::checkFormatFile",
             outputFromTest = testRecord.id,
             log = logMessage
         )

@@ -5,7 +5,6 @@ import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import io.github.ostrails.dmpevaluatorservice.plugin.ExternalBenchmarkPlugin
 import org.springframework.plugin.core.PluginRegistry
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class PluginManagerService(
