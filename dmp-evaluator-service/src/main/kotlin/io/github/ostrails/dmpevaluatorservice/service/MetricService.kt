@@ -1,12 +1,10 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
-import io.github.ostrails.dmpevaluatorservice.database.repository.BenchmarkRepository
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.metric.*
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
-import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationMetricVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
