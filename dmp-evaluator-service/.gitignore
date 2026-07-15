@@ -73,3 +73,6 @@ jacoco*.exec
 
 # Kotlin Native / Multiplatform (if used)
 bin/
+
+# Local ktlint CLI binary (downloaded manually, not committed - see ci.yml for version)
+/ktlint
