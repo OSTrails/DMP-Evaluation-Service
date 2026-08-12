@@ -1,5 +1,7 @@
 # DMP Evaluation Service
 
+[![CI](https://github.com/OSTrails/DMP-Evaluation-Service/actions/workflows/ci.yml/badge.svg)](https://github.com/OSTrails/DMP-Evaluation-Service/actions/workflows/ci.yml)
+
 A Spring Boot 3 + WebFlux (reactive) REST microservice for the semi-automated evaluation of Data Management Plans (DMPs). It supports both machine-actionable DMPs (maDMPs) in JSON format compliant with the [DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) and traditional narrative-style DMPs.
 
 This service is a key component of the [OSTrails project](https://ostrails.eu/) and reflects input from research funders, institutional policy frameworks, and research support needs.
@@ -19,6 +21,7 @@ This service is a key component of the [OSTrails project](https://ostrails.eu/) 
 - [Configuration](#configuration)
 - [Requirements](#requirements)
 - [Running the Service](#running-the-service)
+- [Continuous Integration](#continuous-integration)
 - [Output Format](#output-format)
 
 ---
@@ -293,6 +296,19 @@ Swagger UI: `http://localhost:8080/swagger-ui.html`
 ---
 
 MongoDB must be running before executing integration tests.
+
+---
+
+## Continuous Integration
+
+Every push to `main` and every pull request targeting `main` runs the GitHub Actions workflow defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+
+| Step | Purpose | Blocking? |
+|------|---------|-----------|
+| Build & test (`./mvnw --batch-mode clean verify`) | Compiles the service and runs the full test suite against a MongoDB 6.0 service container spun up for the job | Yes — a failure fails the pipeline |
+| ktlint style check | Reports Kotlin style violations across `src/**/*.kt` | No — currently report-only (`continue-on-error`) while the codebase is brought into line with ktlint's rules |
+
+The job runs on `ubuntu-latest` with Java 17 (Temurin) and Maven dependency caching. No manual MongoDB setup is needed in CI — the workflow provisions its own MongoDB container and waits for it to become healthy before running tests.
 
 ---
 
