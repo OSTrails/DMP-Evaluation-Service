@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   benchmark response envelope.
 - README rewritten with an architecture overview, plugin system, data model, API
   reference, and configuration documentation.
+- GitHub Actions CI workflow (`.github/workflows/ci.yml`, issue #17): runs
+  `mvnw clean verify` against a MongoDB service container on every push to
+  `main` and every pull request targeting `main`, plus a report-only ktlint
+  style check.
 
 ### Changed
 - `Evaluation`, `EvaluationReport`, `BenchmarkRecord`, `MetricRecord`, and
