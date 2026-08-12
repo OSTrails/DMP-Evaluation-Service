@@ -44,16 +44,15 @@ For instance, the following commit message:
 When contributing to the code, please follow these steps:
 
 1. Fork the repository (if not in the OSTrails organisation).
-2. Create a new branch for your changes (base = `nextRelease`).
+2. Create a new branch for your changes (base = `main`).
 3. Make your changes and commit them.
 4. Push your changes.
-5. Open a pull request to the `nextRelease` branch of the main repository.
+5. Open a pull request to the `main` branch of the main repository.
 
-Both `nextRelease` and `main` branches are protected and require a review before merging.
-The `next` branch is used for the next release, while the `main` branch is used
-for the current release
-(and only release/hotfix PRs will be merged according to
-[Gitflow workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)).
+The `main` branch is protected and requires a review before merging. Every pull
+request to `main` also runs the [CI workflow](./.github/workflows/ci.yml)
+(build, test, and a report-only style check) — make sure it passes before
+requesting review.
 
 ### Crediting Contributors
 

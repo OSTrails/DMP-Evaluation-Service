@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/OSTrails/DMP-Evaluation-Service/discussions
+    about: For questions or general discussion, please use GitHub Discussions instead of an issue.
