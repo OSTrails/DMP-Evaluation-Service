@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, AT/issue-17-ci-pipeline] # TODO: drop the feature branch before merging, main-only per plan
+    branches: [main]
   pull_request:
     branches: [main]
 
