@@ -14,7 +14,7 @@ class UnpaywallService(private val webClient: WebClient,
         val response = webClient.get()
             .uri(globalVariables.unpayWallEndPoint + "$doi?email=" + globalVariables.unpayWallEmail)
             .exchangeToMono { response: ClientResponse ->
-            val statusCode = response.rawStatusCode()
+            val statusCode = response.statusCode().value()
             if (response.statusCode().is2xxSuccessful) {
                 response.bodyToMono(String::class.java).map { body ->
                     buildJsonObject {

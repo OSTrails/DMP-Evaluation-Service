@@ -23,7 +23,7 @@ class FairChampionService(
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody.toString())
             .exchangeToMono { response: ClientResponse ->
-                val status = response.rawStatusCode()
+                val status = response.statusCode().value()
                 if (response.statusCode().is2xxSuccessful) {
                     response.bodyToMono(String::class.java).map { body ->
                         buildJsonObject {
@@ -58,7 +58,7 @@ class FairChampionService(
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody.toString())
             .exchangeToMono { response: ClientResponse ->
-                val status = response.rawStatusCode()
+                val status = response.statusCode().value()
                 if (response.statusCode().is2xxSuccessful) {
                     response.bodyToMono(String::class.java).map { body ->
                         buildJsonObject {
