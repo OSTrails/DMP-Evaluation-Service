@@ -10,6 +10,8 @@ import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.codec.multipart.FilePart
@@ -21,6 +23,8 @@ class EvaluationController(
     private val evaluationManagerService: EvaluationManagerService,
     private val evaluationService: EvaluationService,
 ) {
+
+    private val log: Logger = LoggerFactory.getLogger(EvaluationController::class.java)
 
     @Operation(
         summary = "Create a generic evaluation",
@@ -63,7 +67,7 @@ class EvaluationController(
         @RequestPart(required = false) reportId: String?
     ): ResponseEntity<List<Evaluation>>{
         val filename = maDMP.filename().lowercase()
-        println("filename ---------------- $filename")
+        log.debug("filename: $filename")
         val jsonResult = evaluationManagerService.gatewayBenchmarkEvaluationService(maDMP, benchmark, reportId)
         return ResponseEntity.ok(jsonResult)
     }

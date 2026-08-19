@@ -19,6 +19,8 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.serialization.json.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
@@ -34,9 +36,12 @@ class EvaluationManagerService(
     private val testService: TestService
 ) {
 
+    private val log: Logger = LoggerFactory.getLogger(EvaluationManagerService::class.java)
+
     suspend fun generateEvaluations(request: EvaluationRequest): EvaluationResult {
         // fetch the report id from the request or from the db.
         val reportEvaluation = getReportId(request.reportId)
+        log.debug("generateEvaluations: reportId=${reportEvaluation.reportId}, params=${request.evaluationParams}")
         val evaluationsResults = evaluationResults(reportEvaluation, request)
         return EvaluationResult(
             reportId = reportEvaluation.reportId.toString(),
@@ -51,6 +56,11 @@ class EvaluationManagerService(
                 evaluationReportRepository.findById(it).awaitFirstOrNull()
             }else evaluationReportRepository.save(EvaluationReport()).awaitSingle()
         }?:evaluationReportRepository.save(EvaluationReport()).awaitSingle()
+        if (request == null || request != report.reportId) {
+            log.debug("Created new EvaluationReport '${report.reportId}'")
+        } else {
+            log.debug("Reusing existing EvaluationReport '${report.reportId}'")
+        }
         return report
     }
 
@@ -81,7 +91,10 @@ class EvaluationManagerService(
 
 
     suspend fun getFullReport(reportId: String): EvaluationReportResponse? {
-        val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: throw ResourceNotFoundException("There is exist report with the id $reportId")
+        val report = evaluationReportRepository.findById(reportId).awaitFirstOrNull()?: run {
+            log.warn("Report '$reportId' not found")
+            throw ResourceNotFoundException("There is exist report with the id $reportId")
+        }
         val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() }
         return EvaluationReportResponse(
             report= report,
@@ -95,7 +108,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
-                //jsonFilevalidator(file)
+                log.debug("Running benchmark '$benchmarkId' for report '$reportIdentifier'")
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val benchmark = benchmarkService.getBenchmarkDetail(benchmarkId)
                     val evaluations = evaluationService.generateTestsResultsFromBenchmark(benchmark, maDMP, reportIdentifier.toString())
@@ -104,12 +117,12 @@ class EvaluationManagerService(
                         evaluations = report.evaluations + savedEvaluations.mapNotNull { it.evaluationId }
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
-                    //TODO()
-                    // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluator and test.function.
+                    log.info("Benchmark '$benchmarkId' produced ${savedEvaluations.size} evaluation(s) for report '$reportIdentifier'")
                     return savedEvaluations
 
             }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
         }catch (e: Exception) {
+            log.error("Failed to generate benchmark evaluation for benchmark '$benchmarkId'", e)
             throw ResourceNotFoundException("Was not possible to generate the evaluation due $e")
         }
     }
@@ -119,7 +132,7 @@ class EvaluationManagerService(
             val report = getReportId(reportId)
             if (report.reportId != null) {
                 val reportIdentifier = report.reportId
-                //jsonFilevalidator(file)
+                log.debug("Running test '$testId' for report '$reportIdentifier'")
                 val maDMP = fileToJsonObject(file) // Translate a json file to json object
                 val test = testService.getTest(testId)
                 val evaluation = evaluationService.generateTestResultFromTest(test, maDMP, reportIdentifier.toString())
@@ -129,17 +142,18 @@ class EvaluationManagerService(
                         evaluations = report.evaluations + listOfNotNull(savedEvaluation?.evaluationId)
                     )
                     evaluationReportRepository.save(updateReport).awaitSingle()
+                    log.info("Test '$testId' completed with result '${savedEvaluation?.result}' for report '$reportIdentifier'")
                     return savedEvaluation
                 }else throw ApiException("There is a problem in the execution of the test $testId",)
-                //TODO()
-                // here I´m going to call the function that can trigger the evaluations for each plugin evaluator based on the test.evaluatzor and test.function.
             }else throw ResourceNotFoundException("Not found the report to associated the evaluations")
         }catch (e: Exception) {
+            log.error("Failed to generate test evaluation for test '$testId'", e)
             throw ResourceNotFoundException("Was not possible to generate the evaluation due $e")
         }
     }
 
     suspend fun gatewayBenchmarkEvaluationJsonLD(file: FilePart, benchmarkId: String, reportId: String?): TestResultSetJsonLD {
+        log.debug("Running benchmark '$benchmarkId' (JSON-LD) for report '$reportId'")
         val evaluations = gatewayBenchmarkEvaluationService(file, benchmarkId, reportId)
         val benchmark = benchmarkService.getBenchmarkDetail(benchmarkId)
         val effectiveReportId = evaluations.firstOrNull()?.reportId
@@ -170,6 +184,7 @@ class EvaluationManagerService(
     }
 
     suspend fun mapToRDF(maDMP: FilePart): String {
+        log.debug("Mapping '${maDMP.filename()}' to RDF")
         val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
         val json = dataBuffer.toString(StandardCharsets.UTF_8)
         DataBufferUtils.release(dataBuffer)

@@ -9,6 +9,8 @@ import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import io.github.ostrails.dmpevaluatorservice.service.externalConections.UnpaywallService
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -16,6 +18,8 @@ import java.util.*
 class QualityOfActionsEvaluator(
     private val unpaywallService: UnpaywallService,
 ): EvaluatorPlugin {
+
+    private val log: Logger = LoggerFactory.getLogger(QualityOfActionsEvaluator::class.java)
 
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
@@ -95,13 +99,13 @@ class QualityOfActionsEvaluator(
         val datasetArray = maDMP["dmp"]
             ?.jsonObject?.get("dataset")
             ?.jsonArrayOrNull()
-        println(datasetArray)
+        log.debug("datasetArray: $datasetArray")
         if (datasetArray != null) {
             return  datasetArray.mapNotNull { datasetElement ->
                 val dataset = datasetElement.jsonObject
                 val datasetIdObj = dataset["dataset_id"]?.jsonObjectOrNull()
                 val identifier = datasetIdObj?.get("identifier")
-                println("dataset: $dataset")
+                log.debug("dataset: $dataset")
                 return@mapNotNull identifier?.jsonPrimitive?.contentOrNull
             }
         }else return null

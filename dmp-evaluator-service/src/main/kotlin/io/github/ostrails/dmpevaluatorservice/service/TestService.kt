@@ -13,6 +13,8 @@ import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 
@@ -25,10 +27,14 @@ class TestService(
     private val metricService: MetricService
 ) {
 
+    private val log: Logger = LoggerFactory.getLogger(TestService::class.java)
+
     suspend fun createTest(test: TestRecord): TestRecord {
         val enrichedTest = test.copy(repository = configurationGlobalVariables.repository,
             endpointURL = configurationTestVariables.endpointURL +"/"+ test.id)
-        return testRepository.save(enrichedTest).awaitSingle()
+        val saved = testRepository.save(enrichedTest).awaitSingle()
+        log.info("Created test '${saved.id}'")
+        return saved
     }
 
     suspend fun listAllTests(): List<TestRecord> {
@@ -45,13 +51,19 @@ class TestService(
     }
 
     suspend fun getTest(testId: String): TestRecord {
-        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: run {
+            log.warn("Test '$testId' not found")
+            throw ResourceNotFoundException("Test with id $testId not found")
+        }
         val enrichedTest = test.copy(endpointURL = configurationTestVariables.endpointURL +"/"+ test.id)
         return enrichedTest
     }
 
    suspend fun addMetric(testId: String, testInfo: TestAddMetricRequest): TestRecord? {
-       val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+       val test = testRepository.findById(testId).awaitFirstOrNull() ?: run {
+           log.warn("Test '$testId' not found")
+           throw ResourceNotFoundException("Test with id $testId not found")
+       }
        if (testInfo.evaluator != null) {
            val updateTest = test.copy(
                metricImplemented = testInfo.metricImplemented,
@@ -59,36 +71,53 @@ class TestService(
                functionEvaluator = testInfo.functionEvaluator ?: testInfo.functionEvaluator, )
            metricService.addTests(testInfo.metricImplemented, listOf(testId))
            val testSaved = testRepository.save(updateTest).awaitSingle()
+           log.debug("Linked test '$testId' to metric '${testInfo.metricImplemented}'")
            return testSaved
        }else {
+           log.warn("Test '$testId': no evaluator supplied for metric '${testInfo.metricImplemented}'")
            throw ResourceNotFoundException("The metric id ${testInfo.metricImplemented} not found")
        }
    }
 
     suspend fun deleteTest(testId: String): String? {
-        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: run {
+            log.warn("Test '$testId' not found")
+            throw ResourceNotFoundException("Test with id $testId not found")
+        }
         try {
             testRepository.delete(test).awaitFirstOrNull()
+            log.info("Deleted test '$testId'")
         }catch (e:Exception){
+            log.error("Failed to delete test '$testId'", e)
             throw DatabaseException("There is a error with the database trying to delete the test ${testId}   ${e.message}")
         }
         return testId
     }
 
     suspend fun findMultipleTests(testsIds: List<String>): List<TestRecord> {
-            val tests = testRepository.findByIdIn(testsIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests with the ids ${testsIds} not found")
+            val tests = testRepository.findByIdIn(testsIds).collectList().awaitSingle() ?: run {
+                log.warn("No tests found for ids $testsIds")
+                throw ResourceNotFoundException("Tests with the ids ${testsIds} not found")
+            }
             val enrichedTests = tests.map { it.copy(repository = configurationGlobalVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id )}
             return enrichedTests
     }
 
     suspend fun getTestsByMetrics(metricId: String):List<TestRecord>{
-        val tests = testRepository.findBymetricImplemented(metricId).collectList().awaitSingle() ?: throw ResourceNotFoundException("Tests associated with the metric id $metricId not found")
+        val tests = testRepository.findBymetricImplemented(metricId).collectList().awaitSingle() ?: run {
+            log.warn("No tests found for metric '$metricId'")
+            throw ResourceNotFoundException("Tests associated with the metric id $metricId not found")
+        }
         val enrichedTests = tests.map { it.copy(repository = configurationGlobalVariables.repository, endpointURL = configurationTestVariables.endpointURL +"/"+ it.id)}
         return enrichedTests
     }
 
     suspend fun updateTest (testId: String, newTestData: TestUpdateRequest): TestRecord {
-        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: run {
+            log.warn("Test '$testId' not found")
+            throw ResourceNotFoundException("Test with id $testId not found")
+        }
+        log.debug("Updating test '$testId'")
         val updateTest = test.copy(
             title = newTestData.title ?: test.title,
             description = newTestData.description ?: test.description,
@@ -112,7 +141,10 @@ class TestService(
   }
 
     suspend fun testJsonLD(testId: String): TestJsonLD {
-        val test = testRepository.findById(testId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Test with id $testId not found")
+        val test = testRepository.findById(testId).awaitFirstOrNull() ?: run {
+            log.warn("Test '$testId' not found")
+            throw ResourceNotFoundException("Test with id $testId not found")
+        }
         val keywords = test.keyword?.split(",")?.map { LangLiteral(value = it.trim()) }
 
         return TestJsonLD(

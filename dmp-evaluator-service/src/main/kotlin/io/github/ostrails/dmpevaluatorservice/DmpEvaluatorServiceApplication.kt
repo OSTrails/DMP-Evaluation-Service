@@ -19,6 +19,6 @@ class DmpEvaluatorServiceApplication{
 }
 
 fun main(args: Array<String>) {
-//    DmpEvaluatorServiceApplication.logger.debug("Starting DMP Evaluator Service")
+    DmpEvaluatorServiceApplication.logger.info("Starting DMP Evaluator Service")
     runApplication<DmpEvaluatorServiceApplication>(*args)
 }

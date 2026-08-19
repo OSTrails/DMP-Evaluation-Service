@@ -1,9 +1,14 @@
 package io.github.ostrails.dmpevaluatorservice.utils.dbpatchers
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
+
+@PublishedApi
+internal val log: Logger = LoggerFactory.getLogger("MongoPatcherUtils")
 
 inline fun <reified T : Any> patchMongoCollection(
     mongoTemplate: MongoTemplate,
@@ -11,11 +16,11 @@ inline fun <reified T : Any> patchMongoCollection(
 ) {
     val defaultInstance = createDefaultInstance<T>()
     if (defaultInstance == null) {
-        println("❌ Could not create default instance for ${T::class.simpleName}")
+        log.error("Could not create default instance for ${T::class.simpleName}")
         return
     }
 
-    println("✅ Default instance created: $defaultInstance")
+    log.info("Default instance created: $defaultInstance")
     val updates = Update()
     val kClass = T::class
 
@@ -30,7 +35,7 @@ inline fun <reified T : Any> patchMongoCollection(
     }
 
     val result = mongoTemplate.updateMulti(Query(), updates, T::class.java, collectionName)
-    println("🔧 Patched ${result.modifiedCount} documents in '$collectionName'")
+    log.info("Patched ${result.modifiedCount} documents in '$collectionName'")
 }
 
 inline fun <reified T : Any> createDefaultInstance(): T? {
@@ -40,7 +45,7 @@ inline fun <reified T : Any> createDefaultInstance(): T? {
         }
         constructor?.callBy(emptyMap())
     } catch (e: Exception) {
-        println("⚠️ Could not create instance of ${T::class.simpleName}: ${e.message}")
+        log.warn("Could not create instance of ${T::class.simpleName}: ${e.message}")
         null
     }
 }

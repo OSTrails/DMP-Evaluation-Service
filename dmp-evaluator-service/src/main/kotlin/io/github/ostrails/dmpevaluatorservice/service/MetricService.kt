@@ -9,6 +9,8 @@ import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationMetricVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,8 +21,12 @@ class MetricService(
     val configurationBenchmarkVariables: ConfigurationBenchmarkVariables
 ) {
 
+    private val log: Logger = LoggerFactory.getLogger(MetricService::class.java)
+
     suspend fun createMetric(metric: MetricRecord): MetricRecord {
-        return metricRepository.save(metric).awaitSingle()
+        val saved = metricRepository.save(metric).awaitSingle()
+        log.info("Created metric '${saved.id}'")
+        return saved
     }
 
     suspend fun listMetrics(): List<MetricRecord> {
@@ -39,11 +45,18 @@ class MetricService(
     }
 
     suspend fun metricDetail(metricId: String): MetricRecord {
-        return metricRepository.findById(metricId).awaitSingle() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        return metricRepository.findById(metricId).awaitSingle() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("Metric with id $metricId not found")
+        }
     }
 
     suspend fun updateMetric(metricId: String, metricRequest: MetricUpdateRequest): MetricRecord {
-        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("Metric with id $metricId not found")
+        }
+        log.debug("Updating metric '$metricId'")
         val updateMetric = metric.copy(
             title = metricRequest.title ?: metric.title,
             version = metricRequest.version ?: metric.version,
@@ -59,68 +72,67 @@ class MetricService(
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
-    /*
-    *     suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest): BenchmarkRecord {
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
-        val updateBenchmark = benchmark.copy(
-            title = benchmarkRequest.title ?: benchmark.title,
-            version = benchmarkRequest.version ?: benchmark.version,
-            description = benchmarkRequest.description ?: benchmark.description,
-            keyword = benchmarkRequest.keyword ?: benchmark.keyword,
-            abbreviation = benchmarkRequest.abbreviation ?: benchmark.abbreviation,
-            landingPage = benchmarkRequest.landingPage ?: benchmark.landingPage,
-            theme = benchmarkRequest.theme ?: benchmark.theme,
-            status = benchmarkRequest.status ?: benchmark.status,
-            creator = benchmarkRequest.creator ?: benchmark.creator
-            )
-        return benchmarkRepository.save(updateBenchmark).awaitSingle()
-    }
-    *
-    * */
-
     suspend fun deleteMetric(metricId: String): String? {
         val record = metricRepository.findById(metricId).awaitFirstOrNull()
         if (record != null) {
             metricRepository.deleteById(metricId).awaitFirstOrNull()
+            log.info("Deleted metric '$metricId'")
             return record.id
         }else{
+            log.warn("Metric '$metricId' not found, nothing deleted")
             return null
         }
     }
 
     suspend fun addTests(metricId: String, tests:List<String>): MetricRecord {
         val testsToAdd: List<String>
-        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("Metric with id $metricId not found")
+        }
         if (metric.testAssociated != null) {
             testsToAdd = tests.filterNot { it in metric.testAssociated }
         }else testsToAdd = tests
         val updateMetric = metric.copy(testAssociated = metric.testAssociated?.plus(testsToAdd) ?: tests)
+        log.debug("Adding ${testsToAdd.size} test(s) to metric '$metricId'")
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
     suspend fun deleteTest(metricId: String, tests: List<String>): MetricRecord{
-        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("Metric with id $metricId not found")
+        }
         if (metric.testAssociated != null && metric.testAssociated.isNotEmpty()) {
             val testFiltered = metric.testAssociated.filterNot { it in tests }
             val updateMetric = metric.copy(testAssociated = testFiltered)
+            log.debug("Removing ${tests.size} test(s) from metric '$metricId'")
             return metricRepository.save(updateMetric).awaitSingle()
         }else {
+            log.warn("Metric '$metricId' has no tests to delete")
             throw ResourceNotFoundException("There is not tests to delete in this metric")
         }
     }
 
     suspend fun findMultipleMetrics(metricIds: List<String>): List<MetricRecord> {
-        val metrics = metricRepository.findByIdIn(metricIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("Metrics with the ids ${metricIds} not found")
+        val metrics = metricRepository.findByIdIn(metricIds).collectList().awaitSingle() ?: run {
+            log.warn("No metrics found for ids $metricIds")
+            throw ResourceNotFoundException("Metrics with the ids ${metricIds} not found")
+        }
         return metrics
     }
 
     suspend fun addBenchMark(metricId: String, benchMarkIds: List<String>): MetricRecord{
         val benchmarkToAdd: List<String>
-        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $metricId not found")
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("Metric with id $metricId not found")
+        }
         if (metric.hasBenchmark != null) {
             benchmarkToAdd = benchMarkIds.filterNot { it in metric.hasBenchmark }
         }else benchmarkToAdd = benchMarkIds
         val updateMetric = metric.copy(hasBenchmark = metric.hasBenchmark?.plus(benchmarkToAdd) ?: benchMarkIds)
+        log.debug("Adding ${benchmarkToAdd.size} benchmark(s) to metric '$metricId'")
         return metricRepository.save(updateMetric).awaitSingle()
     }
 
@@ -132,7 +144,10 @@ class MetricService(
 
 
     suspend fun getMetricDetailJsonLD(metricId: String): MetricJsonLD {
-        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $metricId")
+        val metric = metricRepository.findById(metricId).awaitFirstOrNull() ?: run {
+            log.warn("Metric '$metricId' not found")
+            throw ResourceNotFoundException("There is no record with id $metricId")
+        }
         val result = metricJsonLD(metric)
         return result
     }
