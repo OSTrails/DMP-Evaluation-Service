@@ -33,6 +33,7 @@ class EvaluationService(
         val metrics = metricService.findMultipleMetrics(metricsIds)
         val testsIds = metrics.mapNotNull { it.testAssociated }.flatten()
         val tests = testService.findMultipleTests(testsIds)
+        log.debug("Benchmark '${benchmark.title}': resolved ${tests.size} test(s) from ${metrics.size} metric(s)")
         return tests
     }
 
@@ -41,13 +42,23 @@ class EvaluationService(
         val tests = testsToExecute(benchmark)
         val testsEvaluations = tests.map { test ->
             async<List<Evaluation>> {
-                val evaluatorId = test.evaluator ?: return@async emptyList()
-                val functionName = test.functionEvaluator ?: return@async emptyList()
-                val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return@async emptyList()
+                val evaluatorId = test.evaluator ?: run {
+                    log.warn("Test '${test.id}' has no evaluator configured, skipping.")
+                    return@async emptyList()
+                }
+                val functionName = test.functionEvaluator ?: run {
+                    log.warn("Test '${test.id}' has no functionEvaluator configured, skipping.")
+                    return@async emptyList()
+                }
+                val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: run {
+                    log.warn("No plugin registered for evaluator '$evaluatorId' (test '${test.id}').")
+                    return@async emptyList()
+                }
 
                 if (plugin is ExternalBenchmarkPlugin) {
                     val batchFn = plugin.benchmarkFunctionMap[functionName]
                     if (batchFn != null) {
+                        log.debug("Running external benchmark test '${test.id}' via $evaluatorId::$functionName")
                         return@async try {
                             batchFn(maDMP, reportId, test)
                         } catch (e: Exception) {
@@ -64,10 +75,23 @@ class EvaluationService(
     }
 
     suspend fun generateTestResultFromTest(test: TestRecord, maDMP: JsonObject, reportId:String): Evaluation? {
-        val evaluatorId = test.evaluator ?: return null
-        val functionName = test.functionEvaluator ?: return null
-        val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: return null
-        val functionTest = plugin.functionMap[functionName] ?: return null
+        val evaluatorId = test.evaluator ?: run {
+            log.warn("Test '${test.id}' has no evaluator configured, skipping.")
+            return null
+        }
+        val functionName = test.functionEvaluator ?: run {
+            log.warn("Test '${test.id}' has no functionEvaluator configured, skipping.")
+            return null
+        }
+        val plugin = pluginRegistry.getPluginFor(evaluatorId).orElse(null) ?: run {
+            log.warn("No plugin registered for evaluator '$evaluatorId' (test '${test.id}').")
+            return null
+        }
+        val functionTest = plugin.functionMap[functionName] ?: run {
+            log.warn("Plugin '$evaluatorId' has no function '$functionName' (test '${test.id}').")
+            return null
+        }
+        log.debug("Running test '${test.id}' via $evaluatorId::$functionName")
         return try {
             test.let { functionTest(maDMP, reportId, it) }
         }catch (e:Exception){

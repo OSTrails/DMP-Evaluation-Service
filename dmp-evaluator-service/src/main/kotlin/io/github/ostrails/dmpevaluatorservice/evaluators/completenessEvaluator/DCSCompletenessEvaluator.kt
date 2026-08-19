@@ -17,12 +17,16 @@ import org.everit.json.schema.ValidationException
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.JSONObject
 import org.json.JSONTokener
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.InputStream
 import java.util.*
 
 @Component
 class DCSCompletenessEvaluator: EvaluatorPlugin {
+
+    private val log: Logger = LoggerFactory.getLogger(DCSCompletenessEvaluator::class.java)
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
 
@@ -103,7 +107,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         reportId: String,
         testRecord: TestRecord): Evaluation{
         val costs = extractValuesByPath<String>(maDMP, "dmp.cost[*]")
-        println(costs.toString())
+        log.debug("costs: $costs")
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
             result =if (costs.isEmpty()) ResultTestEnum.FAIL else ResultTestEnum.PASS,

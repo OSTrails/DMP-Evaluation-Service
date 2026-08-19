@@ -15,11 +15,15 @@ import org.eclipse.rdf4j.rio.RDFFormat
 import org.eclipse.rdf4j.rio.Rio
 import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer
 import org.eclipse.rdf4j.sail.memory.MemoryStore
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.*
 
 @Service
 class ToRDFService {
+
+    private val log: Logger = LoggerFactory.getLogger(ToRDFService::class.java)
 
     suspend fun jsonToRDF(json: String): String {
         try {
@@ -68,7 +72,7 @@ class ToRDFService {
                 kotlinx.serialization.json.JsonObject(jsonObject)
             )
             madmpFile.writeText(updatedJson)
-            println("File created at: ${madmpFile.absolutePath}")
+            log.info("File created at: ${madmpFile.absolutePath}")
 
             val mappingResource = this::class.java.classLoader.getResource("rmlmappings/rmlMappings.ttl")
                 ?: error("RML mapping resource not found")
@@ -93,11 +97,11 @@ class ToRDFService {
 
             val result = executor.execute(null)[NamedNode("rmlmapper://default.store")]
             if (result == null) {
-                println("No RDF output generated.")
+                log.warn("No RDF output generated.")
                 return "No RDF output generated."
             }
 
-            println("Saving output to: \${outFile.absolutePath}")
+            log.info("Saving output to: \${outFile.absolutePath}")
 
             val modelField = RDF4JStore::class.java.getDeclaredField("model").apply { isAccessible = true }
             val model = modelField.get(result) as Model
@@ -111,9 +115,9 @@ class ToRDFService {
                     val ontologyModel = Rio.parse(ontologyFile.inputStream(), ontologyFile.toURI().toString(), RDFFormat.TURTLE)
                     tBoxAndABox.addAll(ontologyModel)
                     ontologyNamespaces = ontologyModel.namespaces
-                    println("Ontology file added.")
-                } else println("Ontology file not found at: \${ontologyFile.absolutePath}")
-            } ?: println("Ontology resource not found.")
+                    log.info("Ontology file added.")
+                } else log.warn("Ontology file not found at: \${ontologyFile.absolutePath}")
+            } ?: log.warn("Ontology resource not found.")
 
             val repo = SailRepository(SchemaCachingRDFSInferencer(MemoryStore())).apply { init() }
             repo.connection.use { conn: RepositoryConnection ->
@@ -129,8 +133,7 @@ class ToRDFService {
                 return stringWriter.toString()
                 }
             } catch (e: Exception) {
-            println("Error during RDF generation: ${e.message}")
-            e.printStackTrace()
+            log.error("Error during RDF generation: ${e.message}", e)
             return "Error during RDF generation: ${e.message}"
         }
     }

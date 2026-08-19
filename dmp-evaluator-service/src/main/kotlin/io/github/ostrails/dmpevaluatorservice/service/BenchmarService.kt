@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,14 +24,19 @@ class BenchmarService(
     val configurationMetricVariables: ConfigurationMetricVariables,
 ){
 
+    private val log: Logger = LoggerFactory.getLogger(BenchmarService::class.java)
+
     suspend fun createBenchmark(benchmark: BenchmarkRecord): BenchmarkRecord {
-        return benchmarkRepository.save(benchmark).awaitSingle()
+        val saved = benchmarkRepository.save(benchmark).awaitSingle()
+        log.info("Created benchmark '${saved.benchmarkId}'")
+        return saved
     }
 
     suspend fun getBenchmarks():List<BenchmarkRecord> {
         try {
             return benchmarkRepository.findAll().asFlow().toList()
         }catch (e:Exception){
+            log.error("Failed to fetch benchmarks", e)
             throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
         }
     }
@@ -39,36 +46,51 @@ class BenchmarService(
             val benchmarks =  benchmarkRepository.findAll().asFlow().toList()
             return benchmarks.map { configurationBenchmarkVariables.endpointURL + "/" + it.benchmarkId.toString() }
         }catch (e:Exception){
+            log.error("Failed to fetch benchmark ids", e)
             throw DatabaseException("There is a error with the database trying to get the benchmarks ${e.message}")
         }
     }
 
     suspend fun addMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
         val metricToAdd:List<String>
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        }
         if (benchmark.hasAssociatedMetric !=  null){
             metricToAdd = metricsId.filterNot { it in benchmark.hasAssociatedMetric }
         }else metricToAdd = metricsId
         val updateBenchmark = benchmark.copy(hasAssociatedMetric = benchmark.hasAssociatedMetric?.plus(metricToAdd) ?: metricsId)
+        log.debug("Adding ${metricToAdd.size} metric(s) to benchmark '$benchmarkId'")
         return benchmarkRepository.save(updateBenchmark).awaitSingle()
     }
 
     suspend fun deleteMetric(benchmarkId: String, metricsId: List<String>): BenchmarkRecord {
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("Metric with id $benchmarkId not found")
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("Metric with id $benchmarkId not found")
+        }
         if (benchmark.hasAssociatedMetric != null && benchmark.hasAssociatedMetric.isNotEmpty()) {
             val metricFiltered = benchmark.hasAssociatedMetric.filterNot { it in metricsId }
             val updateBenchmark = benchmark.copy(hasAssociatedMetric = metricFiltered ?: null)
+            log.debug("Removing ${metricsId.size} metric(s) from benchmark '$benchmarkId'")
             return benchmarkRepository.save(updateBenchmark).awaitSingle()
         }else {
+            log.warn("Benchmark '$benchmarkId' has no metrics to delete")
             throw ResourceNotFoundException("There is not metric to delete in this benchmark")
         }
     }
 
     suspend fun deleteBenchmark(benchmarkId: String): String? {
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+        }
         try {
             benchmarkRepository.delete(benchmark).awaitFirstOrNull()
+            log.info("Deleted benchmark '$benchmarkId'")
         }catch (e:Exception){
+            log.error("Failed to delete benchmark '$benchmarkId'", e)
             throw DatabaseException("There is a error with the database trying to delete the record ${benchmarkId}   ${e.message}")
         }
         return benchmarkId
@@ -76,19 +98,31 @@ class BenchmarService(
     }
 
     suspend fun getBenchmarkDetail(benchmarkId: String): BenchmarkRecord{
-        return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+        return benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkId")
+        }
     }
 
     suspend fun getBenchmarskDetail(benchmarkIds: List<String>): List<BenchmarkRecord>{
-        return benchmarkRepository.findAllByBenchmarkIdIn(benchmarkIds).collectList().awaitSingle() ?: throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkIds")
+        return benchmarkRepository.findAllByBenchmarkIdIn(benchmarkIds).collectList().awaitSingle() ?: run {
+            log.warn("No benchmarks found for ids $benchmarkIds")
+            throw ResourceNotFoundException("There is no benchmark with the ID $benchmarkIds")
+        }
     }
 
     suspend fun benchmarkByTitle(title: String): BenchmarkRecord {
-        return benchmarkRepository.findByTitle(title).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no benchmark with the title $title")
+        return benchmarkRepository.findByTitle(title).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark with title '$title' not found")
+            throw ResourceNotFoundException("There is no benchmark with the title $title")
+        }
     }
 
     suspend fun getBenchmarkDetailJsonLD(benchmarkId: String): BenchmarkJsonLD{
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        }
         val result = toJsonLD(benchmark)
         return result
     }
@@ -96,7 +130,11 @@ class BenchmarService(
 
 
     suspend fun updateBenchmark(benchmarkId: String, benchmarkRequest: BenchmarkUpdateRequest): BenchmarkRecord {
-        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        val benchmark = benchmarkRepository.findById(benchmarkId).awaitFirstOrNull() ?: run {
+            log.warn("Benchmark '$benchmarkId' not found")
+            throw ResourceNotFoundException("There is no record with id $benchmarkId")
+        }
+        log.debug("Updating benchmark '$benchmarkId'")
         val updateBenchmark = benchmark.copy(
             title = benchmarkRequest.title ?: benchmark.title,
             version = benchmarkRequest.version ?: benchmark.version,

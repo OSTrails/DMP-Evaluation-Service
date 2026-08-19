@@ -4,6 +4,8 @@ import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.serialization.json.*
 import kotlinx.serialization.json.buildJsonObject
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ClientResponse
@@ -15,7 +17,10 @@ class FairChampionService(
     val globalVariables: ConfigurationGlobalVariables
 ) {
 
+    private val log: Logger = LoggerFactory.getLogger(FairChampionService::class.java)
+
     suspend fun assessBenchmark(guid: String): JsonObject {
+        log.debug("Requesting FAIR Champion benchmark assessment for guid '$guid'")
         val requestBody = buildJsonObject { put("guid", guid) }
         val rawResponse = webClient.post()
             .uri(globalVariables.fairChampionBenchmarkEndpoint)
@@ -33,6 +38,7 @@ class FairChampionService(
                         }.toString()
                     }
                 } else {
+                    log.warn("FAIR Champion benchmark assessment for guid '$guid' failed with status $status")
                     response.bodyToMono(String::class.java).map { errorBody ->
                         buildJsonObject {
                             put("success", false)
@@ -48,6 +54,7 @@ class FairChampionService(
 
     suspend fun assessTest(testName: String, resourceUrl: String): JsonObject {
         val endpoint = globalVariables.fairChampionEndPoint + testName
+        log.debug("Requesting FAIR Champion test '$testName' for resource '$resourceUrl'")
 
         val requestBody = buildJsonObject {
             put("resource_identifier", resourceUrl)
@@ -68,6 +75,7 @@ class FairChampionService(
                         }.toString()
                     }
                 } else {
+                    log.warn("FAIR Champion test '$testName' for resource '$resourceUrl' failed with status $status")
                     response.bodyToMono(String::class.java).map { errorBody ->
                         buildJsonObject {
                             put("success", false)
