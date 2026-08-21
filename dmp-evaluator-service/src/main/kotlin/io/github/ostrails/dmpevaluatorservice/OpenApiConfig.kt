@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.License
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import io.swagger.v3.oas.models.info.Info
@@ -12,14 +13,20 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 
 
 @Configuration
-class OpenApiConfig {
+class OpenApiConfig(
+    @Value("\${openapi.title}") private val title: String,
+    @Value("\${openapi.version}") private val version: String,
+    @Value("\${openapi.description}") private val description: String,
+    @Value("\${openapi.license.name}") private val licenseName: String,
+    @Value("\${openapi.license.url}") private val licenseUrl: String,
+) {
 
     @Bean
     fun customOpenApi(): OpenAPI{
         return OpenAPI()
             .info(Info()
-            .title("DMP Evaluator Service API").version("v1.0.0").description("API for the service that evaluate DMPs")
-            .license(License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0"))
+            .title(title).version(version).description(description)
+            .license(License().name(licenseName).url(licenseUrl))
             )
     }
 }

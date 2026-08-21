@@ -11,11 +11,14 @@
     <groupId>io.github.ostrails</groupId>
     <artifactId>dmp-evaluator-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>dmp-evaluator-service</name>
-    <description>dmp-evaluator-service</description>
+    <name>DMP Evaluator Service API</name>
+    <description>API for the service that evaluates Data Management Plans (maDMPs)</description>
     <url/>
     <licenses>
-        <license/>
+        <license>
+            <name>Apache 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
     </licenses>
     <developers>
         <developer/>

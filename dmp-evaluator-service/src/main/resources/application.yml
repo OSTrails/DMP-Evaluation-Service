@@ -18,6 +18,14 @@ logging:
     org.springframework: DEBUG
     io.github.ostrails.dmpevaluatorservice: DEBUG
 
+openapi:
+  title: DMP Evaluator Service API
+  version: v1.0.0
+  description: API for the service that evaluates Data Management Plans (maDMPs)
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
 dmp:
   global:
     repository: "https://github.com/OSTrails/DMP-Evaluation-Service"
