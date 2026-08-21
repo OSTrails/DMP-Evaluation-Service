@@ -10,6 +10,7 @@
     </parent>
     <groupId>io.github.ostrails</groupId>
     <artifactId>dmp-evaluator-service</artifactId>
+    <!-- Kept in sync manually with openapi.version in application.yml (see OpenApiConfig.kt) -->
     <version>0.0.1-SNAPSHOT</version>
     <name>DMP Evaluator Service API</name>
     <description>API for the service that evaluates Data Management Plans (maDMPs)</description>

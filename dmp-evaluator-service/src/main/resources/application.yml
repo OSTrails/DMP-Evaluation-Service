@@ -20,6 +20,7 @@ logging:
 
 openapi:
   title: DMP Evaluator Service API
+  # Kept in sync manually with <version> in pom.xml
   version: v1.0.0
   description: API for the service that evaluates Data Management Plans (maDMPs)
   license:
