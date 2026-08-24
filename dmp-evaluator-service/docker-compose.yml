@@ -11,5 +11,15 @@ services:
     environment:
       MONGO_INITDB_DATABASE: dmp-evaluator
 
+  app:
+    build: .
+    container_name: dmp-evaluator-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/dmp-evaluator
+
 volumes:
   mongo-data:
