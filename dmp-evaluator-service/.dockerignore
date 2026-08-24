@@ -1,0 +1,14 @@
+.git
+target/
+.idea/
+.vscode/
+.claude/
+*.iml
+*.log
+
+# Local-only config, never bake secrets/overrides into the image
+src/main/resources/application-local.yml
+
+# Docs not needed to build/run the service
+*.md
+!README.md
