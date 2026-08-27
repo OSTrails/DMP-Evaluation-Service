@@ -116,15 +116,4 @@ class EvaluationController(
 
         return ResponseEntity.ok(jsonLDResult)
     }
-
-    @Operation(
-        summary = "Mapping a maDMP into a RDF format"
-    )
-    @PostMapping("/mappingRDF", consumes = ["multipart/form-data"])
-    suspend fun runMapping(
-        @RequestPart("maDMP") maDMP: FilePart,
-    ): ResponseEntity<Any>{
-        val result = evaluationManagerService.mapToRDF(maDMP)
-        return ResponseEntity.ok().body(result)
-    }
 }

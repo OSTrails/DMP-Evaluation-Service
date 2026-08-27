@@ -12,7 +12,6 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultSetJsonLD
-import io.github.ostrails.dmpevaluatorservice.utils.madmp2rdf.ToRDFService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -23,8 +22,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import java.nio.charset.StandardCharsets
-import org.springframework.core.io.buffer.DataBufferUtils
 
 @Service
 class EvaluationManagerService(
@@ -32,7 +29,6 @@ class EvaluationManagerService(
     private val evaluationReportRepository: EvaluationReportRepository,
     private val benchmarkService: BenchmarService,
     private val evaluationService: EvaluationService,
-    private val toRDFService: ToRDFService,
     private val testService: TestService
 ) {
 
@@ -181,16 +177,6 @@ class EvaluationManagerService(
             put("fileExtension", JsonPrimitive(extension))
             put("fileName", JsonPrimitive(fileName))
         }
-    }
-
-    suspend fun mapToRDF(maDMP: FilePart): String {
-        log.debug("Mapping '${maDMP.filename()}' to RDF")
-        val dataBuffer = DataBufferUtils.join(maDMP.content()).awaitFirstOrNull() ?: throw IllegalArgumentException("Empty file")
-        val json = dataBuffer.toString(StandardCharsets.UTF_8)
-        DataBufferUtils.release(dataBuffer)
-
-        val maDMPTurtle = toRDFService.jsonToRDF(json)
-        return maDMPTurtle
     }
 
     fun jsonFilevalidator(file: FilePart){
