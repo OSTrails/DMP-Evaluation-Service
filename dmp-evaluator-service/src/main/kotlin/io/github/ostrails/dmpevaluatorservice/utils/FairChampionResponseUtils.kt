@@ -50,7 +50,7 @@ private fun JsonObject.toEvaluation(
     val result = when (value) {
         "pass" -> ResultTestEnum.PASS
         "fail" -> ResultTestEnum.FAIL
-        else -> ResultTestEnum.INDERTERMINATED
+        else -> ResultTestEnum.INDETERMINATE
     }
 
     return Evaluation(

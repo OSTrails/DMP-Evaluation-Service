@@ -107,7 +107,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
         val json = maDMP as? JsonObject
             ?: return Evaluation(
                 evaluationId = UUID.randomUUID().toString(),
-                result = ResultTestEnum.INDERTERMINATED,
+                result = ResultTestEnum.INDETERMINATE,
                 title = testRecord.title,
                 details = "Input is not a valid JsonObject",
                 reportId = reportId,
@@ -139,7 +139,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
         val logMessages = mutableListOf<String>()
         val affectedElements = mutableListOf<String>()
         val guidanceIssues = mutableListOf<GuidanceEntry>()
-        var resultValue = ResultTestEnum.INDERTERMINATED
+        var resultValue = ResultTestEnum.INDETERMINATE
 
         val openLicenses = fetchAndUpdateOpenLicenses(logMessages)
 
@@ -288,7 +288,7 @@ class ComplianceEvaluator: EvaluatorPlugin {
         val logMessages = mutableListOf<String>()
         val affectedElements = mutableListOf<String>()
         val guidanceIssues = mutableListOf<GuidanceEntry>()
-        var resultValue = ResultTestEnum.INDERTERMINATED
+        var resultValue = ResultTestEnum.INDETERMINATE
 
         val datasets = extractValuesByPath<Any>(maDMP, "dmp.dataset[*]")
 
