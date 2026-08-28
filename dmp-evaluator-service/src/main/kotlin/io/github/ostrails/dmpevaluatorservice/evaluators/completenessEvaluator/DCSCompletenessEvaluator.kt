@@ -125,13 +125,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         maDMP: JsonObject,
         reportId: String,
         testRecord: TestRecord): Evaluation{
-        var resultValue: ResultTestEnum = ResultTestEnum.INDERTERMINATED
+        var resultValue: ResultTestEnum = ResultTestEnum.INDETERMINATE
         val costs = extractValuesByPath<Any>(maDMP, "dmp.cost[*]")
         val logMessages = mutableListOf<String>()
         if (costs.isEmpty()) {
             resultValue = ResultTestEnum.FAIL
             logMessages.add("Cost field is not present in the maDMP")
-        } else{resultValue = ResultTestEnum.INDERTERMINATED}
+        } else{resultValue = ResultTestEnum.INDETERMINATE}
 
         val validCosts = costs.mapNotNull { element ->
             if (element is JsonObject) {
@@ -179,7 +179,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         testRecord: TestRecord): Evaluation{
         val logMessages = mutableListOf<String>()
         val contributors = extractValuesByPath<String>(maDMP, "dmp.contributor[*]")
-        var resultValue: ResultTestEnum = ResultTestEnum.INDERTERMINATED
+        var resultValue: ResultTestEnum = ResultTestEnum.INDETERMINATE
         logMessages.add("contributors: $contributors")
         if (contributors.isEmpty()) {
             resultValue = ResultTestEnum.FAIL
@@ -208,13 +208,13 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         maDMP: JsonObject,
         reportId: String,
         testRecord: TestRecord): Evaluation{
-        var resultValue: ResultTestEnum = ResultTestEnum.INDERTERMINATED
+        var resultValue: ResultTestEnum = ResultTestEnum.INDETERMINATE
         val datasets = extractValuesByPath<Any>(maDMP, "dmp.dataset[*]")
         val logMessages = mutableListOf<String>()
         if (datasets.isEmpty()) {
             resultValue = ResultTestEnum.FAIL
             logMessages.add("dataset field is not present in the maDMP")
-        } else{resultValue = ResultTestEnum.INDERTERMINATED}
+        } else{resultValue = ResultTestEnum.INDETERMINATE}
 
         datasets.forEachIndexed { index, element ->
             if (element is JsonObject) {
@@ -293,7 +293,7 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         val logMessages = mutableListOf<String>()
         val affectedDatasets = mutableListOf<String>()
         val guidanceIssues = mutableListOf<GuidanceEntry>()
-        var resultValue = ResultTestEnum.INDERTERMINATED
+        var resultValue = ResultTestEnum.INDETERMINATE
         val validTypes = setOf("doi", "handle", "ark", "url", "other")
 
         val datasets = extractValuesByPath<Any>(maDMP, "dmp.dataset[*]")

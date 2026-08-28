@@ -20,5 +20,6 @@ class PostConstruct(
         patchMongoCollection<BenchmarkRecord>(mongoTemplate, "benchmarks")
         patchMongoCollection<BenchmarkRecord>(mongoTemplate, "metrics")
         patchMongoCollection<BenchmarkRecord>(mongoTemplate, "tests")
+        migrateIndeterminatedResultTypo(mongoTemplate)
     }
 }

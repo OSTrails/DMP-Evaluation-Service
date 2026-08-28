@@ -141,7 +141,7 @@ class QualityOfActionsEvaluator(
     ): Evaluation {
         val logMessages = mutableListOf<String>()
         val allowedTypes = setOf("handle", "doi", "ark", "url", "other")
-        var resultValue = ResultTestEnum.INDERTERMINATED
+        var resultValue = ResultTestEnum.INDETERMINATE
 
         val dmpObject = maDMP["dmp"]?.jsonObjectOrNull()
         if (dmpObject == null) {
