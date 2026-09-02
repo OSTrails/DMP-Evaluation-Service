@@ -57,6 +57,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bearer token authorization button in Swagger UI for interactive testing
 - `application-local.yml` profile for local development (excluded from git)
 - `AUTH_CHANGES.md` implementation log explaining every change made
+- Per-IP rate limiting via [Bucket4j](https://github.com/bucket4j/bucket4j) (token-bucket algorithm), backed by a bounded/expiring [Caffeine](https://github.com/ben-manes/caffeine) cache of one bucket per source IP (issue #15): new `ratelimit/` package (`RateLimitProperties`, `RateLimitWebFilter`), registered first in the WebFlux security filter chain so bombing traffic is rejected before authentication or routing
+- `ratelimit.*` configuration (`enabled`, `capacity`, `refill-tokens`, `refill-duration-seconds`), all overridable via `RATE_LIMIT_*` environment variables, defaulting to 100 requests/minute per IP
+- `X-RateLimit-Remaining` response header on every successful request; `429 Too Many Requests` with a `Retry-After` header and a structured JSON error body on rejection
+- `RATE_LIMITING.md`: design writeup of the rate-limiting implementation (token-bucket algorithm, Bucket4j/Caffeine internals, request-lifecycle diagrams)
+- `AUTH_REVIEW_FINDINGS.md`: findings from a code review of the JWT/RBAC/ownership implementation, tracked for follow-up after rate limiting ships
+- README: new "Rate Limiting" subsection under API Reference, plus environment variable documentation for the new `RATE_LIMIT_*` settings
 
 ### Changed
 - `Evaluation`, `EvaluationReport`, `BenchmarkRecord`, `MetricRecord`, and
@@ -92,5 +98,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Passwords stored as BCrypt hashes — never in plain text
 - JWT secret loaded from environment variable `JWT_SECRET` — never hardcoded
 - Records without an owner (`createdBy = null`, i.e. legacy data) can only be updated by `ADMIN`
+- Every endpoint (public and authenticated alike) is now protected by a per-IP token-bucket rate limiter, mitigating bombing by intent or by a faulty script (issue #15)
 
 ## [1.0.0] 2025-MM-DD

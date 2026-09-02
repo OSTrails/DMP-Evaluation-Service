@@ -4,6 +4,8 @@ import io.github.ostrails.dmpevaluatorservice.auth.filter.AuditWebFilter
 import io.github.ostrails.dmpevaluatorservice.auth.filter.JwtAuthenticationWebFilter
 import io.github.ostrails.dmpevaluatorservice.auth.service.JwtService
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ErrorResponse
+import io.github.ostrails.dmpevaluatorservice.ratelimit.config.RateLimitProperties
+import io.github.ostrails.dmpevaluatorservice.ratelimit.filter.RateLimitWebFilter
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,7 +25,8 @@ import reactor.core.publisher.Mono
 @EnableWebFluxSecurity
 class SecurityConfig(
     private val jwtService: JwtService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val rateLimitProperties: RateLimitProperties
 ) {
 
     @Bean
@@ -56,6 +59,7 @@ class SecurityConfig(
                     .pathMatchers(HttpMethod.GET, "/**").permitAll()
                     .anyExchange().authenticated()
             }
+            .addFilterAt(RateLimitWebFilter(rateLimitProperties, objectMapper), SecurityWebFiltersOrder.FIRST)
             .addFilterAt(JwtAuthenticationWebFilter(jwtService), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterAfter(AuditWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .exceptionHandling { ex ->
