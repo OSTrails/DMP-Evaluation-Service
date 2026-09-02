@@ -36,6 +36,12 @@ admin:
   client-secret: ${ADMIN_CLIENT_SECRET}
   display-name: ${ADMIN_DISPLAY_NAME:System Administrator}
 
+ratelimit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  capacity: ${RATE_LIMIT_CAPACITY:100}
+  refill-tokens: ${RATE_LIMIT_REFILL_TOKENS:100}
+  refill-duration-seconds: ${RATE_LIMIT_REFILL_DURATION_SECONDS:60}
+
 dmp:
   global:
     repository: "https://github.com/OSTrails/DMP-Evaluation-Service"

@@ -208,6 +208,34 @@ Tokens expire after **1 hour**. Request a new one using the same endpoint.
 
 A `WRITER` can only update records they created. An `ADMIN` can update any record. Records that existed before authentication was enabled have no owner and can only be updated by an `ADMIN`.
 
+### Rate Limiting
+
+Every request — public or authenticated, any method or path — is subject to a per-IP rate limit, enforced before authentication or routing. This protects the API from being overwhelmed by intentional abuse or a misbehaving script (issue #15).
+
+The limiter uses a token-bucket algorithm (via [Bucket4j](https://github.com/bucket4j/bucket4j)): each source IP gets a bucket of `capacity` tokens that refill continuously at a rate of `refillTokens` per `refillDurationSeconds`. Successful responses include a header showing tokens left:
+
+```http
+X-RateLimit-Remaining: 42
+```
+
+Exceeding the limit returns:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 12
+
+{
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many requests from your IP address — please slow down and retry after 12 seconds",
+  "timestamp": "2026-09-02T10:15:00Z",
+  "path": "/benchmarks"
+}
+```
+
+Default: **100 requests/minute per IP**. Fully configurable via environment variables — see [Environment variables](#environment-variables) below — including a kill switch (`RATE_LIMIT_ENABLED=false`) to disable it entirely.
+
+For the full design writeup (token-bucket internals, library choice, diagrams), see [`dmp-evaluator-service/RATE_LIMITING.md`](dmp-evaluator-service/RATE_LIMITING.md).
+
 ### Assessment (`/assess`)
 
 | Method | Path | Description |
@@ -295,6 +323,10 @@ All variables marked **Required** will cause the service to fail to start if mis
 | `TEST_URL` | **Yes** | — | Base URL used when building test endpoint links (e.g. `http://localhost:8080/tests`). |
 | `METRIC_URL` | **Yes** | — | Base URL used when building metric endpoint links. |
 | `BENCHMARK_URL` | **Yes** | — | Base URL used when building benchmark endpoint links. |
+| `RATE_LIMIT_ENABLED` | No | `true` | Kill switch for the per-IP rate limiter. Set to `false` to disable it entirely. |
+| `RATE_LIMIT_CAPACITY` | No | `100` | Max tokens per IP bucket — i.e. the largest burst a single IP can send instantly. |
+| `RATE_LIMIT_REFILL_TOKENS` | No | `100` | Tokens added back per refill period. |
+| `RATE_LIMIT_REFILL_DURATION_SECONDS` | No | `60` | Length of the refill period, in seconds. Default config = 100 requests/minute/IP. |
 
 ### Fixed configuration
 

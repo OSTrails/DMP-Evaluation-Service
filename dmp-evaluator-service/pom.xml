@@ -181,6 +181,20 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Bucket4j — token-bucket rate limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
+
+        <!-- Caffeine — bounded, expiring cache backing the per-IP bucket store -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
+        </dependency>
+
     </dependencies>
 
     <build>
