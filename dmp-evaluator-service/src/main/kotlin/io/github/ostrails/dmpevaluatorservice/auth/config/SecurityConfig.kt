@@ -2,6 +2,7 @@ package io.github.ostrails.dmpevaluatorservice.auth.config
 
 import io.github.ostrails.dmpevaluatorservice.auth.filter.AuditWebFilter
 import io.github.ostrails.dmpevaluatorservice.auth.filter.JwtAuthenticationWebFilter
+import io.github.ostrails.dmpevaluatorservice.auth.repository.ClientRepository
 import io.github.ostrails.dmpevaluatorservice.auth.service.JwtService
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ErrorResponse
 import io.github.ostrails.dmpevaluatorservice.ratelimit.config.RateLimitProperties
@@ -26,7 +27,8 @@ import reactor.core.publisher.Mono
 class SecurityConfig(
     private val jwtService: JwtService,
     private val objectMapper: ObjectMapper,
-    private val rateLimitProperties: RateLimitProperties
+    private val rateLimitProperties: RateLimitProperties,
+    private val clientRepository: ClientRepository
 ) {
 
     @Bean
@@ -60,7 +62,7 @@ class SecurityConfig(
                     .anyExchange().authenticated()
             }
             .addFilterAt(RateLimitWebFilter(rateLimitProperties, objectMapper), SecurityWebFiltersOrder.FIRST)
-            .addFilterAt(JwtAuthenticationWebFilter(jwtService), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterAt(JwtAuthenticationWebFilter(jwtService, clientRepository), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterAfter(AuditWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .exceptionHandling { ex ->
                 ex.authenticationEntryPoint { exchange, _ ->
