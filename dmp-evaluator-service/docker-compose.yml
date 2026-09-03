@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:6.0
-    container_name: mongo-dev
+    container_name: mongo-dev-test
     ports:
       - "27017:27017"
     volumes:
@@ -19,7 +17,21 @@ services:
     depends_on:
       - mongodb
     environment:
-      MONGODB_URI: mongodb://mongodb:27017/dmp-evaluator
+      MONGODB_URI: "mongodb://mongodb:27017/dmp-evaluator"
+      # Required — service will not start without these. Set them in your
+      # shell or in a .env file next to this compose file (git-ignored).
+      JWT_SECRET: "${JWT_SECRET:?Set JWT_SECRET - generate with 'openssl rand -base64 32'}"
+      ADMIN_CLIENT_SECRET: "${ADMIN_CLIENT_SECRET:?Set ADMIN_CLIENT_SECRET - password for the bootstrap admin client}"
+      TEST_URL: "${TEST_URL:-http://localhost:8080/tests}"
+      METRIC_URL: "${METRIC_URL:-http://localhost:8080/metrics}"
+      BENCHMARK_URL: "${BENCHMARK_URL:-http://localhost:8080/benchmarks}"
+      # Optional — defaults match application.yml if left unset.
+      ADMIN_CLIENT_ID: "${ADMIN_CLIENT_ID:-admin}"
+      ADMIN_DISPLAY_NAME: "${ADMIN_DISPLAY_NAME:-System Administrator}"
+      RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
+      RATE_LIMIT_CAPACITY: "${RATE_LIMIT_CAPACITY:-100}"
+      RATE_LIMIT_REFILL_TOKENS: "${RATE_LIMIT_REFILL_TOKENS:-100}"
+      RATE_LIMIT_REFILL_DURATION_SECONDS: "${RATE_LIMIT_REFILL_DURATION_SECONDS:-60}"
 
 volumes:
   mongo-data:
