@@ -50,6 +50,9 @@ class SecurityConfig(
                     .pathMatchers(HttpMethod.POST, "/auth/token").permitAll()
                     // Assessment submissions — public (anyone can evaluate a DMP without a token)
                     .pathMatchers(HttpMethod.POST, "/assess/**").permitAll()
+                    // Read-only lookup-by-ID-list — a POST only because it needs a request body,
+                    // not a write; kept public like the rest of the read endpoints (issue #15 review)
+                    .pathMatchers(HttpMethod.POST, "/benchmarks/list/filter").permitAll()
                     // Admin client management — ADMIN only (covers all HTTP methods on /admin/**)
                     .pathMatchers("/admin/**").hasRole("ADMIN")
                     // DELETE — ADMIN only
