@@ -83,11 +83,10 @@ class BenchmarkController(
         return ResponseEntity.ok(benchMarkService.getBenchmarkDetail(benchmarkId))
     }
 
-    @Operation(summary = "Get a list of specific benchmarks", security = [SecurityRequirement(name = "bearerAuth")])
+    @Operation(summary = "Get a list of specific benchmarks")
     @PostMapping("/list/filter")
     suspend fun getBenchmarkById(
-        @RequestBody benchmarkIds: List<String>,
-        authentication: Authentication
+        @RequestBody benchmarkIds: List<String>
     ): ResponseEntity<List<BenchmarkRecord>> {
         return ResponseEntity.ok(benchMarkService.getBenchmarskDetail(benchmarkIds))
     }

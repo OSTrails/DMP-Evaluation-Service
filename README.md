@@ -160,6 +160,8 @@ Most read (`GET`) endpoints and assessment (`POST /assess/**`) endpoints are **p
 
 All management endpoints (creating, editing, or deleting benchmarks, metrics, and tests) require a **JWT Bearer token**.
 
+One exception: `POST /benchmarks/list/filter` is public too — it's a read (lookup benchmarks by a list of IDs), just implemented as `POST` because it needs a request body.
+
 #### Roles
 
 | Role | Can create / update | Can delete | Can manage clients |
@@ -265,7 +267,7 @@ All `/assess` multipart endpoints accept:
 | `POST` | `/benchmarks/edit/{benchmarkId}` | Update benchmark metadata |
 | `POST` | `/benchmarks/metrics/{benchmarkId}` | Add metrics to a benchmark |
 | `POST` | `/benchmarks/{benchmarkId}/delete/metric` | Remove a metric from a benchmark |
-| `POST` | `/benchmarks/list/filter` | Filter benchmarks by a list of IDs |
+| `POST` | `/benchmarks/list/filter` | Filter benchmarks by a list of IDs — public despite the `POST` verb; it's a read (needs a body for the ID list), not a write |
 | `DELETE` | `/benchmarks/{benchmarkId}` | Delete a benchmark |
 
 ### Metrics (`/metrics`)
