@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.ostrails.dmpevaluatorservice.auth.repository.ClientRepository
 import io.github.ostrails.dmpevaluatorservice.auth.service.JwtService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -18,6 +19,8 @@ class JwtAuthenticationWebFilter(
     private val jwtService: JwtService,
     private val clientRepository: ClientRepository
 ) : WebFilter {
+
+    private val logger = LoggerFactory.getLogger(JwtAuthenticationWebFilter::class.java)
 
     private val activeClientCache: AsyncLoadingCache<String, Boolean> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofSeconds(30))
@@ -34,8 +37,7 @@ class JwtAuthenticationWebFilter(
         return try {
             val claims = jwtService.parseToken(token)
             val clientId = claims.subject
-            @Suppress("UNCHECKED_CAST")
-            val roles = (claims["roles"] as? List<String>) ?: emptyList()
+            val roles = (claims["roles"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
 
             Mono.fromFuture { activeClientCache.get(clientId) }
                 .flatMap { isActive ->
@@ -49,6 +51,7 @@ class JwtAuthenticationWebFilter(
                     }
                 }
         } catch (e: Exception) {
+            logger.warn("Rejected JWT on {}: {}", exchange.request.path, e.message)
             chain.filter(exchange)
         }
     }
