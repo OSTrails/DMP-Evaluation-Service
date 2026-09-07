@@ -278,7 +278,7 @@ Provides CRUD operations for `MetricRecord` documents. Metrics group related tes
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/tests` | Create a new test record |
+| `POST` | `/tests` | Create a new test record — body is `TestCreateRequest` (title/description/license/version required; server sets the ID, `createdBy`, `repository`, and `endpointURL`). Optionally include `metricImplemented`/`evaluator`/`functionEvaluator` to link it to a metric in the same call — equivalent to a separate `addEvaluator` call, including registering the reverse link on the metric. Fails with `404` (and creates nothing) if `metricImplemented` doesn't exist. |
 | `GET` | `/tests/info` | List all tests |
 | `GET` | `/tests/info/{testId}` | Get a specific test |
 | `GET` | `/tests/{testId}` | Get test as JSON-LD |
@@ -287,6 +287,8 @@ Provides CRUD operations for `MetricRecord` documents. Metrics group related tes
 | `POST` | `/tests/{testId}` | Update a test record |
 | `POST` | `/tests/{testId}/addEvaluator` | Attach an evaluator plugin to a test |
 | `DELETE` | `/tests/{testId}` | Delete a test record |
+
+Responses use `TestResponse` (`identifier` field, matching `Benchmark`/`Metric`) rather than exposing the raw `TestRecord` document — the first entity migrated as part of issue #19 ("Inconsistent API and exposed entities"); the others are tracked to follow the same pattern.
 
 ### Plugins (`/plugins`)
 
