@@ -70,6 +70,26 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(InvalidCredentialsException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleInvalidCredentials(ex: InvalidCredentialsException, exchange: ServerWebExchange): ErrorResponse {
+        return ErrorResponse(
+            code = "UNAUTHORIZED",
+            message = ex.message.orEmpty(),
+            path = exchange.request.path.toString()
+        )
+    }
+
+    @ExceptionHandler(ClientDisabledException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleClientDisabled(ex: ClientDisabledException, exchange: ServerWebExchange): ErrorResponse {
+        return ErrorResponse(
+            code = "FORBIDDEN",
+            message = ex.message.orEmpty(),
+            path = exchange.request.path.toString()
+        )
+    }
+
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleIllegalArgument(ex: IllegalArgumentException, exchange: ServerWebExchange): ErrorResponse {

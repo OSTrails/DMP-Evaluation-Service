@@ -2,9 +2,12 @@ package io.github.ostrails.dmpevaluatorservice.auth.service
 
 import io.github.ostrails.dmpevaluatorservice.auth.model.*
 import io.github.ostrails.dmpevaluatorservice.auth.repository.ClientRepository
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ClientDisabledException
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.InvalidCredentialsException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -17,11 +20,11 @@ class ClientService(
 
     suspend fun authenticate(clientId: String, clientSecret: String): TokenResponse {
         val client = clientRepository.findByClientId(clientId).awaitFirstOrNull()
-            ?: throw IllegalArgumentException("Invalid credentials")
+            ?: throw InvalidCredentialsException("Invalid credentials")
         if (!client.enabled)
-            throw IllegalArgumentException("Client is disabled")
+            throw ClientDisabledException("Client is disabled")
         if (!passwordEncoder.matches(clientSecret, client.passwordHash))
-            throw IllegalArgumentException("Invalid credentials")
+            throw InvalidCredentialsException("Invalid credentials")
         return TokenResponse(
             accessToken = jwtService.generateToken(client),
             expiresIn = jwtService.expirationSeconds
@@ -45,7 +48,11 @@ class ClientService(
             displayName = request.displayName,
             roles = request.roles
         )
-        return clientRepository.save(client).awaitSingle().toResponse()
+        try {
+            return clientRepository.save(client).awaitSingle().toResponse()
+        } catch (e: DuplicateKeyException) {
+            throw IllegalArgumentException("Client ID '${request.clientId}' already exists")
+        }
     }
 
     suspend fun listClients(): List<ClientResponse> =
@@ -77,7 +84,11 @@ class ClientService(
             displayName = displayName,
             roles = roles
         )
-        clientRepository.save(client).awaitSingle()
-        return true
+        return try {
+            clientRepository.save(client).awaitSingle()
+            true
+        } catch (e: DuplicateKeyException) {
+            false
+        }
     }
 }
