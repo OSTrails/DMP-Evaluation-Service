@@ -11,6 +11,9 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/dmp-evaluator}
+      # Spring Data disables this by default; without it, @Indexed(unique = true)
+      # on Client.clientId is never actually created in MongoDB.
+      auto-index-creation: true
 
 logging:
   level:

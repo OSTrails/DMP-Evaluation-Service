@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
+import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import io.github.ostrails.dmpevaluatorservice.plugin.ExternalBenchmarkPlugin
@@ -30,7 +31,7 @@ class PluginManagerService(
     fun getEvaluatorByPluginId(pluginId: String): PluginInfo {
         val plugin = pluginRegistry.getPluginFor(pluginId).orElseThrow {
             log.warn("Plugin '$pluginId' not found")
-            IllegalArgumentException("Plugin '$pluginId' not found")
+            ResourceNotFoundException("Plugin '$pluginId' not found")
         }
         return PluginInfo(
             pluginId = plugin.getPluginIdentifier(),
