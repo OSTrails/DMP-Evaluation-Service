@@ -1,8 +1,8 @@
 package io.github.ostrails.dmpevaluatorservice.service
 
+import io.github.ostrails.dmpevaluatorservice.auth.checkOwnership
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.database.repository.MetricRepository
-import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ForbiddenException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.metric.*
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationBenchmarkVariables
@@ -173,11 +173,4 @@ class MetricService(
         )
     }
 
-    private fun checkOwnership(createdBy: String?, callerClientId: String, isAdmin: Boolean) {
-        if (isAdmin) return
-        if (createdBy == null)
-            throw ForbiddenException("Only ADMIN can modify records without an owner")
-        if (createdBy != callerClientId)
-            throw ForbiddenException("You can only modify records you created")
-    }
 }

@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
+import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
 import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
 import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
 import io.github.ostrails.dmpevaluatorservice.model.metric.MetricUpdateRequest
@@ -109,6 +110,3 @@ class MetricController(
         return ResponseEntity.ok(result)
     }
 }
-
-private fun Authentication.isAdmin(): Boolean =
-    authorities.any { it.authority == "ROLE_ADMIN" }

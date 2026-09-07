@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
+import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkJsonLD
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkUpdateRequest
@@ -114,6 +115,3 @@ class BenchmarkController(
         return ResponseEntity.ok(result)
     }
 }
-
-private fun Authentication.isAdmin(): Boolean =
-    authorities.any { it.authority == "ROLE_ADMIN" }

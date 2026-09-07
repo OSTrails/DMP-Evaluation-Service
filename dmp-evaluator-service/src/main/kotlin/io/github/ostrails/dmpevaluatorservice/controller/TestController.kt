@@ -1,5 +1,6 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
+import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
@@ -104,6 +105,3 @@ class TestController(
         return if (result != null) ResponseEntity.ok(result) else ResponseEntity.notFound().build()
     }
 }
-
-private fun Authentication.isAdmin(): Boolean =
-    authorities.any { it.authority == "ROLE_ADMIN" }
