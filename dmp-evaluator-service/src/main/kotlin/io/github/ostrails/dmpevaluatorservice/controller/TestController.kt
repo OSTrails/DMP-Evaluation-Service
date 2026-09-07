@@ -1,10 +1,12 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
-import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
+import io.github.ostrails.dmpevaluatorservice.model.requests.TestCreateRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.model.test.TestJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.test.TestResponse
+import io.github.ostrails.dmpevaluatorservice.model.test.toResponse
 import io.github.ostrails.dmpevaluatorservice.service.TestService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
@@ -26,11 +28,11 @@ class TestController(
     @Operation(summary = "Create a test record", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping
     suspend fun createTest(
-        @RequestBody test: TestRecord,
+        @RequestBody test: TestCreateRequest,
         authentication: Authentication
-    ): ResponseEntity<TestRecord> {
+    ): ResponseEntity<TestResponse> {
         val result = testService.createTest(test, authentication.name)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Update a test record", security = [SecurityRequirement(name = "bearerAuth")])
@@ -39,9 +41,9 @@ class TestController(
         @PathVariable testId: String,
         @RequestBody test: TestUpdateRequest,
         authentication: Authentication
-    ): ResponseEntity<TestRecord> {
+    ): ResponseEntity<TestResponse> {
         val result = testService.updateTest(testId, test, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Get the list of tests ids")
@@ -51,13 +53,13 @@ class TestController(
 
     @Operation(summary = "Get the list of tests")
     @GetMapping("/info", produces = ["application/json"])
-    suspend fun getTests(): ResponseEntity<List<TestRecord>> =
-        ResponseEntity.ok(testService.listAllTests())
+    suspend fun getTests(): ResponseEntity<List<TestResponse>> =
+        ResponseEntity.ok(testService.listAllTests().map { it.toResponse() })
 
     @Operation(summary = "Get a specific test")
     @GetMapping("/info/{testId}", produces = ["application/json"])
-    suspend fun getTestById(@PathVariable testId: String): ResponseEntity<TestRecord> =
-        ResponseEntity.ok(testService.getTest(testId))
+    suspend fun getTestById(@PathVariable testId: String): ResponseEntity<TestResponse> =
+        ResponseEntity.ok(testService.getTest(testId).toResponse())
 
     @Operation(summary = "Get a test in json-ld using the path variable")
     @GetMapping("/{testId}", produces = ["application/ld+json"])
@@ -91,8 +93,8 @@ class TestController(
 
     @Operation(summary = "Filter tests by metric")
     @GetMapping("/metrics/{metricId}")
-    suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestRecord>> =
-        ResponseEntity.ok(testService.getTestsByMetrics(metricId))
+    suspend fun getTestsByMetricId(@PathVariable metricId: String): ResponseEntity<List<TestResponse>> =
+        ResponseEntity.ok(testService.getTestsByMetrics(metricId).map { it.toResponse() })
 
     @Operation(summary = "Update the evaluator and function of a test", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping("/{testId}/addEvaluator")
@@ -100,8 +102,8 @@ class TestController(
         @PathVariable testId: String,
         @RequestBody test: TestAddMetricRequest,
         authentication: Authentication
-    ): ResponseEntity<TestRecord> {
+    ): ResponseEntity<TestResponse> {
         val result = testService.addMetric(testId, test, authentication.name, authentication.isAdmin())
-        return if (result != null) ResponseEntity.ok(result) else ResponseEntity.notFound().build()
+        return if (result != null) ResponseEntity.ok(result.toResponse()) else ResponseEntity.notFound().build()
     }
 }

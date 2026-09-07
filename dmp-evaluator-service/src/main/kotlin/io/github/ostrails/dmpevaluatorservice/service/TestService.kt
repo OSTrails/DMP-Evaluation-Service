@@ -6,6 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.database.repository.TestRepository
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.DatabaseException
 import io.github.ostrails.dmpevaluatorservice.exceptionHandler.ResourceNotFoundException
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestAddMetricRequest
+import io.github.ostrails.dmpevaluatorservice.model.requests.TestCreateRequest
 import io.github.ostrails.dmpevaluatorservice.model.requests.TestUpdateRequest
 import io.github.ostrails.dmpevaluatorservice.model.test.IdWrapper
 import io.github.ostrails.dmpevaluatorservice.model.test.LangLiteral
@@ -14,6 +15,7 @@ import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationGlobalVariables
 import io.github.ostrails.dmpevaluatorservice.utils.ConfigurationTestVariables
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,13 +30,34 @@ class TestService(
 
     private val log: Logger = LoggerFactory.getLogger(TestService::class.java)
 
-    suspend fun createTest(test: TestRecord, callerClientId: String): TestRecord {
-        val enrichedTest = test.copy(
+    suspend fun createTest(request: TestCreateRequest, callerClientId: String): TestRecord {
+        val testId = ObjectId().toHexString()
+        if (request.metricImplemented != null) {
+            metricService.addTests(request.metricImplemented, listOf(testId))
+        }
+        val test = TestRecord(
+            id = testId,
+            title = request.title,
+            description = request.description,
+            license = request.license,
+            version = request.version,
+            endpointURL = configurationTestVariables.endpointURL + "/" + testId,
+            endpointDescription = request.endpointDescription,
+            keyword = request.keyword,
+            abbreviation = request.abbreviation,
             repository = configurationGlobalVariables.repository,
-            endpointURL = configurationTestVariables.endpointURL + "/" + test.id,
+            type = request.type,
+            theme = request.theme,
+            versionNotes = request.versionNotes,
+            status = request.status,
+            isApplicableFor = request.isApplicableFor,
+            supportedBy = request.supportedBy,
+            metricImplemented = request.metricImplemented,
+            evaluator = request.evaluator,
+            functionEvaluator = request.functionEvaluator,
             createdBy = callerClientId
         )
-        val saved = testRepository.save(enrichedTest).awaitSingle()
+        val saved = testRepository.save(test).awaitSingle()
         log.info("Created test '${saved.id}'")
         return saved
     }
