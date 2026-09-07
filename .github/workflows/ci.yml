@@ -32,6 +32,12 @@ jobs:
           cache: maven
 
       - name: Build and test
+        env:
+          JWT_SECRET: Y2ktb25seS10ZXN0LXNlY3JldC1uZXZlci11c2UtaW4tcHJvZA==
+          ADMIN_CLIENT_SECRET: ci-only-test-admin-password
+          TEST_URL: http://localhost:8080/tests
+          METRIC_URL: http://localhost:8080/metrics
+          BENCHMARK_URL: http://localhost:8080/benchmarks
         run: ./mvnw --batch-mode clean verify
 
       - name: ktlint (report-only)
