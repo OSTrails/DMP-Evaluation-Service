@@ -2,10 +2,10 @@ package io.github.ostrails.dmpevaluatorservice.model.metric
 
 
 data class MetricUpdateRequest(
-    val title: String? = "",
-    val description: String? = "",
-    val version: String? = "",
-    val keyword: String? = "",
+    val title: String? = null,
+    val description: String? = null,
+    val version: String? = null,
+    val keyword: String? = null,
     val abbreviation: String? = null,
     val landingPage: String? = null,
     val theme: String? = null,

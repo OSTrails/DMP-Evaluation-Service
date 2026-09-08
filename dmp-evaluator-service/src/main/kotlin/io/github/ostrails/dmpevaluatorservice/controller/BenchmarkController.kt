@@ -1,9 +1,11 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
-import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkCreateRequest
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkResponse
 import io.github.ostrails.dmpevaluatorservice.model.benchmark.BenchmarkUpdateRequest
+import io.github.ostrails.dmpevaluatorservice.model.benchmark.toResponse
 import io.github.ostrails.dmpevaluatorservice.model.metric.metricsListsIDs
 import io.github.ostrails.dmpevaluatorservice.service.BenchmarService
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -23,11 +25,11 @@ class BenchmarkController(
     @Operation(summary = "Create a benchmark", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping
     suspend fun create(
-        @RequestBody benchmarkBody: BenchmarkRecord,
+        @RequestBody benchmarkBody: BenchmarkCreateRequest,
         authentication: Authentication
-    ): ResponseEntity<BenchmarkRecord> {
+    ): ResponseEntity<BenchmarkResponse> {
         val result = benchMarkService.createBenchmark(benchmarkBody, authentication.name)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Add a metric to a benchmark", security = [SecurityRequirement(name = "bearerAuth")])
@@ -36,9 +38,9 @@ class BenchmarkController(
         @PathVariable benchmarkId: String,
         @RequestBody newMetrics: metricsListsIDs,
         authentication: Authentication
-    ): ResponseEntity<BenchmarkRecord> {
+    ): ResponseEntity<BenchmarkResponse> {
         val benchmark = benchMarkService.addMetric(benchmarkId, newMetrics.metrics, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(benchmark)
+        return ResponseEntity.ok(benchmark.toResponse())
     }
 
     @Operation(summary = "Edit a benchmark", security = [SecurityRequirement(name = "bearerAuth")])
@@ -47,15 +49,15 @@ class BenchmarkController(
         @PathVariable benchmarkId: String,
         @RequestBody benchmark: BenchmarkUpdateRequest,
         authentication: Authentication
-    ): ResponseEntity<BenchmarkRecord> {
+    ): ResponseEntity<BenchmarkResponse> {
         val benchmarkResult = benchMarkService.updateBenchmark(benchmarkId, benchmark, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(benchmarkResult)
+        return ResponseEntity.ok(benchmarkResult.toResponse())
     }
 
     @Operation(summary = "Get all the benchmarks")
     @GetMapping("/list", produces = ["application/json"])
-    suspend fun getBenchmarks(): ResponseEntity<List<BenchmarkRecord>> {
-        return ResponseEntity.ok(benchMarkService.getBenchmarks())
+    suspend fun getBenchmarks(): ResponseEntity<List<BenchmarkResponse>> {
+        return ResponseEntity.ok(benchMarkService.getBenchmarks().map { it.toResponse() })
     }
 
     @Operation(summary = "Get all the benchmarks ids")
@@ -80,16 +82,16 @@ class BenchmarkController(
 
     @Operation(summary = "Get a specific benchmark")
     @GetMapping("/info/{benchmarkId}")
-    suspend fun getBenchmark(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkRecord> {
-        return ResponseEntity.ok(benchMarkService.getBenchmarkDetail(benchmarkId))
+    suspend fun getBenchmark(@PathVariable benchmarkId: String): ResponseEntity<BenchmarkResponse> {
+        return ResponseEntity.ok(benchMarkService.getBenchmarkDetail(benchmarkId).toResponse())
     }
 
     @Operation(summary = "Get a list of specific benchmarks")
     @PostMapping("/list/filter")
     suspend fun getBenchmarkById(
         @RequestBody benchmarkIds: List<String>
-    ): ResponseEntity<List<BenchmarkRecord>> {
-        return ResponseEntity.ok(benchMarkService.getBenchmarskDetail(benchmarkIds))
+    ): ResponseEntity<List<BenchmarkResponse>> {
+        return ResponseEntity.ok(benchMarkService.getBenchmarskDetail(benchmarkIds).map { it.toResponse() })
     }
 
     @Operation(summary = "Get a specific benchmark in json-ld")
@@ -110,8 +112,8 @@ class BenchmarkController(
         @PathVariable benchmarkId: String,
         @RequestBody metrics: List<String>,
         authentication: Authentication
-    ): ResponseEntity<BenchmarkRecord> {
+    ): ResponseEntity<BenchmarkResponse> {
         val result = benchMarkService.deleteMetric(benchmarkId, metrics, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 }
