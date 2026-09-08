@@ -44,7 +44,7 @@ class BenchmarkController(
     }
 
     @Operation(summary = "Edit a benchmark", security = [SecurityRequirement(name = "bearerAuth")])
-    @PostMapping("/edit/{benchmarkId}")
+    @PutMapping("/{benchmarkId}")
     suspend fun updateBenchmark(
         @PathVariable benchmarkId: String,
         @RequestBody benchmark: BenchmarkUpdateRequest,

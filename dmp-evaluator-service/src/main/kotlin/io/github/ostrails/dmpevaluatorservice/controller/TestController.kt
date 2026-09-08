@@ -36,7 +36,7 @@ class TestController(
     }
 
     @Operation(summary = "Update a test record", security = [SecurityRequirement(name = "bearerAuth")])
-    @PostMapping("/{testId}")
+    @PutMapping("/{testId}")
     suspend fun updateTest(
         @PathVariable testId: String,
         @RequestBody test: TestUpdateRequest,
