@@ -24,8 +24,25 @@ class MetricService(
 
     private val log: Logger = LoggerFactory.getLogger(MetricService::class.java)
 
-    suspend fun createMetric(metric: MetricRecord, callerClientId: String): MetricRecord {
-        val saved = metricRepository.save(metric.copy(createdBy = callerClientId)).awaitSingle()
+    suspend fun createMetric(request: MetricCreateRequest, callerClientId: String): MetricRecord {
+        val metric = MetricRecord(
+            title = request.title,
+            description = request.description,
+            version = request.version,
+            testAssociated = null,
+            keyword = request.keyword,
+            abbreviation = request.abbreviation,
+            landingPage = request.landingPage,
+            theme = request.theme,
+            status = request.status,
+            isApplicableFor = request.isApplicableFor,
+            supportedBy = request.supportedBy,
+            hasBenchmark = null,
+            license = request.license,
+            inDimension = request.inDimension,
+            createdBy = callerClientId
+        )
+        val saved = metricRepository.save(metric).awaitSingle()
         log.info("Created metric '${saved.id}'")
         return saved
     }

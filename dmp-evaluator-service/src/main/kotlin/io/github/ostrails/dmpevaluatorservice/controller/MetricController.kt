@@ -1,9 +1,11 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
 import io.github.ostrails.dmpevaluatorservice.auth.isAdmin
-import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricCreateRequest
 import io.github.ostrails.dmpevaluatorservice.model.metric.MetricJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.metric.MetricResponse
 import io.github.ostrails.dmpevaluatorservice.model.metric.MetricUpdateRequest
+import io.github.ostrails.dmpevaluatorservice.model.metric.toResponse
 import io.github.ostrails.dmpevaluatorservice.service.MetricService
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.Operation
@@ -22,11 +24,11 @@ class MetricController(
     @Operation(summary = "Create a metric", security = [SecurityRequirement(name = "bearerAuth")])
     @PostMapping
     suspend fun create(
-        @RequestBody metricBody: MetricRecord,
+        @RequestBody metricBody: MetricCreateRequest,
         authentication: Authentication
-    ): ResponseEntity<MetricRecord> {
+    ): ResponseEntity<MetricResponse> {
         val result = metricService.createMetric(metricBody, authentication.name)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "List the ids of metrics")
@@ -36,8 +38,8 @@ class MetricController(
 
     @Operation(summary = "List the metrics")
     @GetMapping("/list", produces = ["application/json"])
-    suspend fun getMetrics(): ResponseEntity<List<MetricRecord>> =
-        ResponseEntity.ok(metricService.listMetrics())
+    suspend fun getMetrics(): ResponseEntity<List<MetricResponse>> =
+        ResponseEntity.ok(metricService.listMetrics().map { it.toResponse() })
 
     @Operation(summary = "List the metrics in Json-ld")
     @GetMapping("/list/jsonLD", produces = ["application/ld+json"])
@@ -46,8 +48,8 @@ class MetricController(
 
     @Operation(summary = "Detail of a metric")
     @GetMapping("/info/{metricId}", produces = ["application/json"])
-    suspend fun detailMetric(@PathVariable metricId: String): ResponseEntity<MetricRecord> =
-        ResponseEntity.ok(metricService.metricDetail(metricId))
+    suspend fun detailMetric(@PathVariable metricId: String): ResponseEntity<MetricResponse> =
+        ResponseEntity.ok(metricService.metricDetail(metricId).toResponse())
 
     @Operation(summary = "Detail metric in json-ld")
     @GetMapping("/{metricId}")
@@ -60,14 +62,14 @@ class MetricController(
         ResponseEntity.ok(metricService.getMetricDetailJsonLD(metricId))
 
     @Operation(summary = "Update a metric", security = [SecurityRequirement(name = "bearerAuth")])
-    @PutMapping("/update/{metricId}")
+    @PutMapping("/{metricId}")
     suspend fun updateMetric(
         @PathVariable metricId: String,
         @RequestBody metric: MetricUpdateRequest,
         authentication: Authentication
-    ): ResponseEntity<MetricRecord> {
+    ): ResponseEntity<MetricResponse> {
         val result = metricService.updateMetric(metricId, metric, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Add tests to a specific metric", security = [SecurityRequirement(name = "bearerAuth")])
@@ -76,9 +78,9 @@ class MetricController(
         @PathVariable metricId: String,
         @RequestBody tests: List<String>,
         authentication: Authentication
-    ): ResponseEntity<MetricRecord> {
+    ): ResponseEntity<MetricResponse> {
         val result = metricService.addTests(metricId, tests, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Add a benchmark to a metric", security = [SecurityRequirement(name = "bearerAuth")])
@@ -87,9 +89,9 @@ class MetricController(
         @PathVariable metricId: String,
         @RequestBody benchMarks: List<String>,
         authentication: Authentication
-    ): ResponseEntity<MetricRecord> {
+    ): ResponseEntity<MetricResponse> {
         val result = metricService.addBenchMark(metricId, benchMarks, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     @Operation(summary = "Delete metric", security = [SecurityRequirement(name = "bearerAuth")])
@@ -105,8 +107,8 @@ class MetricController(
         @PathVariable metricId: String,
         @RequestBody tests: List<String>,
         authentication: Authentication
-    ): ResponseEntity<MetricRecord> {
+    ): ResponseEntity<MetricResponse> {
         val result = metricService.deleteTest(metricId, tests, authentication.name, authentication.isAdmin())
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(result.toResponse())
     }
 }

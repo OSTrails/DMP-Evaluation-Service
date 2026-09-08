@@ -264,7 +264,7 @@ All `/assess` multipart endpoints accept:
 | `GET` | `/benchmarks/list/jsonLD` | List all benchmarks as JSON-LD |
 | `GET` | `/benchmarks/info/{benchmarkId}` | Get benchmark details |
 | `GET` | `/benchmarks/{benchmarkId}` | Get benchmark as JSON-LD |
-| `POST` | `/benchmarks/edit/{benchmarkId}` | Update benchmark metadata |
+| `PUT` | `/benchmarks/{benchmarkId}` | Update benchmark metadata |
 | `POST` | `/benchmarks/metrics/{benchmarkId}` | Add metrics to a benchmark |
 | `POST` | `/benchmarks/{benchmarkId}/delete/metric` | Remove a metric from a benchmark |
 | `POST` | `/benchmarks/list/filter` | Filter benchmarks by a list of IDs — public despite the `POST` verb; it's a read (needs a body for the ID list), not a write |
@@ -274,7 +274,23 @@ Responses use `BenchmarkResponse` (`identifier`/`scoringFunction` fields) rather
 
 ### Metrics (`/metrics`)
 
-Provides CRUD operations for `MetricRecord` documents. Metrics group related tests and are referenced by benchmarks.
+Metrics group related tests and are referenced by benchmarks.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/metrics` | Create a new metric — body is `MetricCreateRequest` (title/description/version required; server sets the ID and `createdBy`) |
+| `GET` | `/metrics` | List all metric IDs |
+| `GET` | `/metrics/list` | List all metrics |
+| `GET` | `/metrics/list/jsonLD` | List all metrics as JSON-LD |
+| `GET` | `/metrics/info/{metricId}` | Get a specific metric |
+| `GET` | `/metrics/{metricId}` | Get metric as JSON-LD |
+| `PUT` | `/metrics/{metricId}` | Update metric metadata |
+| `POST` | `/metrics/addTests/{metricId}` | Add tests to a metric |
+| `POST` | `/metrics/addBenchmarks/{metricId}` | Add benchmarks to a metric |
+| `POST` | `/metrics/delete/test/{metricId}` | Remove a test from a metric |
+| `DELETE` | `/metrics/{metricId}` | Delete a metric |
+
+Responses use `MetricResponse` (`identifier` field) rather than exposing the raw `MetricRecord` document — migrated to the DTO pattern established for `Test`/`Benchmark` as part of issue #19.
 
 ### Tests (`/tests`)
 
@@ -286,7 +302,7 @@ Provides CRUD operations for `MetricRecord` documents. Metrics group related tes
 | `GET` | `/tests/{testId}` | Get test as JSON-LD |
 | `GET` | `/tests/list` | List tests as JSON-LD |
 | `GET` | `/tests/metrics/{metricId}` | Get tests belonging to a metric |
-| `POST` | `/tests/{testId}` | Update a test record |
+| `PUT` | `/tests/{testId}` | Update a test record |
 | `POST` | `/tests/{testId}/addEvaluator` | Attach an evaluator plugin to a test |
 | `DELETE` | `/tests/{testId}` | Delete a test record |
 
