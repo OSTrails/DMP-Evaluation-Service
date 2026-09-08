@@ -11,6 +11,8 @@ import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
+import io.github.ostrails.dmpevaluatorservice.model.toInfo
+import io.github.ostrails.dmpevaluatorservice.model.toResponse
 import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultSetJsonLD
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -41,7 +43,7 @@ class EvaluationManagerService(
         val evaluationsResults = evaluationResults(reportEvaluation, request)
         return EvaluationResult(
             reportId = reportEvaluation.reportId.toString(),
-            evaluations = evaluationsResults
+            evaluations = evaluationsResults.map { it.toResponse() }
         )
     }
 
@@ -93,8 +95,8 @@ class EvaluationManagerService(
         }
         val evaluations = report.let{ resultEvaluationResultRepository.findByReportId(reportId).asFlow().toList() }
         return EvaluationReportResponse(
-            report= report,
-            evaluations = evaluations
+            report = report.toInfo(),
+            evaluations = evaluations.map { it.toResponse() }
         )
     }
 
