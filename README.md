@@ -259,7 +259,7 @@ All `/assess` multipart endpoints accept:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/benchmarks` | Create a new benchmark |
+| `POST` | `/benchmarks` | Create a new benchmark — body is `BenchmarkCreateRequest` (title/description/version required; server sets the ID and `createdBy`) |
 | `GET` | `/benchmarks/list` | List all benchmarks |
 | `GET` | `/benchmarks/list/jsonLD` | List all benchmarks as JSON-LD |
 | `GET` | `/benchmarks/info/{benchmarkId}` | Get benchmark details |
@@ -269,6 +269,8 @@ All `/assess` multipart endpoints accept:
 | `POST` | `/benchmarks/{benchmarkId}/delete/metric` | Remove a metric from a benchmark |
 | `POST` | `/benchmarks/list/filter` | Filter benchmarks by a list of IDs — public despite the `POST` verb; it's a read (needs a body for the ID list), not a write |
 | `DELETE` | `/benchmarks/{benchmarkId}` | Delete a benchmark |
+
+Responses use `BenchmarkResponse` (`identifier`/`scoringFunction` fields) rather than exposing the raw `BenchmarkRecord` document — migrated to the DTO pattern established for `Test` as part of issue #19.
 
 ### Metrics (`/metrics`)
 

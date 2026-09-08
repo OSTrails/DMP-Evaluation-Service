@@ -27,8 +27,22 @@ class BenchmarService(
 
     private val log: Logger = LoggerFactory.getLogger(BenchmarService::class.java)
 
-    suspend fun createBenchmark(benchmark: BenchmarkRecord, callerClientId: String): BenchmarkRecord {
-        val saved = benchmarkRepository.save(benchmark.copy(createdBy = callerClientId)).awaitSingle()
+    suspend fun createBenchmark(request: BenchmarkCreateRequest, callerClientId: String): BenchmarkRecord {
+        val benchmark = BenchmarkRecord(
+            title = request.title,
+            description = request.description,
+            version = request.version,
+            keyword = request.keyword,
+            abbreviation = request.abbreviation,
+            landingPage = request.landingPage,
+            theme = request.theme,
+            status = request.status,
+            creator = request.creator,
+            license = request.license,
+            algorithms = request.scoringFunction,
+            createdBy = callerClientId
+        )
+        val saved = benchmarkRepository.save(benchmark).awaitSingle()
         log.info("Created benchmark '${saved.benchmarkId}'")
         return saved
     }
