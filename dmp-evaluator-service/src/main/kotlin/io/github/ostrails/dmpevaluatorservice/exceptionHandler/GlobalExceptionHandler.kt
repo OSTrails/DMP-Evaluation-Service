@@ -1,9 +1,11 @@
 package io.github.ostrails.dmpevaluatorservice.exceptionHandler
 
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 
 
@@ -37,6 +39,18 @@ class GlobalExceptionHandler {
             code = "API_ERROR",
             message = ex.message.orEmpty(),
             path = exchange.request.path.toString()
+        )
+    }
+
+    @ExceptionHandler(ResponseStatusException::class)
+    fun handleResponseStatus(ex: ResponseStatusException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
+        val status = HttpStatus.valueOf(ex.statusCode.value())
+        return ResponseEntity.status(status).body(
+            ErrorResponse(
+                code = status.name,
+                message = ex.reason ?: ex.message.orEmpty(),
+                path = exchange.request.path.toString()
+            )
         )
     }
 
