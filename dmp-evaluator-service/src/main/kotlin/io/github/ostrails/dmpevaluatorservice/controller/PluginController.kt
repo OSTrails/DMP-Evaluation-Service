@@ -33,9 +33,9 @@ class PluginController(
         summary = "Get an specific plugin",
         description = "List the plugin requetesd"
     )
-    @GetMapping("/{evaluatorId}")
-    suspend fun getPlugin(@PathVariable evaluatorId: String): ResponseEntity<PluginInfo> {
-        val plugin = pluginManagerService.getEvaluatorByPluginId(evaluatorId)
+    @GetMapping("/{pluginId}")
+    suspend fun getPlugin(@PathVariable pluginId: String): ResponseEntity<PluginInfo> {
+        val plugin = pluginManagerService.getEvaluatorByPluginId(pluginId)
         return ResponseEntity.ok(plugin)
     }
 

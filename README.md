@@ -313,7 +313,7 @@ Responses use `TestResponse` (`identifier` field, matching `Benchmark`/`Metric`)
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/plugins` | List all registered evaluator plugins |
-| `GET` | `/plugins/{evaluatorId}` | Get information about a specific plugin |
+| `GET` | `/plugins/{pluginId}` | Get information about a specific plugin |
 
 ---
 
