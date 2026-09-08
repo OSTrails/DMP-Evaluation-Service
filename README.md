@@ -242,13 +242,14 @@ For the full design writeup (token-bucket internals, library choice, diagrams), 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/assess/benchmark` | Run all tests in a benchmark against a maDMP file. Returns `List<Evaluation>`. |
+| `POST` | `/assess/benchmark` | Run all tests in a benchmark against a maDMP file. Returns `List<EvaluationResponse>`. |
 | `POST` | `/assess/benchmark/json-ld` | Same as above, returns FTR-compliant JSON-LD (`TestResultSetJsonLD`). |
-| `POST` | `/assess/test` | Run a single test against a maDMP file. Returns `Evaluation`. |
+| `POST` | `/assess/test` | Run a single test against a maDMP file. Returns `EvaluationResponse`. |
 | `POST` | `/assess/test/JsonLD` | Same as above, returns JSON-LD (`TestResultJsonLD`). |
-| `POST` | `/assess/mappingRDF` | Convert a maDMP file to RDF using RML mappings. |
 | `GET` | `/assess` | List all stored evaluations. |
 | `GET` | `/assess/report/{reportId}/full` | Retrieve a full evaluation report with all linked results. |
+
+Responses use `EvaluationResponse`/`EvaluationReportInfo` (`identifier` fields) rather than exposing the raw `Evaluation`/`EvaluationReport` documents — migrated to the DTO pattern established for `Benchmark`/`Metric`/`Test` as part of issue #19.
 
 All `/assess` multipart endpoints accept:
 - `maDMP` — the maDMP JSON file (FilePart)

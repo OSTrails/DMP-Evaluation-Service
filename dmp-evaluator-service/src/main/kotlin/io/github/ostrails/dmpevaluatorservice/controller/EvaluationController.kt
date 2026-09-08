@@ -1,11 +1,12 @@
 package io.github.ostrails.dmpevaluatorservice.controller
 
-import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationReportResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationRequest
+import io.github.ostrails.dmpevaluatorservice.model.EvaluationResponse
 import io.github.ostrails.dmpevaluatorservice.model.EvaluationResult
 import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultJsonLD
 import io.github.ostrails.dmpevaluatorservice.model.testResult.TestResultSetJsonLD
+import io.github.ostrails.dmpevaluatorservice.model.toResponse
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationManagerService
 import io.github.ostrails.dmpevaluatorservice.service.EvaluationService
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -41,9 +42,9 @@ class EvaluationController(
         description = "List all the evaluations in the system"
     )
     @GetMapping()
-    suspend fun getAllEvaluations(): ResponseEntity<List<Evaluation>> {
+    suspend fun getAllEvaluations(): ResponseEntity<List<EvaluationResponse>> {
         val evaluations = evaluationManagerService.getEvaluations()
-        return ResponseEntity.ok(evaluations)
+        return ResponseEntity.ok(evaluations.map { it.toResponse() })
     }
 
     @Operation(
@@ -65,11 +66,11 @@ class EvaluationController(
         @RequestPart("maDMP") maDMP: FilePart,
         @RequestPart("benchmark") benchmark: String,
         @RequestPart(required = false) reportId: String?
-    ): ResponseEntity<List<Evaluation>>{
+    ): ResponseEntity<List<EvaluationResponse>>{
         val filename = maDMP.filename().lowercase()
         log.debug("filename: $filename")
         val jsonResult = evaluationManagerService.gatewayBenchmarkEvaluationService(maDMP, benchmark, reportId)
-        return ResponseEntity.ok(jsonResult)
+        return ResponseEntity.ok(jsonResult.map { it.toResponse() })
     }
 
 
@@ -96,9 +97,9 @@ class EvaluationController(
         @RequestPart("maDMP") maDMP: FilePart,
         @RequestPart("test") test: String,
         @RequestPart(required = false) reportId: String?
-    ): ResponseEntity<Evaluation>{
+    ): ResponseEntity<EvaluationResponse>{
         val jsonResult = evaluationManagerService.gatewayTestsEvaluationService(maDMP, test, reportId)
-        return ResponseEntity.ok(jsonResult)
+        return ResponseEntity.ok(jsonResult?.toResponse())
     }
 
     @Operation(
