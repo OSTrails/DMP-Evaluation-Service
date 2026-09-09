@@ -1,6 +1,8 @@
 package io.github.ostrails.dmpevaluatorservice.utils.dbpatchers
 
 import io.github.ostrails.dmpevaluatorservice.database.model.BenchmarkRecord
+import io.github.ostrails.dmpevaluatorservice.database.model.MetricRecord
+import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,8 +20,8 @@ class PostConstruct(
     fun run() {
         log.info("Mongo patcher starting up...")
         patchMongoCollection<BenchmarkRecord>(mongoTemplate, "benchmarks")
-        patchMongoCollection<BenchmarkRecord>(mongoTemplate, "metrics")
-        patchMongoCollection<BenchmarkRecord>(mongoTemplate, "tests")
+        patchMongoCollection<MetricRecord>(mongoTemplate, "metrics")
+        patchMongoCollection<TestRecord>(mongoTemplate, "tests")
         migrateIndeterminatedResultTypo(mongoTemplate)
     }
 }
