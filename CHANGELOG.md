@@ -63,6 +63,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `RATE_LIMITING.md`: design writeup of the rate-limiting implementation (token-bucket algorithm, Bucket4j/Caffeine internals, request-lifecycle diagrams)
 - `AUTH_REVIEW_FINDINGS.md`: findings from a code review of the JWT/RBAC/ownership implementation, tracked for follow-up after rate limiting ships
 - README: new "Rate Limiting" subsection under API Reference, plus environment variable documentation for the new `RATE_LIMIT_*` settings
+- `TestResponse`/`TestCreateRequest`, `BenchmarkResponse`/`BenchmarkCreateRequest`, `MetricResponse`/`MetricCreateRequest`, and `EvaluationResponse`/`EvaluationReportInfo` DTOs, so API responses no longer expose raw MongoDB documents (issue #19)
+- `BaseEntitySeeder`: seeds the benchmarks/metrics/tests already registered on the deployed service, using their exact production ids, so a fresh deployment starts with the same base entities and reseeding is safe against production. Replaces `FairChampionSeeder`.
 
 ### Changed
 - `Evaluation`, `EvaluationReport`, `BenchmarkRecord`, `MetricRecord`, and
@@ -87,12 +89,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `BenchmarkRecord`, `MetricRecord`, `TestRecord` services updated to enforce ownership checks on update operations
 - `GlobalExceptionHandler` extended with handlers for `ForbiddenException` (HTTP 403) and `IllegalArgumentException` (HTTP 400)
 - `README.md` updated with full configuration reference, local development guide, and authentication documentation
+- Update endpoints standardized to `PUT` (issue #19)
+- `evaluatorId` path param renamed to `pluginId` to match what it identifies (issue #19)
+- `GET /tests/list` and `GET /tests/list/jsonLD` renamed from `/tests/info` and `/tests/list` to match the `Benchmark`/`Metric` list-endpoint convention
+- `license`, `isApplicableFor`, and `supportedBy` values on seeded tests/metrics corrected to proper URIs per the FTR v1.2.0 spec (previously plain strings such as `"MIT"` or `"maDMP"`)
+- `org.springframework` and app debug logging moved from `application.yml` to the local-only `application-local.yml` profile — production and Docker Compose now log at `info`
 
 ### Fixed
 - `GET /plugins` was missing the function names for `ExternalBenchmarkPlugin`
   implementations; `PluginManagerService` now resolves functions from
   `benchmarkFunctionMap` for those plugins.
 - Corrected the FAIR Champion evaluator's plugin description text.
+- Unmatched routes now return their real HTTP status instead of a hardcoded 500
+- Startup DB patcher was patching the `metrics`/`tests` collections using `BenchmarkRecord`'s type, and was a permanent no-op regardless due to a missing `upsert`
+- `MetricService.metricJsonLD()` declared `isApplicableFor`/`supportedBy` but never read them from the entity, so they always serialized as `null`
 
 ### Security
 - Passwords stored as BCrypt hashes — never in plain text
