@@ -52,7 +52,7 @@ class TestController(
         ResponseEntity.ok(testService.listAllTestUIDs())
 
     @Operation(summary = "Get the list of tests")
-    @GetMapping("/info", produces = ["application/json"])
+    @GetMapping("/list", produces = ["application/json"])
     suspend fun getTests(): ResponseEntity<List<TestResponse>> =
         ResponseEntity.ok(testService.listAllTests().map { it.toResponse() })
 
@@ -80,7 +80,7 @@ class TestController(
     }
 
     @Operation(summary = "List the tests in json-ld")
-    @GetMapping("/list", produces = ["application/ld+json"])
+    @GetMapping("/list/jsonLD", produces = ["application/ld+json"])
     suspend fun getTestsJsonLD(): ResponseEntity<List<TestJsonLD?>> {
         val result = testService.listAllTests()
         return ResponseEntity.ok(result.map { it.id?.let { id -> testService.testJsonLD(id) } })
