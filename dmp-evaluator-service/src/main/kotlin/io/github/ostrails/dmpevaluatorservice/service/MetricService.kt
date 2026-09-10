@@ -186,6 +186,8 @@ class MetricService(
             keyword = metric.keyword?.split(",")?.map { LangLiteral("en", it.trim()) },
             hasTest = metric.testAssociated?.map { IdWrapper(configurationTestVariables.endpointURL + "/" + it) } ?: listOf(),
             hasBenchmark = metric.hasBenchmark?.map { IdWrapper(configurationBenchmarkVariables.endpointURL + "/" + it) } ?: listOf(),
+            isApplicableFor = metric.isApplicableFor?.let { IdWrapper(it) },
+            supportedBy = metric.supportedBy?.let { IdWrapper(it) },
             license = IdWrapper("http://creativecommons.org/licenses/by/2.0/"),
         )
     }
