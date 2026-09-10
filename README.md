@@ -391,6 +391,11 @@ Instead of setting environment variables manually every time, create a local ove
        endpointURL: http://localhost:8080/metrics
      benchmark:
        endpointURL: http://localhost:8080/benchmarks
+
+   logging:
+     level:
+       org.springframework: DEBUG
+       io.github.ostrails.dmpevaluatorservice: DEBUG
    ```
 
 2. Run with the profile active:
@@ -399,6 +404,8 @@ Instead of setting environment variables manually every time, create a local ove
    ```
 
 > **Never commit `application-local.yml`** — it is listed in `.gitignore` to prevent accidental exposure of secrets.
+
+> **DEBUG logging is local-only.** The `logging.level` block above (including Spring's auto-configuration condition-evaluation report on startup) only applies when the `local` profile is active. Docker Compose and production runs use the base `application.yml`, which stays at `root: info` — no `-Dspring-boot.run.profiles=local` means no verbose Spring/framework logging. If you rebuild `application-local.yml` from scratch (it's gitignored, so it isn't shared), add the `logging` block above again to get DEBUG output back.
 
 ---
 
