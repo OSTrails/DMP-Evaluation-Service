@@ -298,10 +298,10 @@ Responses use `MetricResponse` (`identifier` field) rather than exposing the raw
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/tests` | Create a new test record — body is `TestCreateRequest` (title/description/license/version required; server sets the ID, `createdBy`, `repository`, and `endpointURL`). Optionally include `metricImplemented`/`evaluator`/`functionEvaluator` to link it to a metric in the same call — equivalent to a separate `addEvaluator` call, including registering the reverse link on the metric. Fails with `404` (and creates nothing) if `metricImplemented` doesn't exist. |
-| `GET` | `/tests/info` | List all tests |
+| `GET` | `/tests/list` | List all tests |
 | `GET` | `/tests/info/{testId}` | Get a specific test |
 | `GET` | `/tests/{testId}` | Get test as JSON-LD |
-| `GET` | `/tests/list` | List tests as JSON-LD |
+| `GET` | `/tests/list/jsonLD` | List tests as JSON-LD |
 | `GET` | `/tests/metrics/{metricId}` | Get tests belonging to a metric |
 | `PUT` | `/tests/{testId}` | Update a test record |
 | `POST` | `/tests/{testId}/addEvaluator` | Attach an evaluator plugin to a test |
@@ -429,20 +429,40 @@ Instead of setting environment variables manually every time, create a local ove
 git clone https://github.com/OSTrails/DMP-Evaluation-Service.git
 cd DMP-Evaluation-Service/dmp-evaluator-service
 
-# 2. Start MongoDB
-docker-compose up -d
+# 2. Set the env vars docker-compose.yml requires (see Environment variables below) —
+#    needed even if you only want step 3 to start MongoDB, since docker-compose
+#    validates every service's env vars before starting any of them
+cp .env.example .env
+# then edit .env and fill in JWT_SECRET / ADMIN_CLIENT_SECRET at minimum
 
-# 3. Edit src/main/resources/application-local.yml with your local values
+# 3. Start MongoDB
+docker-compose up -d mongodb
+```
+
+Then pick one of the two ways to run the service itself:
+
+**Option A — Maven, for local dev/debugging (recommended)**
+
+```bash
+# 4. Edit src/main/resources/application-local.yml with your local values
 #    (see the Configuration section above)
 
-# 4. Build the project
+# 5. Build the project
 ./mvnw clean install -DskipTests
 
-# 5. Run with the local profile
+# 6. Run with the local profile
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 > On Windows CMD/PowerShell use `mvnw.cmd` instead of `./mvnw`.
+
+**Option B — Docker Compose, full stack**
+
+```bash
+docker-compose up -d
+```
+
+This builds and runs the service itself too (the `app` service in `docker-compose.yml`), reading its config from the `.env` file created in step 2 instead of `application-local.yml`. Don't run this alongside Option A — both bind port 8080.
 
 On first startup the service will automatically create an ADMIN client using the credentials from `application-local.yml`. You will see this log line:
 ```
