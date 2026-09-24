@@ -168,6 +168,8 @@ class ComplianceEvaluator: EvaluatorPlugin {
                         ))
                         resultValue = ResultTestEnum.FAIL
                     } else {
+                        var datasetHasOpenLicensedDistribution = false
+
                         distributions.forEachIndexed { distIndex, distElement ->
                             val distObj = distElement as? JsonObject
                             val distTitle = distObj?.get("title")?.jsonPrimitiveOrNull?.contentOrNull
@@ -180,34 +182,42 @@ class ComplianceEvaluator: EvaluatorPlugin {
                                     dataset = datasetLabel,
                                     reason = "Distribution '$distTitle': no license declared. Add an open license (e.g., CC BY 4.0: https://creativecommons.org/licenses/by/4.0/)."
                                 ))
-                                resultValue = ResultTestEnum.FAIL
                             } else {
+                                var distributionHasOpenLicense = true
                                 licenses.forEachIndexed { licIndex, licElement ->
                                     val licRef = (licElement as? JsonObject)
                                         ?.get("license_ref")?.jsonPrimitiveOrNull?.contentOrNull
                                     when {
                                         licRef.isNullOrBlank() -> {
+                                            distributionHasOpenLicense = false
                                             logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: license_ref is missing.")
                                             affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].license[$licIndex]")
                                             guidanceIssues.add(GuidanceEntry(
                                                 dataset = datasetLabel,
                                                 reason = "Distribution '$distTitle', license entry ${licIndex + 1}: missing 'license_ref' field. Provide the URL of an open license."
                                             ))
-                                            resultValue = ResultTestEnum.FAIL
                                         }
                                         !isOpenLicense(licRef, openLicenses) -> {
+                                            distributionHasOpenLicense = false
                                             logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: '$licRef' is not a recognized open license.")
                                             affectedElements.add("dataset[$datasetIndex].distribution[$distIndex].license[$licIndex]:$licRef")
                                             guidanceIssues.add(GuidanceEntry(
                                                 dataset = datasetLabel,
                                                 reason = "Distribution '$distTitle': '$licRef' is not a recognized open license. Replace it with an open license (e.g., CC BY 4.0: https://creativecommons.org/licenses/by/4.0/)."
                                             ))
-                                            resultValue = ResultTestEnum.FAIL
                                         }
                                         else -> logMessages.add("Dataset[$datasetIndex] distribution[$distIndex] license[$licIndex]: '$licRef' is an open license.")
                                     }
                                 }
+                                if (distributionHasOpenLicense) datasetHasOpenLicensedDistribution = true
                             }
+                        }
+
+                        if (datasetHasOpenLicensedDistribution) {
+                            logMessages.add("Dataset[$datasetIndex]: at least one distribution has an open license.")
+                        } else {
+                            logMessages.add("Dataset[$datasetIndex]: none of its distributions have an open license.")
+                            resultValue = ResultTestEnum.FAIL
                         }
                     }
                 }
@@ -215,15 +225,19 @@ class ComplianceEvaluator: EvaluatorPlugin {
         }
 
         val guidance = when {
-            resultValue != ResultTestEnum.FAIL -> Guidance(
-                summary = "All datasets use open licenses in their distributions."
-            )
             datasets.isEmpty() -> Guidance(
                 summary = "No datasets found in the maDMP. Add at least one dataset with distributions and open licenses."
             )
-            else -> Guidance(
-                summary = "${guidanceIssues.size} license issue(s) found across the datasets.",
+            resultValue == ResultTestEnum.FAIL -> Guidance(
+                summary = "${guidanceIssues.size} license issue(s) found; at least one dataset has no distribution with an open license.",
                 issues = guidanceIssues
+            )
+            guidanceIssues.isNotEmpty() -> Guidance(
+                summary = "All datasets have at least one openly-licensed distribution. ${guidanceIssues.size} other distribution(s) have license issues — see details.",
+                issues = guidanceIssues
+            )
+            else -> Guidance(
+                summary = "All datasets use open licenses in their distributions."
             )
         }
 
@@ -274,10 +288,20 @@ class ComplianceEvaluator: EvaluatorPlugin {
         }
     }
 
-    // Normalizes both sides (lowercase, strip trailing slash) before comparing
     private fun isOpenLicense(licenseRef: String, openLicenses: Set<String>): Boolean {
-        val normalized = licenseRef.trimEnd('/').lowercase()
-        return openLicenses.any { it.trimEnd('/').lowercase() == normalized }
+        val normalized = normalizeLicenseUrl(licenseRef)
+        return openLicenses.any { normalizeLicenseUrl(it) == normalized }
+    }
+
+    private fun normalizeLicenseUrl(url: String): String {
+        return url.trim()
+            .trimEnd('/')
+            .lowercase()
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .removePrefix("www.")
+            .replace("/licenses/", "/license/")
+            .replace(Regex("[^a-z0-9/]"), "")
     }
 
     fun datasetRepositoryIsInRe3data(
