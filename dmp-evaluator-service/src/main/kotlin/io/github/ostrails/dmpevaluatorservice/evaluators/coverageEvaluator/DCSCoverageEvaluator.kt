@@ -55,6 +55,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "repositoryCertified" to ::repositoryCertified,
         "trustedRepositoryReferenced" to ::trustedRepositoryReferenced,
         "distributionAccessOpen" to ::distributionAccessOpen,
+        "noEthicalIssuesJustified" to ::noEthicalIssuesJustified,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -191,6 +192,25 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
 
     private fun securityMeasures(dataset: JsonObject): List<String> =
         dataset.array("security_and_privacy").orEmpty().mapNotNull { (it as? JsonObject)?.text("title") }
+
+    // ethics.co.3 - a DMP declaring no ethical issues justifies why; not applicable for yes/unknown/missing
+    fun noEthicalIssuesJustified(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("noEthicalIssuesJustified"),
+            subjects = dmpSubject(maDMP).map { subject ->
+                val status = subject.json?.text("ethical_issues_exist")
+                if (status == "no") subject
+                else subject.copy(preset = SubjectCheck.Undetermined(
+                    "Only applies when 'ethical_issues_exist' is 'no'; it is '${status ?: "missing"}'."))
+            },
+            noun = "DMP",
+            requirement = "the absence of ethical issues is justified",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DMP,
+        ) { dmp ->
+            if (dmp.text("ethical_issues_description") != null) SubjectCheck.Ok("No ethical issues, with a justification provided.")
+            else SubjectCheck.Problem("'ethical_issues_exist' is 'no' but no 'ethical_issues_description' explains why. Justify the absence of ethical issues (e.g. no human participants, no personal data).")
+        }
 
     // Checks a DCS yes/no/unknown field: yes/no is declared, 'unknown' cannot be assessed, anything else is a problem
     private fun declaredStatus(json: JsonObject, field: String): SubjectCheck =

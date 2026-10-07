@@ -204,6 +204,14 @@ class CoverageMetricSeeder(
                 keyword = "open access, data access, distribution, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000027", testId = "6ac62fd3616d0a2f64000028",
+                abbreviation = "ethics.co.3",
+                title = "Justification for Absence of Ethical Issues",
+                description = "Checks that a maDMP declaring no ethical issues (ethical_issues_exist is 'no') justifies this in ethical_issues_description. Fails if the justification is missing; indeterminate when ethical issues are declared as 'yes', 'unknown' or not declared.",
+                function = "noEthicalIssuesJustified",
+                keyword = "ethics, ethical issues, justification, DMP, DCS",
+            ),
         )
     }
 
