@@ -44,6 +44,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "datasetTypeSpecified" to ::datasetTypeSpecified,
         "distributionSizeSpecified" to ::distributionSizeSpecified,
         "metadataStandardDeclared" to ::metadataStandardDeclared,
+        "metadataStandardInDmp" to ::metadataStandardInDmp,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -256,6 +257,21 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             val standards = metadataStandards(dataset)
             if (standards.isNotEmpty()) SubjectCheck.Ok("Metadata standard(s): ${standards.joinToString()}.")
             else SubjectCheck.Problem("No metadata standard declared. Add a 'metadata' entry with a 'metadata_standard_id' (e.g. https://schema.datacite.org/ for DataCite).")
+        }
+
+    // data.exteresource.co.2 - the DMP names at least one metadata standard (on any dataset)
+    fun metadataStandardInDmp(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("metadataStandardInDmp"),
+            subjects = dmpSubject(maDMP),
+            noun = "DMP",
+            requirement = "at least one metadata standard is specified",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DMP,
+        ) { dmp ->
+            val standards = dmp.array("dataset").orEmpty().flatMap { (it as? JsonObject)?.let(::metadataStandards).orEmpty() }.distinct()
+            if (standards.isNotEmpty()) SubjectCheck.Ok("Metadata standard(s): ${standards.joinToString()}.")
+            else SubjectCheck.Problem("No metadata standard is specified anywhere in the DMP. Add a 'metadata' entry with a 'metadata_standard_id' to the datasets.")
         }
 
     private fun metadataStandards(dataset: JsonObject): List<String> =

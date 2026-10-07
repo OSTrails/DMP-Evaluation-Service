@@ -143,6 +143,14 @@ class CoverageMetricSeeder(
                 keyword = "metadata standard, metadata, dataset, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000019", testId = "6ac62fd3616d0a2f6400001a",
+                abbreviation = "data.exteresource.co.2",
+                title = "Metadata Standard Specified in the DMP",
+                description = "Checks that the maDMP specifies at least one metadata standard (metadata[].metadata_standard_id) on any of its datasets. Fails if no dataset declares a metadata standard.",
+                function = "metadataStandardInDmp",
+                keyword = "metadata standard, external resources, DMP, DCS",
+            ),
         )
     }
 
