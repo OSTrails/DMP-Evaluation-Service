@@ -151,6 +151,15 @@ class CoverageMetricSeeder(
                 function = "metadataStandardInDmp",
                 keyword = "metadata standard, external resources, DMP, DCS",
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400001b", testId = "6ac62fd3616d0a2f6400001c",
+                abbreviation = "qc.qual.1",
+                title = "Quality Control Methods Stated",
+                description = "Checks that every dataset in the maDMP states at least one quality control method (data_quality_assurance). Fails if any dataset states none.",
+                function = "qualityAssuranceDeclared",
+                keyword = "quality control, quality assurance, dataset, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
