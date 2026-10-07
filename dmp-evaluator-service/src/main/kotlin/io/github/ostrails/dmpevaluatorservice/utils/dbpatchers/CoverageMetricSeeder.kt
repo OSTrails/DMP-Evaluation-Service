@@ -116,6 +116,15 @@ class CoverageMetricSeeder(
                 keyword = "persistent identifier, PID system, repository, host, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000013", testId = "6ac62fd3616d0a2f64000014",
+                abbreviation = "data.info.cov.1",
+                title = "Dataset Type Specified",
+                description = "Checks that every dataset in the maDMP specifies its type (type). Fails if any dataset has no type.",
+                function = "datasetTypeSpecified",
+                keyword = "dataset type, dataset, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
