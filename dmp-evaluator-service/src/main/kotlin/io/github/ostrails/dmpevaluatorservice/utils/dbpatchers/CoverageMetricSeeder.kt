@@ -134,6 +134,15 @@ class CoverageMetricSeeder(
                 keyword = "size, byte size, distribution, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000017", testId = "6ac62fd3616d0a2f64000018",
+                abbreviation = "meta.stand.comp.1",
+                title = "Metadata Standards Used",
+                description = "Checks that every dataset in the maDMP declares at least one metadata standard (metadata[].metadata_standard_id). Fails if any dataset declares none.",
+                function = "metadataStandardDeclared",
+                keyword = "metadata standard, metadata, dataset, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

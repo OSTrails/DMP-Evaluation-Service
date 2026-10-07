@@ -43,6 +43,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "repositoryPidSystemDeclared" to ::repositoryPidSystemDeclared,
         "datasetTypeSpecified" to ::datasetTypeSpecified,
         "distributionSizeSpecified" to ::distributionSizeSpecified,
+        "metadataStandardDeclared" to ::metadataStandardDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -241,6 +242,24 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
                 else -> SubjectCheck.Ok("Size: $size bytes.")
             }
         }
+
+    // meta.stand.comp.1 - every dataset names the metadata standard(s) used to describe it
+    fun metadataStandardDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("metadataStandardDeclared"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "a metadata standard is declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            val standards = metadataStandards(dataset)
+            if (standards.isNotEmpty()) SubjectCheck.Ok("Metadata standard(s): ${standards.joinToString()}.")
+            else SubjectCheck.Problem("No metadata standard declared. Add a 'metadata' entry with a 'metadata_standard_id' (e.g. https://schema.datacite.org/ for DataCite).")
+        }
+
+    private fun metadataStandards(dataset: JsonObject): List<String> =
+        dataset.array("metadata").orEmpty().mapNotNull { (it as? JsonObject)?.obj("metadata_standard_id")?.text("identifier") }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
         distribution.array("license").orEmpty().any { (it as? JsonObject)?.text("license_ref") != null }
