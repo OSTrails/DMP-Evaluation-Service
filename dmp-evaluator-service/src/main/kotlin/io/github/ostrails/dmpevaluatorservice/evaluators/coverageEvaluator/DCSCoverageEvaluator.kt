@@ -53,6 +53,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "backupFrequencyDeclared" to ::backupFrequencyDeclared,
         "contributorPidsDeclared" to ::contributorPidsDeclared,
         "repositoryCertified" to ::repositoryCertified,
+        "trustedRepositoryReferenced" to ::trustedRepositoryReferenced,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -365,6 +366,27 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
                     in REPOSITORY_CERTIFICATIONS -> SubjectCheck.Ok("Certified with '$certification'.")
                     else -> SubjectCheck.Problem("'$certification' is not a recognised certification. Allowed values: ${REPOSITORY_CERTIFICATIONS.joinToString()}.")
                 }
+            }
+        }
+
+    // data.pid.cov.2 - the host of every distribution references its re3data registry entry (host_id, DCS 1.3).
+    // Only checks the declaration; ComplianceEvaluator.datasetRepositoryIsInRe3data verifies registration online.
+    fun trustedRepositoryReferenced(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("trustedRepositoryReferenced"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the repository is referenced by its re3data identifier",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            withHost(distribution) { host ->
+                val re3data = host.array("host_id").orEmpty()
+                    .mapNotNull { it as? JsonObject }
+                    .firstOrNull { it.text("type")?.lowercase() == "re3data" }
+                    ?.text("identifier")
+                if (re3data != null) SubjectCheck.Ok("re3data identifier: '$re3data'.")
+                else SubjectCheck.Problem("The host has no 'host_id' of type 're3data'. Reference the repository's re3data entry (e.g. https://doi.org/10.17616/R3QP53 for Zenodo).")
             }
         }
 
