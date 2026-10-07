@@ -39,6 +39,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "securityMeasuresDeclared" to ::securityMeasuresDeclared,
         "sensitiveDataProtected" to ::sensitiveDataProtected,
         "repositoryPidSystemDeclared" to ::repositoryPidSystemDeclared,
+        "datasetTypeSpecified" to ::datasetTypeSpecified,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -202,6 +203,21 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
                 systems.isEmpty() -> SubjectCheck.Problem("The host declares no 'pid_system'. Add the PID system(s) the repository assigns (e.g. 'doi', 'handle').")
                 else -> SubjectCheck.Ok("PID system(s): ${systems.joinToString()}.")
             }
+        }
+
+    // data.info.cov.1 - every dataset specifies its type
+    fun datasetTypeSpecified(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("datasetTypeSpecified"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "the dataset type is specified",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            val type = dataset.text("type")
+            if (type != null) SubjectCheck.Ok("Type: '$type'.")
+            else SubjectCheck.Problem("No 'type' specified. Add the dataset type, preferably from the DataCite or COAR vocabulary (e.g. 'Dataset', 'Software', 'raw data').")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
