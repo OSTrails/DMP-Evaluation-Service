@@ -125,6 +125,15 @@ class CoverageMetricSeeder(
                 keyword = "dataset type, dataset, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000015", testId = "6ac62fd3616d0a2f64000016",
+                abbreviation = "data.info.cov.3",
+                title = "Dataset Size Specified",
+                description = "Checks that every distribution of every dataset in the maDMP specifies its size in bytes (byte_size, a non-negative integer). Fails if any distribution has no or an invalid size, or a dataset has no distributions.",
+                function = "distributionSizeSpecified",
+                keyword = "size, byte size, distribution, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
