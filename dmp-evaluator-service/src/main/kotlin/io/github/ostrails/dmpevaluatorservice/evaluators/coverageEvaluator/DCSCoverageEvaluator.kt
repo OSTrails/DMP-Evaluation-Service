@@ -7,6 +7,8 @@ import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import org.springframework.stereotype.Component
 
 // Coverage checks for the OSTrails pilot metrics: each test verifies that a DMP Common Standard (DCS 1.2/1.3)
@@ -40,6 +42,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "sensitiveDataProtected" to ::sensitiveDataProtected,
         "repositoryPidSystemDeclared" to ::repositoryPidSystemDeclared,
         "datasetTypeSpecified" to ::datasetTypeSpecified,
+        "distributionSizeSpecified" to ::distributionSizeSpecified,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -218,6 +221,25 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             val type = dataset.text("type")
             if (type != null) SubjectCheck.Ok("Type: '$type'.")
             else SubjectCheck.Problem("No 'type' specified. Add the dataset type, preferably from the DataCite or COAR vocabulary (e.g. 'Dataset', 'Software', 'raw data').")
+        }
+
+    // data.info.cov.3 - every distribution specifies its size in bytes
+    fun distributionSizeSpecified(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("distributionSizeSpecified"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the size in bytes is specified",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            val raw = distribution["byte_size"]
+            val size = (raw as? JsonPrimitive)?.takeIf { !it.isString }?.longOrNull
+            when {
+                raw == null -> SubjectCheck.Problem("No 'byte_size' specified. Add the (expected) size of the distribution in bytes.")
+                size == null || size < 0 -> SubjectCheck.Problem("'byte_size' must be a non-negative whole number of bytes, found '$raw'.")
+                else -> SubjectCheck.Ok("Size: $size bytes.")
+            }
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
