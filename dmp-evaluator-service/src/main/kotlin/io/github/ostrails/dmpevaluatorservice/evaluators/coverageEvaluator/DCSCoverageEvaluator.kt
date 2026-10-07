@@ -45,6 +45,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "distributionSizeSpecified" to ::distributionSizeSpecified,
         "metadataStandardDeclared" to ::metadataStandardDeclared,
         "metadataStandardInDmp" to ::metadataStandardInDmp,
+        "qualityAssuranceDeclared" to ::qualityAssuranceDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -276,6 +277,21 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
 
     private fun metadataStandards(dataset: JsonObject): List<String> =
         dataset.array("metadata").orEmpty().mapNotNull { (it as? JsonObject)?.obj("metadata_standard_id")?.text("identifier") }
+
+    // qc.qual.1 - every dataset states the quality control methods applied to it
+    fun qualityAssuranceDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("qualityAssuranceDeclared"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "quality control methods are stated",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            val methods = dataset.array("data_quality_assurance").orEmpty().mapNotNull { it.textOrNull() }
+            if (methods.isNotEmpty()) SubjectCheck.Ok("${methods.size} quality assurance statement(s).")
+            else SubjectCheck.Problem("No 'data_quality_assurance' stated. Describe how data quality is ensured (e.g. instrument calibration, validation, peer review).")
+        }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
         distribution.array("license").orEmpty().any { (it as? JsonObject)?.text("license_ref") != null }
