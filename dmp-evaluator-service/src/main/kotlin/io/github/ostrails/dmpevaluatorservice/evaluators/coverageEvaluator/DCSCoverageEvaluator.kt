@@ -26,6 +26,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
 
     companion object {
         const val NO_DATASETS = "No datasets found in the maDMP."
+        const val NO_DMP = "No 'dmp' object found in the maDMP."
     }
 
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
@@ -34,6 +35,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "storageLocationDeclared" to ::storageLocationDeclared,
         "distributionFormatSpecified" to ::distributionFormatSpecified,
         "preservationStatementPresent" to ::preservationStatementPresent,
+        "ethicalIssuesStatusDeclared" to ::ethicalIssuesStatusDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -112,6 +114,26 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         ) { dataset ->
             if (dataset.text("preservation_statement") != null) SubjectCheck.Ok("Preservation statement provided.")
             else SubjectCheck.Problem("No 'preservation_statement'. Describe how and for how long the dataset will be preserved (e.g. repository retention period, integrity checks).")
+        }
+
+    // ethics.co.1 - the DMP states whether ethical issues exist ('unknown' cannot be assessed)
+    fun ethicalIssuesStatusDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("ethicalIssuesStatusDeclared"),
+            subjects = dmpSubject(maDMP),
+            noun = "DMP",
+            requirement = "the existence of ethical issues is declared as yes or no",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DMP,
+        ) { dmp -> declaredStatus(dmp, "ethical_issues_exist") }
+
+    // Checks a DCS yes/no/unknown field: yes/no is declared, 'unknown' cannot be assessed, anything else is a problem
+    private fun declaredStatus(json: JsonObject, field: String): SubjectCheck =
+        when (val value = json.text(field)) {
+            "yes", "no" -> SubjectCheck.Ok("'$field' is '$value'.")
+            "unknown" -> SubjectCheck.Undetermined("'$field' is 'unknown'. State 'yes' or 'no' once it has been assessed.")
+            null -> SubjectCheck.Problem("'$field' is missing. Declare it as 'yes' or 'no'.")
+            else -> SubjectCheck.Problem("'$field' has the invalid value '$value'. Allowed values: yes, no, unknown.")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
