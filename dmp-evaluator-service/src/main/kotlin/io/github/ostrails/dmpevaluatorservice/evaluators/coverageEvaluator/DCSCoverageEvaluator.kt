@@ -29,6 +29,8 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
     companion object {
         const val NO_DATASETS = "No datasets found in the maDMP."
         const val NO_DMP = "No 'dmp' object found in the maDMP."
+        val PERSON_PID_TYPES = setOf("orcid", "isni")
+        val ORGANISATION_PID_TYPES = setOf("ror", "grid", "isni")
     }
 
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
@@ -47,6 +49,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "metadataStandardInDmp" to ::metadataStandardInDmp,
         "qualityAssuranceDeclared" to ::qualityAssuranceDeclared,
         "backupFrequencyDeclared" to ::backupFrequencyDeclared,
+        "contributorPidsDeclared" to ::contributorPidsDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -309,6 +312,38 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
                 if (frequency != null) SubjectCheck.Ok("Backup frequency: '$frequency'.")
                 else SubjectCheck.Problem("The host states no 'backup_frequency'. Add how often the data is backed up (e.g. 'daily').")
             }
+        }
+
+    // role.pid.co.1 - every contributor has a person PID (orcid/isni) and every declared affiliation an
+    // organisation PID (ror/grid/isni, DCS 1.3); contributors without affiliations are not penalised
+    fun contributorPidsDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("contributorPidsDeclared"),
+            subjects = contributorSubjects(maDMP),
+            noun = "contributor",
+            requirement = "the contributor and their organisations are identified by persistent identifiers",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = "No contributors found in the maDMP.",
+        ) { contributor ->
+            val problems = mutableListOf<String>()
+            val id = contributor.obj("contributor_id")
+            val idType = id?.text("type")?.lowercase()
+            when {
+                id?.text("identifier") == null -> problems.add("No 'contributor_id'. Add the person's ORCID.")
+                idType !in PERSON_PID_TYPES -> problems.add("The contributor_id type is '${idType ?: "missing"}', which is not a persistent identifier. Use an ORCID or ISNI.")
+            }
+            val affiliations = contributor.array("affiliation").orEmpty()
+            affiliations.forEachIndexed { index, element ->
+                val affiliation = element as? JsonObject
+                val name = affiliation?.text("name") ?: "affiliation ${index + 1}"
+                val affiliationId = affiliation?.obj("affiliation_id")
+                val affiliationType = affiliationId?.text("type")?.lowercase()
+                if (affiliationId?.text("identifier") == null || affiliationType !in ORGANISATION_PID_TYPES) {
+                    problems.add("Affiliation '$name' has no organisation PID. Add an 'affiliation_id' of type ror, grid or isni.")
+                }
+            }
+            if (problems.isEmpty()) SubjectCheck.Ok("Identified by $idType; ${affiliations.size} affiliation(s) with organisation PIDs.")
+            else SubjectCheck.Problem(problems.joinToString(" "))
         }
 
     // Runs [check] on the distribution's host, or reports a problem when no host is declared

@@ -169,6 +169,14 @@ class CoverageMetricSeeder(
                 keyword = "backup, storage, host, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400001f", testId = "6ac62fd3616d0a2f64000020",
+                abbreviation = "role.pid.co.1",
+                title = "Contributors and Organisations PIDs",
+                description = "Checks that every contributor in the maDMP is identified by a persistent identifier (contributor_id of type orcid or isni) and that every declared affiliation has an organisation identifier (affiliation_id of type ror, grid or isni, DCS 1.3). Fails if there are no contributors or any contributor or affiliation lacks a PID.",
+                function = "contributorPidsDeclared",
+                keyword = "contributor, ORCID, ROR, persistent identifier, affiliation, DCS",
+            ),
         )
     }
 
