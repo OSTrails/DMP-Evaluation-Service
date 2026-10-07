@@ -98,6 +98,15 @@ class CoverageMetricSeeder(
                 keyword = "security, privacy, dataset, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400000f", testId = "6ac62fd3616d0a2f64000010",
+                abbreviation = "store.comp.1",
+                title = "Alignment of Storage and Backup with Information Sensitivity",
+                description = "Checks that every dataset declaring personal or sensitive data ('yes') also declares security and privacy measures (security_and_privacy). Datasets declaring 'no' for both are skipped; 'unknown' or missing flags are indeterminate, as is a DMP with no such datasets.",
+                function = "sensitiveDataProtected",
+                keyword = "sensitive data, personal data, security, storage, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
