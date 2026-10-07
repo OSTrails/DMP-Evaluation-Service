@@ -125,15 +125,14 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         maDMP: JsonObject,
         reportId: String,
         testRecord: TestRecord): Evaluation{
-        var resultValue: ResultTestEnum = ResultTestEnum.INDETERMINATE
         val costs = extractValuesByPath<Any>(maDMP, "dmp.cost[*]")
         val logMessages = mutableListOf<String>()
         if (costs.isEmpty()) {
-            resultValue = ResultTestEnum.FAIL
             logMessages.add("Cost field is not present in the maDMP")
-        } else{resultValue = ResultTestEnum.INDETERMINATE}
+        }
 
-        val validCosts = costs.mapNotNull { element ->
+        // Evaluate every entry (map, not all) so each one is logged; any incomplete entry fails the test
+        val costEntriesComplete = costs.map { element ->
             if (element is JsonObject) {
                 val title = element["title"]?.jsonPrimitiveOrNull?.contentOrNull
                 val value = element["value"]?.jsonPrimitiveOrNull?.contentOrNull
@@ -143,20 +142,17 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
                 logMessages.add("Cost entry - title: $title, description; $description, value: $value, currency: $currency")
 
                 if (!title.isNullOrBlank() && !description.isNullOrBlank() && !value.isNullOrBlank() && !currency.isNullOrBlank()) {
-                    title // Use title as a "valid presence" indicator
-                    resultValue = ResultTestEnum.PASS
-                    return@mapNotNull true
+                    true
                 } else {
-                    resultValue = ResultTestEnum.FAIL
                     logMessages.add("The full data for the cost is required")
-                    return@mapNotNull false
+                    false
                 }
             } else {
                 logMessages.add("Invalid cost entry: not a JsonObject.")
-                resultValue = ResultTestEnum.FAIL
-                return@mapNotNull false
+                false
             }
         }
+        val resultValue = if (costs.isNotEmpty() && costEntriesComplete.all { it }) ResultTestEnum.PASS else ResultTestEnum.FAIL
 
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
