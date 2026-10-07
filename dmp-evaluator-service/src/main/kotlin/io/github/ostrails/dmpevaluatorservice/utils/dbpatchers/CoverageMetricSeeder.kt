@@ -177,6 +177,15 @@ class CoverageMetricSeeder(
                 function = "contributorPidsDeclared",
                 keyword = "contributor, ORCID, ROR, persistent identifier, affiliation, DCS",
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000021", testId = "6ac62fd3616d0a2f64000022",
+                abbreviation = "repo.co.5",
+                title = "Certification of Repository",
+                description = "Checks that the host of every distribution declares a recognised repository certification (host.certified_with, e.g. coretrustseal). Fails if any distribution has no host, or its host declares no or an unrecognised certification.",
+                function = "repositoryCertified",
+                keyword = "certification, CoreTrustSeal, repository, host, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

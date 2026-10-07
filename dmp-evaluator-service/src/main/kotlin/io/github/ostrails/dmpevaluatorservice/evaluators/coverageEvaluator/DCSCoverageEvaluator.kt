@@ -31,6 +31,8 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         const val NO_DMP = "No 'dmp' object found in the maDMP."
         val PERSON_PID_TYPES = setOf("orcid", "isni")
         val ORGANISATION_PID_TYPES = setOf("ror", "grid", "isni")
+        // DCS 1.2/1.3 Certification enum
+        val REPOSITORY_CERTIFICATIONS = setOf("din31644", "dini-zertifikat", "dsa", "iso16363", "iso16919", "trac", "wds", "coretrustseal")
     }
 
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
@@ -50,6 +52,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "qualityAssuranceDeclared" to ::qualityAssuranceDeclared,
         "backupFrequencyDeclared" to ::backupFrequencyDeclared,
         "contributorPidsDeclared" to ::contributorPidsDeclared,
+        "repositoryCertified" to ::repositoryCertified,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -344,6 +347,25 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             }
             if (problems.isEmpty()) SubjectCheck.Ok("Identified by $idType; ${affiliations.size} affiliation(s) with organisation PIDs.")
             else SubjectCheck.Problem(problems.joinToString(" "))
+        }
+
+    // repo.co.5 - the host of every distribution holds a recognised repository certification
+    fun repositoryCertified(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("repositoryCertified"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the repository's certification is declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            withHost(distribution) { host ->
+                when (val certification = host.text("certified_with")?.lowercase()) {
+                    null -> SubjectCheck.Problem("The host declares no 'certified_with'. Add the repository's certification (e.g. 'coretrustseal') if it has one.")
+                    in REPOSITORY_CERTIFICATIONS -> SubjectCheck.Ok("Certified with '$certification'.")
+                    else -> SubjectCheck.Problem("'$certification' is not a recognised certification. Allowed values: ${REPOSITORY_CERTIFICATIONS.joinToString()}.")
+                }
+            }
         }
 
     // Runs [check] on the distribution's host, or reports a problem when no host is declared
