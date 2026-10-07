@@ -6,6 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -26,9 +27,7 @@ class FeasibilityEvaluator: EvaluatorPlugin {
         )
     }
 
-    override val functionMap = mapOf(
-        "evaluateCoherentLicense" to  ::evaluateCoherentLicense
-    )
+    override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = emptyMap()
 
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
@@ -45,23 +44,6 @@ class FeasibilityEvaluator: EvaluatorPlugin {
             )
         }
         return evaluationsResults
-    }
-
-    fun evaluateCoherentLicense(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            assessmentTarget = "https://www.rd-alliance.org/group/dmp-common-standards-wg/outcomes/rda",
-            wasGeneratedBy = "${this::class.qualifiedName}::evaluateCoherentLicense",
-            outputFromTest = testRecord.id
-        )
     }
 
 }
