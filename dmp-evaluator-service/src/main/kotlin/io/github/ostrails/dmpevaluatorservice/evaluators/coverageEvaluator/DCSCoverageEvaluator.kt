@@ -31,6 +31,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
         "datasetLicenseDeclared" to ::datasetLicenseDeclared,
         "distributionLicensePresent" to ::distributionLicensePresent,
+        "storageLocationDeclared" to ::storageLocationDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -63,6 +64,23 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         ) { distribution ->
             if (hasLicenseRef(distribution)) SubjectCheck.Ok("License declared.")
             else SubjectCheck.Problem("No license declared. Add a license with a 'license_ref' URL (e.g. https://creativecommons.org/licenses/by/4.0/).")
+        }
+
+    // store.cov.1 - every distribution names where it is stored (host title, url or host_id; url is optional in DCS 1.3)
+    fun storageLocationDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("storageLocationDeclared"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "a storage location (host) is declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            val host = distribution.obj("host")
+            val name = host?.text("title") ?: host?.text("url") ?: host?.array("host_id")?.firstNotNullOfOrNull { (it as? JsonObject)?.text("identifier") }
+            if (name != null) SubjectCheck.Ok("Stored at '$name'.")
+            else if (host == null) SubjectCheck.Problem("No host declared. Add a 'host' describing where the data is stored (e.g. the repository title and URL).")
+            else SubjectCheck.Problem("The host has no title, url or host_id. Identify where the data is stored.")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =

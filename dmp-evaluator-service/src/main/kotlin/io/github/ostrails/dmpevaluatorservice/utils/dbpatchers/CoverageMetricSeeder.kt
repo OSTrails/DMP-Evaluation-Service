@@ -54,6 +54,15 @@ class CoverageMetricSeeder(
                 keyword = "license, distribution, data sharing, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000005", testId = "6ac62fd3616d0a2f64000006",
+                abbreviation = "store.cov.1",
+                title = "Data Storage Location mentioned in the DMP",
+                description = "Checks that every distribution of every dataset declares where it is stored: a host with a title, url or host_id (DCS 1.3). Fails if any distribution has no host, or a host without any of these fields.",
+                function = "storageLocationDeclared",
+                keyword = "storage, host, repository, distribution, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
