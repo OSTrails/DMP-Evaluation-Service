@@ -81,6 +81,14 @@ class CoverageMetricSeeder(
                 keyword = "preservation, long-term, dataset, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400000b", testId = "6ac62fd3616d0a2f6400000c",
+                abbreviation = "ethics.co.1",
+                title = "Ethical Issues Status Declared",
+                description = "Checks that the maDMP declares whether ethical issues exist (ethical_issues_exist). Passes for 'yes' or 'no', is indeterminate for 'unknown', and fails if the field is missing or invalid.",
+                function = "ethicalIssuesStatusDeclared",
+                keyword = "ethics, ethical issues, DMP, DCS",
+            ),
         )
     }
 
