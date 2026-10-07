@@ -72,6 +72,15 @@ class CoverageMetricSeeder(
                 keyword = "file format, media type, distribution, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000009", testId = "6ac62fd3616d0a2f6400000a",
+                abbreviation = "repo.feas.2",
+                title = "Long-Term Preservation Dataset",
+                description = "Checks that every dataset in the maDMP provides a long-term preservation statement (preservation_statement). Fails if any dataset has no preservation statement.",
+                function = "preservationStatementPresent",
+                keyword = "preservation, long-term, dataset, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
