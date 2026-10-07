@@ -33,6 +33,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "distributionLicensePresent" to ::distributionLicensePresent,
         "storageLocationDeclared" to ::storageLocationDeclared,
         "distributionFormatSpecified" to ::distributionFormatSpecified,
+        "preservationStatementPresent" to ::preservationStatementPresent,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -97,6 +98,20 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             val formats = distribution.array("format").orEmpty().mapNotNull { it.textOrNull() }
             if (formats.isNotEmpty()) SubjectCheck.Ok("Format(s): ${formats.joinToString()}.")
             else SubjectCheck.Problem("No file format specified. Add the format, preferably as an IANA media type (e.g. 'text/csv').")
+        }
+
+    // repo.feas.2 - every dataset describes how it will be preserved long-term
+    fun preservationStatementPresent(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("preservationStatementPresent"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "a long-term preservation statement is provided",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            if (dataset.text("preservation_statement") != null) SubjectCheck.Ok("Preservation statement provided.")
+            else SubjectCheck.Problem("No 'preservation_statement'. Describe how and for how long the dataset will be preserved (e.g. repository retention period, integrity checks).")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
