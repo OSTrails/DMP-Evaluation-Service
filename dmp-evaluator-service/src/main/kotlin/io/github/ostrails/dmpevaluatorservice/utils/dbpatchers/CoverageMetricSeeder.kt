@@ -89,6 +89,15 @@ class CoverageMetricSeeder(
                 function = "ethicalIssuesStatusDeclared",
                 keyword = "ethics, ethical issues, DMP, DCS",
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400000d", testId = "6ac62fd3616d0a2f6400000e",
+                abbreviation = "secur.co.1",
+                title = "Security Measures Implementation",
+                description = "Checks that every dataset in the maDMP declares at least one security and privacy measure (security_and_privacy with a title). Fails if any dataset declares none.",
+                function = "securityMeasuresDeclared",
+                keyword = "security, privacy, dataset, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

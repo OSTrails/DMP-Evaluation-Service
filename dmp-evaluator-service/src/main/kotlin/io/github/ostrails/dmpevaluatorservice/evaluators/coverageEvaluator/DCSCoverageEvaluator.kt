@@ -36,6 +36,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "distributionFormatSpecified" to ::distributionFormatSpecified,
         "preservationStatementPresent" to ::preservationStatementPresent,
         "ethicalIssuesStatusDeclared" to ::ethicalIssuesStatusDeclared,
+        "securityMeasuresDeclared" to ::securityMeasuresDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -126,6 +127,24 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             whenEmpty = ResultTestEnum.FAIL,
             emptyMessage = NO_DMP,
         ) { dmp -> declaredStatus(dmp, "ethical_issues_exist") }
+
+    // secur.co.1 - every dataset declares the security and privacy measures applied to it
+    fun securityMeasuresDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("securityMeasuresDeclared"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "security and privacy measures are declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            val measures = securityMeasures(dataset)
+            if (measures.isNotEmpty()) SubjectCheck.Ok("Security measures: ${measures.joinToString()}.")
+            else SubjectCheck.Problem("No 'security_and_privacy' measures declared. Add each measure with a title (e.g. 'Encryption at rest').")
+        }
+
+    private fun securityMeasures(dataset: JsonObject): List<String> =
+        dataset.array("security_and_privacy").orEmpty().mapNotNull { (it as? JsonObject)?.text("title") }
 
     // Checks a DCS yes/no/unknown field: yes/no is declared, 'unknown' cannot be assessed, anything else is a problem
     private fun declaredStatus(json: JsonObject, field: String): SubjectCheck =
