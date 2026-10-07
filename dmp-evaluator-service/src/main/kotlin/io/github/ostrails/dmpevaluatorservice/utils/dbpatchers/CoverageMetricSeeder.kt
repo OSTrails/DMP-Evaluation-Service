@@ -195,6 +195,15 @@ class CoverageMetricSeeder(
                 keyword = "re3data, trusted repository, host identifier, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000025", testId = "6ac62fd3616d0a2f64000026",
+                abbreviation = "data.shar.op.1",
+                title = "Data Access Status Open for the Dataset",
+                description = "Checks that every distribution of every dataset in the maDMP is openly accessible (data_access is 'open'). Fails if any distribution is restricted, closed, shared (deprecated) or declares no data access.",
+                function = "distributionAccessOpen",
+                keyword = "open access, data access, distribution, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

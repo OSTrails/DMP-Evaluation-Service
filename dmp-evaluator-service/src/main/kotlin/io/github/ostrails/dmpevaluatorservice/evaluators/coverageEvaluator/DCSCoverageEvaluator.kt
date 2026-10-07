@@ -54,6 +54,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "contributorPidsDeclared" to ::contributorPidsDeclared,
         "repositoryCertified" to ::repositoryCertified,
         "trustedRepositoryReferenced" to ::trustedRepositoryReferenced,
+        "distributionAccessOpen" to ::distributionAccessOpen,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -387,6 +388,23 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
                     ?.text("identifier")
                 if (re3data != null) SubjectCheck.Ok("re3data identifier: '$re3data'.")
                 else SubjectCheck.Problem("The host has no 'host_id' of type 're3data'. Reference the repository's re3data entry (e.g. https://doi.org/10.17616/R3QP53 for Zenodo).")
+            }
+        }
+
+    // data.shar.op.1 - every distribution is openly accessible
+    fun distributionAccessOpen(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("distributionAccessOpen"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "data access is open",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            when (val access = distribution.text("data_access")) {
+                "open" -> SubjectCheck.Ok("Data access is 'open'.")
+                null -> SubjectCheck.Problem("No 'data_access' declared. State whether access is open, restricted or closed.")
+                else -> SubjectCheck.Problem("Data access is '$access', not 'open'.")
             }
         }
 
