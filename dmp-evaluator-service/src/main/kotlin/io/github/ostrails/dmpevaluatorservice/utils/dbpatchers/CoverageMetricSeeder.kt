@@ -63,6 +63,15 @@ class CoverageMetricSeeder(
                 keyword = "storage, host, repository, distribution, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000007", testId = "6ac62fd3616d0a2f64000008",
+                abbreviation = "data.info.cov.2",
+                title = "Dataset File Format Specified",
+                description = "Checks that every distribution of every dataset in the maDMP specifies at least one file format (format). Fails if any distribution has no format or a dataset has no distributions.",
+                function = "distributionFormatSpecified",
+                keyword = "file format, media type, distribution, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

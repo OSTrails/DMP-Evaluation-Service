@@ -32,6 +32,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "datasetLicenseDeclared" to ::datasetLicenseDeclared,
         "distributionLicensePresent" to ::distributionLicensePresent,
         "storageLocationDeclared" to ::storageLocationDeclared,
+        "distributionFormatSpecified" to ::distributionFormatSpecified,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -81,6 +82,21 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             if (name != null) SubjectCheck.Ok("Stored at '$name'.")
             else if (host == null) SubjectCheck.Problem("No host declared. Add a 'host' describing where the data is stored (e.g. the repository title and URL).")
             else SubjectCheck.Problem("The host has no title, url or host_id. Identify where the data is stored.")
+        }
+
+    // data.info.cov.2 - every distribution specifies its file format(s)
+    fun distributionFormatSpecified(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("distributionFormatSpecified"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the file format is specified",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            val formats = distribution.array("format").orEmpty().mapNotNull { it.textOrNull() }
+            if (formats.isNotEmpty()) SubjectCheck.Ok("Format(s): ${formats.joinToString()}.")
+            else SubjectCheck.Problem("No file format specified. Add the format, preferably as an IANA media type (e.g. 'text/csv').")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
