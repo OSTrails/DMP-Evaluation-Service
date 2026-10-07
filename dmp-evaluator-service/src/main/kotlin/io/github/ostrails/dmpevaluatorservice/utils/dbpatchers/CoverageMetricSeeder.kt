@@ -186,6 +186,15 @@ class CoverageMetricSeeder(
                 keyword = "certification, CoreTrustSeal, repository, host, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000023", testId = "6ac62fd3616d0a2f64000024",
+                abbreviation = "data.pid.cov.2",
+                title = "Trusted Repository Referenced",
+                description = "Checks that the host of every distribution references its re3data registry entry (host.host_id of type re3data, DCS 1.3). Fails if any distribution has no host or its host has no re3data identifier. Registration itself is verified online by the RE3data compliance test.",
+                function = "trustedRepositoryReferenced",
+                keyword = "re3data, trusted repository, host identifier, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
