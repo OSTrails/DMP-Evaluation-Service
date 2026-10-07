@@ -174,29 +174,67 @@ class DCSCompletenessEvaluator: EvaluatorPlugin {
         reportId: String,
         testRecord: TestRecord): Evaluation{
         val logMessages = mutableListOf<String>()
-        val contributors = extractValuesByPath<String>(maDMP, "dmp.contributor[*]")
-        var resultValue: ResultTestEnum = ResultTestEnum.INDETERMINATE
-        logMessages.add("contributors: $contributors")
+        val affectedContributors = mutableListOf<String>()
+        val guidanceIssues = mutableListOf<GuidanceEntry>()
+        val contributors = extractValuesByPath<Any>(maDMP, "dmp.contributor[*]")
+
         if (contributors.isEmpty()) {
-            resultValue = ResultTestEnum.FAIL
-            logMessages.add("Contributor field are not present in the maDMP")
-        }  else {
-            resultValue = ResultTestEnum.PASS
-            logMessages.add("Contributor fields are present in the maDMP")
+            logMessages.add("Contributor field is not present in the maDMP.")
+        }
+
+        contributors.forEachIndexed { index, element ->
+            val contributor = element as? JsonObject
+            val name = contributor?.get("name")?.jsonPrimitiveOrNull?.contentOrNull
+            val label = if (!name.isNullOrBlank()) name else "Unnamed contributor (position $index)"
+            val roleElement = contributor?.get("role")
+            val roles = roleElement?.jsonArrayOrNull()
+
+            val problem = when {
+                contributor == null -> "Contributor entry is not a JSON object."
+                roleElement == null -> "No role declared. Add at least one role (e.g. 'Data Steward')."
+                roles == null -> "'role' must be a list of role names."
+                roles.isEmpty() -> "The role list is empty. Add at least one role (e.g. 'Data Steward')."
+                roles.any { it.jsonPrimitiveOrNull?.contentOrNull.isNullOrBlank() } -> "The role list contains a blank or non-text entry."
+                else -> null
+            }
+
+            if (problem == null) {
+                logMessages.add("Contributor[$index] '$label': roles ${roles?.map { it.jsonPrimitive.content }}.")
+            } else {
+                logMessages.add("Contributor[$index] '$label': $problem")
+                affectedContributors.add("contributor[$index]")
+                guidanceIssues.add(GuidanceEntry(dataset = label, reason = problem))
+            }
+        }
+
+        val resultValue = if (contributors.isNotEmpty() && guidanceIssues.isEmpty()) ResultTestEnum.PASS else ResultTestEnum.FAIL
+
+        val guidance = when {
+            contributors.isEmpty() -> Guidance(
+                summary = "No contributors found in the maDMP. Add the people responsible for data management, each with at least one role."
+            )
+            resultValue == ResultTestEnum.PASS -> Guidance(
+                summary = "All contributors have at least one declared role."
+            )
+            else -> Guidance(
+                summary = "${guidanceIssues.size} out of ${contributors.size} contributor(s) have no valid role declared.",
+                issues = guidanceIssues
+            )
         }
 
         return Evaluation(
             evaluationId = UUID.randomUUID().toString(),
-            result =resultValue,
+            result = resultValue,
             details = testRecord.description,
-            affectedElements = listOf("dpm.contributor"),
+            affectedElements = affectedContributors.ifEmpty { null },
             title = testRecord.title,
             reportId = reportId,
             log = logMessages.joinToString("\n"),
             assessmentTarget = extractAssessmentTarget(maDMP),
             wasGeneratedBy = "${this::class.qualifiedName}::contributorValuesPresent",
             outputFromTest = testRecord.id,
-            completion = 100
+            completion = 100,
+            guidance = guidance
             )
     }
 
