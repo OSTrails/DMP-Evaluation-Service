@@ -6,6 +6,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
 import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
+import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -15,9 +16,7 @@ class CompletenessEvaluator: EvaluatorPlugin {
 
     override fun supports(t: String): Boolean = t == getPluginIdentifier()
 
-    override val functionMap = mapOf(
-        "testFuntion" to ::testFuntion
-    )
+    override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = emptyMap()
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> {
         val evaluationsResults = tests.map { test ->
@@ -41,21 +40,6 @@ class CompletenessEvaluator: EvaluatorPlugin {
             pluginId = getPluginIdentifier(),
             description = "Evaluator to perform completeness tests",
             functions = listOf()
-        )
-    }
-
-    fun testFuntion(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.FAIL,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            outputFromTest = testRecord.id
         )
     }
 }

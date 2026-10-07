@@ -66,7 +66,6 @@ class ComplianceEvaluator: EvaluatorPlugin {
     )
 
     override val functionMap = mapOf(
-        "evaluateCoherentLicense" to ::evaluateLicenseCompliance,
         "checkFormatFile" to ::checkFormatFile,
         "datasetLicenseIsOpen" to ::datasetLicenseIsOpen,
         "datasetRepositoryIsInRe3data" to ::datasetRepositoryIsInRe3data,
@@ -82,21 +81,6 @@ class ComplianceEvaluator: EvaluatorPlugin {
                 reportId = report.reportId
             )
         }
-    }
-
-    fun evaluateLicenseCompliance(
-        maDMP: Any,
-        reportId: String,
-        testRecord: TestRecord
-    ): Evaluation {
-        return Evaluation(
-            evaluationId = UUID.randomUUID().toString(),
-            result = ResultTestEnum.PASS,
-            details = testRecord.description,
-            title = testRecord.title,
-            reportId = reportId,
-            outputFromTest = testRecord.id
-        )
     }
 
     fun checkFormatFile(
