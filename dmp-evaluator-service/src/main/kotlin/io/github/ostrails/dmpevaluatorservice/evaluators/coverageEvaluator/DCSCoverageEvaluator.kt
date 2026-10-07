@@ -38,6 +38,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "ethicalIssuesStatusDeclared" to ::ethicalIssuesStatusDeclared,
         "securityMeasuresDeclared" to ::securityMeasuresDeclared,
         "sensitiveDataProtected" to ::sensitiveDataProtected,
+        "repositoryPidSystemDeclared" to ::repositoryPidSystemDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -182,6 +183,25 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             "unknown" -> SubjectCheck.Undetermined("'$field' is 'unknown'. State 'yes' or 'no' once it has been assessed.")
             null -> SubjectCheck.Problem("'$field' is missing. Declare it as 'yes' or 'no'.")
             else -> SubjectCheck.Problem("'$field' has the invalid value '$value'. Allowed values: yes, no, unknown.")
+        }
+
+    // data.pid.cov.1 - the repository of every distribution declares the PID system(s) it supports
+    fun repositoryPidSystemDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("repositoryPidSystemDeclared"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the repository's persistent identifier system is declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            val host = distribution.obj("host")
+            val systems = host?.array("pid_system").orEmpty().mapNotNull { it.textOrNull() }
+            when {
+                host == null -> SubjectCheck.Problem("No host declared, so no PID system can be determined. Add the repository as 'host'.")
+                systems.isEmpty() -> SubjectCheck.Problem("The host declares no 'pid_system'. Add the PID system(s) the repository assigns (e.g. 'doi', 'handle').")
+                else -> SubjectCheck.Ok("PID system(s): ${systems.joinToString()}.")
+            }
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =

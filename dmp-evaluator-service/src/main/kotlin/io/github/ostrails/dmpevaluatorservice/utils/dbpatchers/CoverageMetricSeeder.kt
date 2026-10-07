@@ -107,6 +107,15 @@ class CoverageMetricSeeder(
                 keyword = "sensitive data, personal data, security, storage, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000011", testId = "6ac62fd3616d0a2f64000012",
+                abbreviation = "data.pid.cov.1",
+                title = "Repository Supports Persistent Identifiers for Datasets",
+                description = "Checks that the repository (host) of every distribution declares at least one persistent identifier system (pid_system, e.g. doi or handle). Fails if any distribution has no host or its host declares no PID system.",
+                function = "repositoryPidSystemDeclared",
+                keyword = "persistent identifier, PID system, repository, host, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
