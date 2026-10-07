@@ -46,6 +46,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "metadataStandardDeclared" to ::metadataStandardDeclared,
         "metadataStandardInDmp" to ::metadataStandardInDmp,
         "qualityAssuranceDeclared" to ::qualityAssuranceDeclared,
+        "backupFrequencyDeclared" to ::backupFrequencyDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -292,6 +293,28 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             if (methods.isNotEmpty()) SubjectCheck.Ok("${methods.size} quality assurance statement(s).")
             else SubjectCheck.Problem("No 'data_quality_assurance' stated. Describe how data quality is ensured (e.g. instrument calibration, validation, peer review).")
         }
+
+    // store.co.1 - the host of every distribution states how often it backs up the data
+    fun backupFrequencyDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("backupFrequencyDeclared"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "the backup frequency of the host is stated",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            withHost(distribution) { host ->
+                val frequency = host.text("backup_frequency")
+                if (frequency != null) SubjectCheck.Ok("Backup frequency: '$frequency'.")
+                else SubjectCheck.Problem("The host states no 'backup_frequency'. Add how often the data is backed up (e.g. 'daily').")
+            }
+        }
+
+    // Runs [check] on the distribution's host, or reports a problem when no host is declared
+    private fun withHost(distribution: JsonObject, check: (JsonObject) -> SubjectCheck): SubjectCheck =
+        distribution.obj("host")?.let(check)
+            ?: SubjectCheck.Problem("No host declared. Add the repository or storage system as 'host'.")
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
         distribution.array("license").orEmpty().any { (it as? JsonObject)?.text("license_ref") != null }

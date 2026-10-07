@@ -160,6 +160,15 @@ class CoverageMetricSeeder(
                 keyword = "quality control, quality assurance, dataset, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f6400001d", testId = "6ac62fd3616d0a2f6400001e",
+                abbreviation = "store.co.1",
+                title = "Back up Frequency",
+                description = "Checks that the host of every distribution states its backup frequency (host.backup_frequency). Fails if any distribution has no host or its host states no backup frequency.",
+                function = "backupFrequencyDeclared",
+                keyword = "backup, storage, host, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
