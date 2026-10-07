@@ -37,6 +37,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "preservationStatementPresent" to ::preservationStatementPresent,
         "ethicalIssuesStatusDeclared" to ::ethicalIssuesStatusDeclared,
         "securityMeasuresDeclared" to ::securityMeasuresDeclared,
+        "sensitiveDataProtected" to ::sensitiveDataProtected,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -142,6 +143,34 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             if (measures.isNotEmpty()) SubjectCheck.Ok("Security measures: ${measures.joinToString()}.")
             else SubjectCheck.Problem("No 'security_and_privacy' measures declared. Add each measure with a title (e.g. 'Encryption at rest').")
         }
+
+    // store.comp.1 - datasets with personal or sensitive data declare security measures; datasets declaring
+    // neither are skipped, and 'unknown' or missing flags cannot be assessed
+    fun sensitiveDataProtected(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation {
+        val flags = listOf("personal_data", "sensitive_data")
+        val subjects = datasetSubjects(maDMP).mapNotNull { subject ->
+            val dataset = subject.json ?: return@mapNotNull subject
+            val values = flags.map { dataset.text(it) }
+            when {
+                "yes" in values -> subject
+                values.all { it == "no" } -> null
+                else -> subject.copy(preset = SubjectCheck.Undetermined(
+                    "personal_data is '${values[0] ?: "missing"}' and sensitive_data is '${values[1] ?: "missing"}'. State 'yes' or 'no' for both."))
+            }
+        }
+        return evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("sensitiveDataProtected"),
+            subjects = subjects,
+            noun = "dataset with personal or sensitive data",
+            requirement = "security and privacy measures are declared",
+            whenEmpty = ResultTestEnum.INDETERMINATE,
+            emptyMessage = "No dataset declares personal or sensitive data, so there is nothing to assess.",
+        ) { dataset ->
+            val measures = securityMeasures(dataset)
+            if (measures.isNotEmpty()) SubjectCheck.Ok("Contains personal or sensitive data; security measures: ${measures.joinToString()}.")
+            else SubjectCheck.Problem("Contains personal or sensitive data but declares no 'security_and_privacy' measures. Describe how the data is protected (e.g. access control, encryption, pseudonymisation).")
+        }
+    }
 
     private fun securityMeasures(dataset: JsonObject): List<String> =
         dataset.array("security_and_privacy").orEmpty().mapNotNull { (it as? JsonObject)?.text("title") }
