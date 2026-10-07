@@ -45,6 +45,15 @@ class CoverageMetricSeeder(
                 keyword = "license, dataset, distribution, DCS",
                 isApplicableFor = DATASET,
             ),
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000003", testId = "6ac62fd3616d0a2f64000004",
+                abbreviation = "data.shar.co.1",
+                title = "Data License is Present",
+                description = "Checks that every distribution of every dataset in the maDMP declares a license (license_ref). Fails if any distribution has no license or a dataset has no distributions.",
+                function = "distributionLicensePresent",
+                keyword = "license, distribution, data sharing, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 
