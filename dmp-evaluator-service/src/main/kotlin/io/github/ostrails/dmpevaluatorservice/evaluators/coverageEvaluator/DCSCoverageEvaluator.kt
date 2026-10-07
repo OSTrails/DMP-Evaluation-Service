@@ -30,6 +30,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
 
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
         "datasetLicenseDeclared" to ::datasetLicenseDeclared,
+        "distributionLicensePresent" to ::distributionLicensePresent,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
@@ -48,6 +49,20 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
             val licensed = dataset.array("distribution").orEmpty().count { (it as? JsonObject)?.let(::hasLicenseRef) == true }
             if (licensed > 0) SubjectCheck.Ok("$licensed distribution(s) declare a license.")
             else SubjectCheck.Problem("No distribution declares a license. Add a license with a 'license_ref' URL (e.g. https://creativecommons.org/licenses/by/4.0/).")
+        }
+
+    // data.shar.co.1 - every distribution declares a license
+    fun distributionLicensePresent(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("distributionLicensePresent"),
+            subjects = distributionSubjects(datasetSubjects(maDMP)),
+            noun = "distribution",
+            requirement = "a license is declared",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { distribution ->
+            if (hasLicenseRef(distribution)) SubjectCheck.Ok("License declared.")
+            else SubjectCheck.Problem("No license declared. Add a license with a 'license_ref' URL (e.g. https://creativecommons.org/licenses/by/4.0/).")
         }
 
     private fun hasLicenseRef(distribution: JsonObject): Boolean =
