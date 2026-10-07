@@ -36,6 +36,15 @@ class CoverageMetricSeeder(
         private const val DATASET = "https://schema.org/Dataset"
 
         val specs: List<CoverageMetricSpec> = listOf(
+            CoverageMetricSpec(
+                metricId = "6ac62fd3616d0a2f64000001", testId = "6ac62fd3616d0a2f64000002",
+                abbreviation = "data.lice.co.1",
+                title = "Dataset License Declared",
+                description = "Checks that every dataset in the maDMP declares a license (license_ref) on at least one of its distributions. Fails if any dataset has no distributions or none of them declares a license.",
+                function = "datasetLicenseDeclared",
+                keyword = "license, dataset, distribution, DCS",
+                isApplicableFor = DATASET,
+            ),
         )
     }
 

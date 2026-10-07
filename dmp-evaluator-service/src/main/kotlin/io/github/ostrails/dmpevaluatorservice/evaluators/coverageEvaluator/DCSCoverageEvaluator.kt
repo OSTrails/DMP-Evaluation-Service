@@ -4,6 +4,7 @@ import io.github.ostrails.dmpevaluatorservice.database.model.Evaluation
 import io.github.ostrails.dmpevaluatorservice.database.model.EvaluationReport
 import io.github.ostrails.dmpevaluatorservice.database.model.TestRecord
 import io.github.ostrails.dmpevaluatorservice.model.PluginInfo
+import io.github.ostrails.dmpevaluatorservice.model.ResultTestEnum
 import io.github.ostrails.dmpevaluatorservice.plugin.EvaluatorPlugin
 import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Component
@@ -23,11 +24,34 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         functions = listOf()
     )
 
+    companion object {
+        const val NO_DATASETS = "No datasets found in the maDMP."
+    }
+
     override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
+        "datasetLicenseDeclared" to ::datasetLicenseDeclared,
     )
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
         emptyList()
+
+    // data.lice.co.1 - every dataset declares a license on at least one of its distributions
+    fun datasetLicenseDeclared(maDMP: JsonObject, reportId: String, testRecord: TestRecord): Evaluation =
+        evaluateSubjects(
+            maDMP, reportId, testRecord, generatedBy("datasetLicenseDeclared"),
+            subjects = datasetSubjects(maDMP),
+            noun = "dataset",
+            requirement = "a license is declared on at least one distribution",
+            whenEmpty = ResultTestEnum.FAIL,
+            emptyMessage = NO_DATASETS,
+        ) { dataset ->
+            val licensed = dataset.array("distribution").orEmpty().count { (it as? JsonObject)?.let(::hasLicenseRef) == true }
+            if (licensed > 0) SubjectCheck.Ok("$licensed distribution(s) declare a license.")
+            else SubjectCheck.Problem("No distribution declares a license. Add a license with a 'license_ref' URL (e.g. https://creativecommons.org/licenses/by/4.0/).")
+        }
+
+    private fun hasLicenseRef(distribution: JsonObject): Boolean =
+        distribution.array("license").orEmpty().any { (it as? JsonObject)?.text("license_ref") != null }
 
     private fun generatedBy(function: String) = "${this::class.qualifiedName}::$function"
 }
