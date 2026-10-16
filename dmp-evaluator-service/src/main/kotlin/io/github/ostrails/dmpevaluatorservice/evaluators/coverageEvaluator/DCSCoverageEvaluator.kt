@@ -35,7 +35,7 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         val REPOSITORY_CERTIFICATIONS = setOf("din31644", "dini-zertifikat", "dsa", "iso16363", "iso16919", "trac", "wds", "coretrustseal")
     }
 
-    override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
+    private val coreFunctions: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
         "datasetLicenseDeclared" to ::datasetLicenseDeclared,
         "distributionLicensePresent" to ::distributionLicensePresent,
         "storageLocationDeclared" to ::storageLocationDeclared,
@@ -57,6 +57,15 @@ class DCSCoverageEvaluator : EvaluatorPlugin {
         "distributionAccessOpen" to ::distributionAccessOpen,
         "noEthicalIssuesJustified" to ::noEthicalIssuesJustified,
     )
+
+    // The group files (DatasetProvenanceTests, SecurityAccessTests, RepositoryStorageTests) add their functions
+    // here; a function name defined twice fails at startup instead of silently overriding another test
+    override val functionMap: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = run {
+        val maps = listOf(coreFunctions, DatasetProvenanceTests.functions, SecurityAccessTests.functions, RepositoryStorageTests.functions)
+        val duplicates = maps.flatMap { it.keys }.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+        require(duplicates.isEmpty()) { "Duplicate DCSCoverageEvaluator function names: $duplicates" }
+        maps.reduce { all, map -> all + map }
+    }
 
     override fun evaluate(maDMP: Map<String, Any>, config: Map<String, Any>, tests: List<String>, report: EvaluationReport): List<Evaluation> =
         emptyList()
