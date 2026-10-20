@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonObject
 // Use the helpers in CoverageSupport.kt (datasetSubjects(maDMP, DatasetScope.NEW / REUSED), distributionSubjects,
 // evaluateSubjects, SubjectCheck) and see DCSCoverageEvaluator for examples. Unit-test each function with
 // CoverageTestSupport.run("<functionName>", dmp(...)). Above each function, state when it returns PASS / FAIL /
-// INDETERMINATE / NOT_APPLICABLE.
+// INDETERMINATE (also used when the test does not apply, see DCSCoverageEvaluator.noEthicalIssuesJustified).
 object DatasetProvenanceTests {
 
     val functions: Map<String, (JsonObject, String, TestRecord) -> Evaluation> = mapOf(
