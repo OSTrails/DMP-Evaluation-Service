@@ -31,10 +31,8 @@ data class Subject(
     val preset: SubjectCheck? = null,
 )
 
+// REUSED: is_reused is true (DCS 1.3). NEW: everything else, so DCS 1.2 datasets without the flag count as new.
 enum class DatasetScope { ALL, NEW, REUSED }
-
-const val CANNOT_CLASSIFY_REUSE =
-    "'is_reused' is not set, so the dataset cannot be classified as new or reused (DCS 1.3)."
 
 fun JsonObject.text(key: String): String? =
     (this[key] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
@@ -56,16 +54,11 @@ fun datasetSubjects(maDMP: JsonObject, scope: DatasetScope = DatasetScope.ALL): 
         val datasetId = dataset.obj("dataset_id")
         val label = buildDatasetLabel(dataset.text("title"), datasetId?.text("type"), datasetId?.text("identifier"), index)
         val subject = Subject("dataset[$index]", label, dataset)
+        val reused = isReused(dataset) == true
         when (scope) {
             DatasetScope.ALL -> subject
-            DatasetScope.NEW, DatasetScope.REUSED -> {
-                val reused = isReused(dataset)
-                when {
-                    reused == null -> subject.copy(preset = SubjectCheck.Undetermined(CANNOT_CLASSIFY_REUSE))
-                    reused == (scope == DatasetScope.REUSED) -> subject
-                    else -> null
-                }
-            }
+            DatasetScope.NEW -> subject.takeIf { !reused }
+            DatasetScope.REUSED -> subject.takeIf { reused }
         }
     }
 }

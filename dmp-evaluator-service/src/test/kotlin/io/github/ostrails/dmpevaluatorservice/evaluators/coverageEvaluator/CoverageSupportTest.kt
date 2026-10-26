@@ -47,12 +47,9 @@ class CoverageSupportTest {
     }
 
     @Test
-    fun `reused scope keeps reused datasets and marks unclassified ones undetermined`() {
-        val maDMP = dmp("""{"title": "new", "is_reused": false}""", """{"title": "old", "is_reused": true}""", """{"title": "unknown"}""")
-        val reused = datasetSubjects(maDMP, DatasetScope.REUSED)
-        assertEquals(listOf("dataset[1]", "dataset[2]"), reused.map { it.path })
-        assertEquals(null, reused[0].preset)
-        assertEquals(SubjectCheck.Undetermined(CANNOT_CLASSIFY_REUSE), reused[1].preset)
+    fun `reused scope keeps only is_reused true and new scope treats a missing flag as new`() {
+        val maDMP = dmp("""{"title": "new", "is_reused": false}""", """{"title": "old", "is_reused": true}""", """{"title": "unflagged"}""")
+        assertEquals(listOf("dataset[1]"), datasetSubjects(maDMP, DatasetScope.REUSED).map { it.path })
         assertEquals(listOf("dataset[0]", "dataset[2]"), datasetSubjects(maDMP, DatasetScope.NEW).map { it.path })
     }
 
