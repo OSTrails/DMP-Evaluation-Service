@@ -22,6 +22,7 @@ This service is a key component of the [OSTrails project](https://ostrails.eu/) 
 - [Requirements](#requirements)
 - [Running the Service](#running-the-service)
 - [Continuous Integration](#continuous-integration)
+- [Branching and Deployment](#branching-and-deployment)
 - [Output Format](#output-format)
 
 ---
@@ -489,7 +490,7 @@ MongoDB must be running before executing integration tests.
 
 ## Continuous Integration
 
-Every push to `main` and every pull request targeting `main` runs the GitHub Actions workflow defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+Every push to `main` or `develop` and every pull request targeting either branch runs the GitHub Actions workflow defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 | Step | Purpose | Blocking? |
 |------|---------|-----------|
@@ -497,6 +498,38 @@ Every push to `main` and every pull request targeting `main` runs the GitHub Act
 | ktlint style check | Reports Kotlin style violations across `src/**/*.kt` | No — currently report-only (`continue-on-error`) while the codebase is brought into line with ktlint's rules |
 
 The job runs on `ubuntu-latest` with Java 17 (Temurin) and Maven dependency caching. No manual MongoDB setup is needed in CI — the workflow provisions its own MongoDB container and waits for it to become healthy before running tests.
+
+---
+
+## Branching and Deployment
+
+Two long-lived branches map to the two deployed environments. Each environment rebuilds and redeploys automatically when its branch receives a push (including a merged pull request):
+
+| Branch | Environment | Purpose |
+|--------|-------------|---------|
+| `develop` | Stage | Integration and testing of new work before release |
+| `main` | Production | Released, tested code only |
+
+```
+feature branch ──PR──▶ develop ──(auto-deploy)──▶ Stage        ← test here
+                          │
+                          └──PR (release)──▶ main ──(auto-deploy)──▶ Production
+```
+
+**Day-to-day work**
+
+1. Branch off `develop` (e.g. `feat/...`, `fix/...`, `docs/...`).
+2. Open a pull request targeting **`develop`** — not `main`. CI must pass before merging.
+3. Once merged, the change is deployed to stage. Verify it there.
+
+**Releasing to production**
+
+1. When stage looks good, open a pull request from `develop` to `main`.
+2. Merging it deploys to production.
+
+**Keeping the branches in sync**
+
+If a change ever lands on `main` without going through `develop` (e.g. an urgent hotfix), merge `main` back into `develop` straight away so stage does not drift behind production.
 
 ---
 

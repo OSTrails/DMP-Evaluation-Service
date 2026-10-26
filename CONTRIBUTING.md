@@ -44,13 +44,19 @@ For instance, the following commit message:
 When contributing to the code, please follow these steps:
 
 1. Fork the repository (if not in the OSTrails organisation).
-2. Create a new branch for your changes (base = `main`).
+2. Create a new branch for your changes (base = `develop`).
 3. Make your changes and commit them.
 4. Push your changes.
-5. Open a pull request to the `main` branch of the main repository.
+5. Open a pull request to the `develop` branch of the main repository.
+
+Merged changes to `develop` are deployed to the stage environment for testing.
+Maintainers release to production by opening a pull request from `develop` to
+`main`; contributors should not target `main` directly. See
+[Branching and Deployment](./README.md#branching-and-deployment) in the README
+for the full flow.
 
 The `main` branch is protected and requires a review before merging. Every pull
-request to `main` also runs the [CI workflow](./.github/workflows/ci.yml)
+request to `develop` or `main` also runs the [CI workflow](./.github/workflows/ci.yml)
 (build, test, and a report-only style check) — make sure it passes before
 requesting review.
 
